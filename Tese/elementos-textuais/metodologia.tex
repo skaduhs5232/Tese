@@ -1,0 +1,231 @@
+\chapter{Metodologia}
+\label{chap:metodologia}
+
+Este capítulo descreve os dados e cada etapa do processamento. A pergunta de pesquisa é se a população de uma bacia hidrográfica está associada ao microplástico medido na sua foz. Respondê-la exige cruzar três bases de dados independentes, que não foram feitas para ser usadas juntas, e por isso cada decisão de processamento é justificada ao longo do texto. A \autoref{sec:visao-geral} dá uma visão geral do \textit{pipeline}; as seções seguintes detalham cada etapa na ordem em que são executadas.
+
+\section{Visão geral}
+\label{sec:visao-geral}
+
+O processamento é dividido em dois \textit{notebooks}. O primeiro calibra os parâmetros do CCA pela lei de Zipf e grava os valores escolhidos num arquivo; o segundo lê esses valores e executa o restante da análise. A separação garante que os parâmetros das manchas urbanas sejam definidos sem nenhum contato com os dados de plástico. As etapas são:
+
+\begin{enumerate}
+	\item \textbf{Recorte} da região de estudo nas três bases (\autoref{sec:recorte}).
+	\item \textbf{Bacias hidrográficas}: definição do oceano e dos \textit{sinks} costeiros, delineamento das bacias pelo IPBA e seleção das bacias principais (\autoref{sec:met-bacias}).
+	\item \textbf{Manchas urbanas}: calibração de $D^{*}$ e $\ell$ pela lei de Zipf e aplicação do CCA (\autoref{sec:met-cca}).
+	\item \textbf{População por bacia}, com a repartição das manchas que cruzam divisores de água (\autoref{sec:met-populacao}).
+	\item \textbf{Microplástico por bacia}: associação de cada foz ao ponto de coleta mais próximo (\autoref{sec:met-plastico}) e varredura do raio de aceitação (\autoref{sec:met-raio}).
+	\item \textbf{Alometria por bacia}: ajuste das leis de escala entre população e microplástico (\autoref{sec:met-alometria}).
+	\item \textbf{Verificações}: distribuição de tamanhos das bacias e das manchas (\autoref{sec:met-verificacoes}).
+\end{enumerate}
+
+\section{Dados}
+\label{sec:dados}
+
+A \autoref{tab:dados} resume as três bases usadas. Todas são públicas e globais, e nenhuma depende das outras.
+
+\begin{table}[ht!]
+	\centering
+	\Caption{\label{tab:dados}Bases de dados usadas no trabalho}
+	\IBGEtab{}{%
+		\small
+		\begin{tabular}{p{2.4cm}p{3.6cm}p{3.4cm}p{4.0cm}}
+			\toprule
+			\textbf{Base} & \textbf{Conteúdo} & \textbf{Resolução} & \textbf{Papel na análise} \\
+			\midrule
+			GEBCO 2024 & Altitude do relevo e profundidade do oceano & 15$''$ ($\approx 460$ m), reamostrado para 2$'$ ($\approx 3{,}7$ km) & Oceano, \textit{sinks} costeiros e bacias hidrográficas \\
+			\midrule
+			GPW v4.11 & Contagem de pessoas por célula, ano 2020 & 30$''$ ($\approx 0{,}93$ km no equador) & Manchas urbanas e população das bacias \\
+			\midrule
+			NOAA NCEI \textit{Marine Microplastics} & Amostras de microplástico com método e unidade & Pontos (coordenadas das coletas) & Microplástico na foz; só \textit{Nurdle Patrol}, em \textit{pellets} por 10 min \\
+			\bottomrule
+		\end{tabular}%
+	}{%
+		\Fonte{elaborado pelo autor a partir de \citeonline{gebco2024}, \citeonline{gpw4} e \citeonline{nyadjro2023}.}%
+	}
+\end{table}
+
+\textbf{Relevo.} O \gls{GEBCO} 2024 é uma grade global de altitudes e profundidades com resolução de 15 segundos de arco \cite{gebco2024}. Ele foi escolhido por cobrir terra e oceano de forma contínua, o que permite definir a linha de costa pelo próprio relevo. A grade é lida diretamente de uma cópia em formato \gls{COG} hospedada em nuvem, o que permite baixar apenas a região de interesse ou uma versão de baixa resolução do mundo inteiro.
+
+\textbf{População.} O \gls{GPW} versão 4, revisão 11, distribui as contagens populacionais dos censos nacionais sobre uma grade regular de 30 segundos de arco, com estimativas para o ano de 2020 \cite{gpw4}. Por ser uma grade de contagens, e não de densidades, a soma dos valores das células de uma região dá a sua população. O GPW foi escolhido porque redistribui os censos sem usar variáveis auxiliares como luzes noturnas ou uso do solo, o que evita que a população seja estimada a partir de indicadores correlacionados com a atividade econômica e, portanto, com a geração de resíduos.
+
+\textbf{Microplástico.} O banco de microplásticos marinhos do \gls{NCEI} reúne 22.530 amostras de diferentes métodos e fontes \cite{nyadjro2023}. Na versão usada, 16.205 amostras estão em partículas por m$^3$ (arrastos de rede), 508 em partículas por kg de sedimento seco e 5.817 em \textit{pellets} por 10 minutos, o protocolo do \textit{Nurdle Patrol} \cite{tunnell2020}. Como unidades diferentes não se comparam, a análise usa apenas as amostras do \textit{Nurdle Patrol}. A escolha tem duas vantagens: o protocolo é o mesmo em todos os pontos, e as coletas são feitas em praias, perto de onde os rios desembocam, e não em mar aberto.
+
+\section{Recorte da região de estudo}
+\label{sec:recorte}
+
+A região de estudo é a caixa de longitude $-125^\circ$ a $-65^\circ$ e latitude $7^\circ$N a $50^\circ$N, que cobre os Estados Unidos contíguos, o sul do Canadá, o México, a América Central e o Caribe (\autoref{fig:recorte}). A parte da caixa que pertence à América do Sul, a leste de $79^\circ$W e ao sul de $12{,}6^\circ$N, é tratada como oceano no relevo e tem a população zerada; o meridiano de $79^\circ$W fica logo a leste do Canal do Panamá, para que a mancha urbana da Cidade do Panamá não seja partida. O limite norte de $50^\circ$N inclui a bacia do Mississippi--Missouri inteira e a maior parte da bacia do São Lourenço, cujas cabeceiras nos Grandes Lagos ficam dentro da caixa.
+
+O recorte foi escolhido por três motivos. Primeiro, é a região com a maior densidade de coletas do \textit{Nurdle Patrol} (\autoref{fig:pontos-coleta}). Segundo, contém bacias que vão de alguns milhares a mais de três milhões de km$^2$ e de alguns milhares a dezenas de milhões de habitantes, o que dá amplitude para ajustar leis de escala. Terceiro, uma versão anterior deste trabalho, restrita à costa do Texas, cortava bacias grandes como a do Rio Grande, cujas cabeceiras ficavam fora da caixa; o recorte continental elimina esse problema para quase todas as bacias.
+
+\begin{figure}[ht!]
+	\centering
+	\Caption{\label{fig:recorte}Relevo (GEBCO 2024) e densidade populacional (GPW v4, 2020) no mundo, em baixa resolução, e ampliados na região de estudo}
+	\IBGEtab{}{%
+		\includegraphics[width=\textwidth]{recorte}%
+	}{%
+		\Fonte{elaborado pelo autor a partir de \citeonline{gebco2024} e \citeonline{gpw4}.}%
+		\Nota{(a) e (b): mundo, com o GEBCO lido de uma versão reduzida e o GPW somado em blocos de $40 \times 40$ células. (c) e (d): região de estudo. No painel (c) o oceano está em azul-claro; no painel (d), as células sem população estão em cinza.}%
+	}
+\end{figure}
+
+\begin{figure}[ht!]
+	\centering
+	\Caption{\label{fig:pontos-coleta}Amostras do banco de microplásticos marinhos da NOAA no mundo e sítios do \textit{Nurdle Patrol} na região de estudo}
+	\IBGEtab{}{%
+		\includegraphics[width=0.78\textwidth]{pontos_coleta}%
+	}{%
+		\Fonte{elaborado pelo autor a partir de \citeonline{nyadjro2023}.}%
+		\Nota{(a) Grade de $2^\circ$: em cor, a mediana das amostras do \textit{Nurdle Patrol} em cada célula; em cinza, células que só têm amostras de outros métodos. (b) Cada sítio do \textit{Nurdle Patrol} na região de estudo, com a média das suas amostras; círculos vazios indicam contagem zero.}%
+	}
+\end{figure}
+
+\section{Bacias hidrográficas}
+\label{sec:met-bacias}
+
+\subsection{Resolução do relevo}
+
+O IPBA disponível \cite{ipba} é implementado em Python puro: cada célula da grade é um objeto e os rótulos das bacias são gravados como inteiros sem sinal de 16 bits, o que limita o número de \textit{sinks} a 65.535. Com a resolução nativa do GEBCO, a região de estudo teria cerca de 150 milhões de células e centenas de milhares de \textit{sinks} costeiros. Por isso o relevo é reamostrado pela média em blocos de $8 \times 8$ células, passando para 2 minutos de arco ($\approx 3{,}7$ km). A grade resultante tem $1290 \times 1800 = 2{,}32$ milhões de células. A perda de resolução afeta sobretudo as bacias costeiras muito pequenas, que não entram na análise, e a posição exata das fozes, que passa a ser conhecida com precisão de um pixel.
+
+\subsection{Oceano e \textit{sinks}}
+
+O oceano é definido como o conjunto de células com altitude menor ou igual a zero \textbf{conectadas à borda da caixa}. A condição de conexão é importante: depressões interiores abaixo do nível do mar, como o Salton Sea e o Vale da Morte, na Califórnia, e o fundo dos Grandes Lagos, continuam sendo terra, porque não são fozes. Na região de estudo, 7.643 células abaixo de zero ficam no interior e são mantidas como terra.
+
+Todo pixel de terra 4-vizinho de um pixel de oceano é declarado um \textit{sink}, com um rótulo próprio. O resultado são 11.851 \textit{sinks}, abaixo do limite de 65.535 do IPBA. Essa regra dispensa qualquer lista de rios ou de fozes: a bacia de um rio grande emerge sozinha, porque todas as células a montante escoam até o \textit{sink} da foz, enquanto os \textit{sinks} da costa entre duas fozes recebem apenas micro-bacias de encosta. O oceano entra no IPBA como ausência de dado, para que a percolação não atravesse o mar de uma bacia para outra.
+
+\subsection{Delineamento e bacias principais}
+
+O IPBA (\autoref{alg:ipba}) é executado sobre o relevo reamostrado com os \textit{sinks} costeiros e vizinhança de 4 células, sem condições de contorno periódicas. Cada célula de terra recebe o rótulo do \textit{sink} para o qual escoa, e cada \textit{sink} define uma bacia.
+
+Como cada pixel de costa é um \textit{sink}, a maioria das bacias são micro-bacias de praia com poucas células. Para ficar apenas com as bacias de rio, as bacias são ordenadas por área, da maior para a menor, e são mantidas as de maior área até que a soma das áreas atinja uma fração $P$ da área de terra total; a bacia que cruza o limiar também é incluída. Com $P = 0{,}90$, esse critério seleciona as bacias principais sem nenhum limiar de área mínima. A área de cada célula é calculada em km$^2$ a partir das suas dimensões em graus, com o fator $\cos(\text{latitude})$ para a largura.
+
+As bacias principais que tocam a borda da caixa ou o corte do Canal do Panamá são marcadas como \textbf{truncadas}, porque parte da sua área e da sua população pode estar fora do recorte. Elas não são excluídas da análise, mas são identificadas nos resultados.
+
+\section{Manchas urbanas}
+\label{sec:met-cca}
+
+\subsection{Aplicação do CCA à grade do GPW}
+
+Cada célula do GPW é um sítio do CCA localizado no seu centro. A densidade de cada célula é a sua população dividida pela sua área em km$^2$, calculada como na seção anterior. Uma célula é ativa se a sua densidade for maior que $D^{*}$, e duas células ativas estão ligadas se a distância entre os seus centros, calculada pela fórmula do haversine sobre uma esfera de raio 6.378,137 km, for menor que $\ell$. A implementação usada é a função \texttt{cca\_grid} do pacote CCA do grupo de pesquisa, que busca os vizinhos com uma árvore k-d sobre a esfera.
+
+\subsection{Calibração de $D^{*}$ e $\ell$ pela lei de Zipf}
+\label{sec:calibracao}
+
+Os valores de $D^{*}$ e $\ell$ determinam quais regiões contam como cidades, e valores tomados de outros contextos não servem para esta região. Os valores usados numa versão anterior deste trabalho, calibrados para o semiárido brasileiro (30 hab/km$^2$ e 2 km), tornavam 98\% da população americana ``urbana''. O limiar de área urbana do censo americano, 1.000 hab/milha$^2$ ($\approx 386$ hab/km$^2$) \cite{census2020}, foi definido para os Estados Unidos e não necessariamente vale para o México e a América Central.
+
+Por isso os dois parâmetros são escolhidos pela lei de Zipf, uma propriedade das cidades conhecida e independente do plástico. O procedimento tem quatro partes.
+
+\textbf{Grade de parâmetros.} $D^{*}$ varia de 10 a 3.000 hab/km$^2$ em passos de 10, e $\ell$ varia de 100 a 5.000 m em passos de 100, num total de $300 \times 50 = 15.000$ combinações. Em cada combinação, calcula-se o expoente de Zipf das manchas resultantes.
+
+\textbf{Varredura por união e busca.} Executar o CCA 15 mil vezes sobre uma grade de 37 milhões de células seria proibitivo. A varredura explora uma propriedade de monotonicidade: para um $\ell$ fixo, o conjunto de células ativas com limiar $D^{*}_1$ contém o conjunto ativo com qualquer limiar $D^{*}_2 > D^{*}_1$. Assim, se as células forem ativadas em ordem \textbf{decrescente} de densidade e cada célula nova for unida aos vizinhos já ativos a menos de $\ell$, as manchas presentes no momento em que a densidade cruza um valor $D^{*}$ da grade são exatamente as manchas do CCA com esse $D^{*}$. As uniões são feitas com uma estrutura de conjuntos disjuntos (\textit{union-find}) com união por tamanho e compressão de caminho \cite{tarjan1975}, a mesma ideia usada para rotular aglomerados em percolação \cite{hoshen1976,newmanziff2000}. O \autoref{alg:varredura} descreve o procedimento para um $\ell$.
+
+\begin{algorithm}[ht!]
+	\SetSpacedAlgorithm
+	\caption{\label{alg:varredura}Varredura do CCA em $D^{*}$ para um $\ell$ fixo}
+	\Entrada{densidades $\rho_k$ e populações $x_k$ das células; valores $D^{*}_1 > D^{*}_2 > \dots > D^{*}_m$; deslocamentos de vizinhança $\mathcal{V}_\ell$ válidos em cada linha da grade}
+	\Saida{populações das manchas para cada $D^{*}_j$}
+	\Inicio{
+		ordena as células com $\rho_k > D^{*}_m$ em ordem decrescente de $\rho_k$\;
+		$\mathit{pos} \leftarrow 1$\;
+		\Para{$j \leftarrow 1$ \textbf{até} $m$}{
+			\Enqto{$\rho_{k_{\mathit{pos}}} > D^{*}_j$}{
+				$k \leftarrow k_{\mathit{pos}}$; \quad ativa $k$ como um conjunto unitário de população $x_k$\;
+				\ParaCada{deslocamento $(\delta_i, \delta_j) \in \mathcal{V}_\ell$ válido na linha de $k$}{
+					$q \leftarrow k + (\delta_i, \delta_j)$\;
+					\Se{$q$ está ativa e $\mathrm{raiz}(q) \neq \mathrm{raiz}(k)$}{une os dois conjuntos, somando as populações\;}
+				}
+				$\mathit{pos} \leftarrow \mathit{pos} + 1$\;
+			}
+			registra as populações das raízes: são as manchas do CCA com $D^{*}_j$\;
+		}
+	}
+\end{algorithm}
+
+Os deslocamentos $\mathcal{V}_\ell$ são os pares $(\delta_i, \delta_j)$ de linhas e colunas cuja distância haversine é menor que $\ell$. Como a largura de uma célula em km diminui com a latitude, a validade de cada deslocamento é pré-calculada para cada linha da grade. Com isso, cada $\ell$ exige uma única passagem pelas células, e toda a coluna de 300 valores de $D^{*}$ sai dessa passagem. Valores de $\ell$ que não mudam o conjunto de deslocamentos válidos, por exemplo os menores que o espaçamento entre células, repetem o resultado anterior sem nova passagem. O algoritmo foi implementado com compilação just-in-time pelo Numba \cite{lam2015}, e a varredura completa leva cerca de 2 minutos e meio. A equivalência com o CCA foi verificada de duas formas: num raster de teste, a varredura reproduziu o \texttt{cca\_grid} em 600 combinações de parâmetros; e na região de estudo, o número de manchas e a população da maior mancha coincidem nos parâmetros escolhidos.
+
+\textbf{Estimador do expoente.} Em cada combinação, o expoente de Zipf é estimado pelo estimador de Hill (\autoref{eq:hill}) sobre as $N$ maiores manchas, com $N = 50$, 100 e 200. Uma primeira versão usava o método CSN completo em cada combinação, com $x_{\min}$ escolhido pela distância KS, mas o $x_{\min}$ saltava de forma descontínua entre combinações vizinhas e o critério acabava escolhendo combinações degeneradas. O estimador de Hill com $N$ fixo é estável e mede exatamente o que a lei de Zipf descreve: a inclinação do topo do \textit{ranking}.
+
+\textbf{Critério de escolha.} Os pares com $\alpha = 1$ formam uma curva no plano $(D^{*}, \ell)$, e não um ponto; é preciso um critério para escolher um par sobre ela. O critério adotado tem duas partes:
+
+\begin{enumerate}
+	\item \textbf{Piso físico para $\ell$.} São admitidos apenas valores $\ell \geq \ell_{\min} = 1.400$ m. A distância entre os centros de duas células do GPW vizinhas na diagonal chega a 1.307 m perto do equador. Com $\ell$ menor que isso, células vizinhas na diagonal não se ligam, e as manchas se fragmentam em faixas leste--oeste que não correspondem a cidades. Essas combinações podem produzir $\alpha \approx 1$ por acaso e precisam ser excluídas.
+	\item \textbf{Zipf em vários tamanhos de amostra.} Entre as combinações admitidas, escolhe-se a que minimiza
+	\begin{equation}
+		\Delta(D^{*}, \ell) = \max_{N \in \{50,\,100,\,200\}} \left| \hat{\alpha}_N(D^{*}, \ell) - 1 \right|,
+		\label{eq:delta}
+	\end{equation}
+	ou seja, a combinação em que o expoente fica mais próximo de 1 simultaneamente no topo do \textit{ranking} (50 maiores manchas) e mais abaixo nele (200 maiores).
+\end{enumerate}
+
+O par escolhido é verificado aplicando o \texttt{cca\_grid} com esses parâmetros e comparando as manchas com as da varredura. Como verificação independente, a distribuição completa das populações das manchas é ajustada pelo método CSN (\autoref{sec:estimacao}), com $x_{\min}$ escolhido pela distância KS, \textit{bootstrap} semiparamétrico com 200 réplicas para o valor-$p$ e comparação com as distribuições lognormal, exponencial e lei de potência truncada pela razão de Vuong.
+
+A curva completa de pares com $\alpha_{100} \approx 1$ é exportada junto com o par escolhido, para que outros critérios possam ser comparados. Um princípio orientou todo o procedimento: os parâmetros do CCA \textbf{nunca} são ajustados para melhorar a correlação entre população e plástico, que só é calculada no segundo \textit{notebook}, depois de os parâmetros estarem fixados.
+
+\subsection{Identificação das manchas}
+
+Para inspeção dos resultados, as maiores manchas recebem o nome da cidade de referência mais próxima do seu centroide, calculado com a população como peso, a partir de uma lista de coordenadas de cerca de 30 metrópoles da região. O nome é usado apenas nas tabelas e figuras e não entra em nenhum cálculo.
+
+\section{População por bacia}
+\label{sec:met-populacao}
+
+A população de uma bacia é a soma das populações das células do GPW dentro dela. Para fazer essa soma, o raster de bacias é levado para a grade do GPW pelo vizinho mais próximo, e não o contrário. A escolha da direção importa: o GPW é uma grade de \textbf{contagens}, e reamostrar contagens para uma grade mais grossa ou deslocada inventa ou duplica pessoas, enquanto o rótulo de bacia é uma variável categórica, que pode ser reamostrada sem perda de consistência.
+
+Como a grade das bacias (2$'$) é mais grossa que a do GPW (30$''$), algumas células habitadas da linha de costa caem sobre um pixel que o relevo reamostrado classifica como oceano. Essas células são atribuídas à bacia de terra mais próxima, desde que ela esteja a no máximo 8 células do GPW ($\approx 7$ km). A população realocada e a que fica fora de qualquer bacia são reportadas nos resultados.
+
+\textbf{Repartição das manchas urbanas.} Uma mancha urbana pode ficar sobre um divisor de águas, com parte da cidade drenando para uma bacia e parte para outra. Nesse caso a mancha é \textbf{dividida}: cada pedaço conta para a bacia em que está, porque é para lá que escoa a água, e com ela o lixo, que cai sobre ele. Uma versão anterior deste trabalho atribuía a mancha inteira à bacia que continha a maior parte da sua área, o que transferia populações inteiras para bacias vizinhas. A tabela de pedaços registra, para cada par (mancha, bacia), a população, a área e a fração da mancha naquela bacia. A população total de uma bacia não depende das manchas; elas servem para calcular a sua população urbana e para identificar quais cidades drenam para cada foz.
+
+\section{Microplástico por bacia}
+\label{sec:met-plastico}
+
+\subsection{Sítios de coleta}
+
+São usadas as amostras do \textit{Nurdle Patrol} com contagem definida dentro da caixa de estudo ampliada por uma margem de 50 km (o maior raio de aceitação testado), excluída a parte sul-americana. Amostras repetidas no mesmo par de coordenadas são agrupadas num \textbf{sítio}, cuja concentração é a média das contagens. O agrupamento evita que um ponto muito amostrado pese mais que os outros na associação com as bacias.
+
+\subsection{O sítio mais próximo da foz}
+
+A foz de cada bacia principal é o seu pixel-\textit{sink}, uma célula de $2' \times 2'$ na linha de costa. A distância entre a foz e cada sítio é calculada pelo haversine até o ponto do pixel mais próximo do sítio, e não até o centro do pixel: uma amostra coletada dentro do pixel da foz está a 0 km dela. Cada bacia principal recebe \textbf{o sítio mais próximo da sua foz} e dois valores de microplástico:
+
+\begin{itemize}
+	\item a \textbf{concentração}, em \textit{pellets} por 10 minutos, no sítio mais próximo;
+	\item o \textbf{indicador de quantidade}, dado pela concentração multiplicada pela área da bacia (\textit{pellets}/10 min $\times$ km$^2$), que dá mais peso às bacias grandes, que drenam mais território.
+\end{itemize}
+
+Uma versão anterior deste trabalho atribuía a cada bacia a média de todas as amostras num círculo de 50 km ao redor da foz. Esse procedimento misturava fontes diferentes e fazia bacias vizinhas compartilharem as mesmas amostras, criando dependência artificial entre as observações. O sítio mais próximo, junto com a varredura do raio descrita a seguir, torna explícito o compromisso entre a proximidade da medição e o número de bacias.
+
+\section{Raio de aceitação}
+\label{sec:met-raio}
+
+Uma bacia só tem microplástico ``medido'' se o seu sítio estiver perto da foz; um sítio a 100 km pode refletir outra bacia. Em vez de fixar um raio, o raio de aceitação $R$ é varrido de 1 a 50 km em passos de 1 km. Para cada $R$ são registrados:
+
+\begin{itemize}
+	\item a fração dos sítios que estão a até $R$ de alguma foz principal;
+	\item o número de bacias com sítio a até $R$ e o número de sítios distintos entre elas, já que duas bacias vizinhas podem ter o mesmo sítio mais próximo;
+	\item o expoente $\beta$, o seu IC de 95\% e o coeficiente $r$ das leis de escala da \autoref{sec:met-alometria}, para a concentração e para o indicador de quantidade.
+\end{itemize}
+
+Dois raios são destacados. O primeiro é $R = 1$ km, que corresponde a uma \textbf{medição garantida}: o sítio está no pixel da foz ou encostado nele. O segundo é $R_{\mathrm{maioria}}$, o \textbf{menor raio que contém a maioria} ($\geq 50\%$) dos sítios de coleta, que aproveita a maior parte da informação disponível sem aceitar distâncias arbitrariamente grandes.
+
+\section{Alometria por bacia}
+\label{sec:met-alometria}
+
+Para cada raio, a lei de escala da \autoref{eq:escala} é ajustada entre a população $X$ da bacia e o microplástico $Y$ na foz, com cada bacia como uma observação. Os ajustes são feitos para as duas variáveis de resposta, concentração e indicador de quantidade, e seguem os passos abaixo.
+
+\begin{enumerate}
+	\item Entram as bacias com sítio a até $R$ da foz, população positiva e $Y > 0$. As contagens zero precisam sair do ajuste em escala log-log e são tratadas à parte, na discussão dos resultados.
+	\item O expoente $\beta$ e o pré-fator $\log_{10} c$ são estimados por MQO sobre $\log_{10} X$ e $\log_{10} Y$.
+	\item O IC de 95\% de $\beta$ e a banda de confiança da reta são obtidos por \textit{bootstrap} de pares com 10.000 reamostragens \cite{efron1979}.
+	\item A significância é avaliada por um teste de permutação com 10.000 permutações dos valores de $Y$, com hipótese nula $\beta = 0$ \cite{good2005}.
+	\item São reportados o coeficiente de Pearson $r$ entre os logaritmos e o coeficiente de Spearman $\rho_s$, com os respectivos valores-$p$.
+	\item A influência de bacias individuais é avaliada por um teste \textit{leave-one-out}: o ajuste é refeito removendo uma bacia de cada vez, e registra-se a variação de $r$ e de $\beta$.
+\end{enumerate}
+
+O ajuste só é feito quando há pelo menos 5 bacias e 3 valores distintos de $Y$; abaixo disso, o resultado é reportado como dados insuficientes. A mesma bacia não entra duas vezes, mas duas bacias podem compartilhar o mesmo sítio; o número de sítios distintos é reportado junto com cada ajuste.
+
+\section{Verificações das distribuições}
+\label{sec:met-verificacoes}
+
+Como verificação da consistência do \textit{pipeline}, três distribuições são ajustadas pelo método CSN com o pacote \texttt{powerlaw} \cite{alstott2014}: a área de todas as bacias delineadas que não tocam a borda, a população de todas as bacias e a população de todas as manchas urbanas. Redes fluviais têm distribuições de área em lei de potência com expoente $\gamma$ próximo de 1,4 a 1,5 para bacias aninhadas \cite{rodrigueziturbe1997,maritan1996}, e as manchas urbanas devem seguir aproximadamente a lei de Zipf ($\gamma \approx 2$). Em cada caso, a lei de potência é comparada com a lognormal e com a exponencial pela razão de Vuong.
+
+\section{Implementação}
+\label{sec:implementacao}
+
+Todo o processamento foi implementado em Python, com NumPy \cite{harris2020}, SciPy \cite{virtanen2020}, pandas, xarray/rioxarray e rasterio para os dados em grade, Numba \cite{lam2015} para a varredura do CCA, \texttt{powerlaw} \cite{alstott2014} para os ajustes de cauda e Matplotlib \cite{hunter2007} para as figuras. O IPBA \cite{ipba} e o pacote CCA são clonados dos seus repositórios em tempo de execução. Os \textit{notebooks} foram desenvolvidos para o Google Colab, e todos os dados são baixados automaticamente. O \autoref{apendice:reprodutibilidade} lista os arquivos, os parâmetros e as saídas de cada etapa.

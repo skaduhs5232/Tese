@@ -1,0 +1,142 @@
+\input{lib/preambulo}
+\usepackage{longtable}
+\renewcommand{\algorithmautorefname}{Algoritmo}
+
+\graphicspath{{figuras/}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%          Configuracoes do uniforTeX2            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\trabalhoacademico{dissertacao}
+
+% Coloque 'sim' para gerar a versão de qualificação
+%\ehqualificacao{nao}
+
+\removerbordasdohyperlink{sim}
+
+\cordohyperlink{nao}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%          Informação sobre a IES                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ies{Universidade de Fortaleza}
+\iessigla{UNIFOR}
+\centro{Centro de Ciências Tecnológicas}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%   Campos de outros tipos de trabalho (não usados) %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\graduacaoem{Ciência da Computação}
+\habilitacao{bacharel}
+\especializacaoem{}
+\programadoutorado{Programa de Pós-Graduação em Informática Aplicada}
+\nomedodoutorado{Doutorado em Informática Aplicada}
+\doutorem{Informática Aplicada}
+\areadeconcentracaodoutorado{Ciência da Computação}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%         Informação para Dissertacao             %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\programamestrado{Programa de Pós-Graduação em Informática Aplicada}
+\nomedomestrado{Mestrado Acadêmico em Informática Aplicada}
+\mestreem{Informática Aplicada}
+\areadeconcentracaomestrado{Ciência da Computação}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Informação relacionadas ao trabalho     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\autor{Thiago de Oliveira Sampaio}
+\titulo{População de bacias hidrográficas e microplástico nas fozes: uma análise de escala na América do Norte e Central}
+\data{2026}
+\local{Fortaleza -- Ceará}
+\dataaprovacao{\rule{1cm}{0.4pt} de \rule{3cm}{0.4pt} de 2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%     Informação sobre o Orientador       %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\orientador{Erneson Alves de Oliveira}
+\orientadories{Universidade de Fortaleza - UNIFOR}
+\orientadorcentro{Centro de Ciências Tecnológicas - CCT}
+\orientadorfeminino{nao}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Informação sobre o Co-orientador   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Deixe o nome do coorientador em branco para remover do documento
+\coorientador{}
+\coorientadories{}
+\coorientadorcentro{}
+\coorientadorfeminino{nao}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Informação sobre a banca           %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Deixe o nome do membro vazio para removê-lo da folha de aprovação
+\membrodabancadois{Prof. Dr. Membro Interno}
+\membrodabancadoiscentro{Centro de Ciências Tecnológicas - CCT}
+\membrodabancadoisies{Universidade de Fortaleza - UNIFOR}
+
+\membrodabancatres{Prof. Dr. Membro Externo}
+\membrodabancatrescentro{Centro}
+\membrodabancatresies{Instituição - SIGLA}
+
+\membrodabancaquatro{}
+\membrodabancaquatrocentro{}
+\membrodabancaquatroies{}
+
+\membrodabancacinco{}
+\membrodabancacincocentro{}
+\membrodabancacincoies{}
+
+\membrodabancaseis{}
+\membrodabancaseiscentro{}
+\membrodabancaseisies{}
+
+\begin{document}
+	\glsaddall
+
+	% Elementos pré-textuais
+	\imprimircapa
+	\imprimirfolhaderosto{}
+	% A ficha catalográfica é gerada em https://unifor.br/ficha-catalografica depois que o
+	% número de páginas estiver fechado; salve o PDF como elementos-pre-textuais/ficha-catalografica.pdf
+	% e descomente a linha abaixo.
+	%\imprimirfichacatalografica{elementos-pre-textuais/ficha-catalografica}
+	\imprimirfolhadeaprovacao
+	\imprimirdedicatoria{elementos-pre-textuais/dedicatoria}
+	\imprimiragradecimentos{elementos-pre-textuais/agradecimentos}
+	\imprimirepigrafe{elementos-pre-textuais/epigrafe}
+	\imprimirresumo{elementos-pre-textuais/resumo}
+	\imprimirabstract{elementos-pre-textuais/abstract}
+	\imprimirlistadeilustracoes
+	\imprimirlistadetabelas
+	\imprimirlistadealgoritmos
+	\imprimirlistadeabreviaturasesiglas
+	\imprimirlistadesimbolos{elementos-pre-textuais/lista-de-simbolos}
+	\imprimirsumario
+
+	% Elementos textuais
+	\textual
+	\input{elementos-textuais/introducao}
+	\input{elementos-textuais/fundamentacao-teorica}
+	\input{elementos-textuais/trabalhos-relacionados}
+	\input{elementos-textuais/metodologia}
+	\input{elementos-textuais/resultados}
+	\input{elementos-textuais/conclusao}
+
+	% Elementos pós-textuais
+	\bibliography{elementos-pos-textuais/referencias}
+	\imprimirglossario
+	\imprimirapendices
+		\input{elementos-pos-textuais/apendices/reprodutibilidade}
+		\input{elementos-pos-textuais/apendices/bacias-com-coleta}
+
+\end{document}

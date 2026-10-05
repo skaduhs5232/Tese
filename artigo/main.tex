@@ -1,0 +1,232 @@
+% =====================================================================
+%  Lei de Pareto das manchas urbanas dos EUA (GPW v4 + CCA)
+%  Trabalho final — artigo de no máximo 3 páginas com elemento gráfico
+%
+%  Compilar com: pdflatex main -> bibtex main -> pdflatex main (2x)
+% =====================================================================
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage[top=2cm,bottom=2cm,left=1.8cm,right=1.8cm,columnsep=0.65cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{flushend}
+\usepackage{titlesec}
+\usepackage{icomma}
+\usepackage[colorlinks=true,allcolors=blue!70!black]{hyperref}
+
+\captionsetup{font=small,labelfont=bf}
+
+% Espaçamentos compactos e elegantes para seções e parágrafos
+\titleformat{\section}{\large\bfseries}{\thesection}{0.7em}{}
+\titlespacing*{\section}{0pt}{1.3ex plus .3ex minus .2ex}{0.7ex plus .2ex}
+\newcommand{\rotuloparagrafo}[1]{#1.}
+\titleformat{\paragraph}[runin]{\normalfont\bfseries}{\theparagraph}{0em}{\rotuloparagrafo}
+\titlespacing*{\paragraph}{0pt}{0.7ex plus .2ex minus .1ex}{0.55em}
+
+\pagestyle{empty}
+\renewcommand{\topfraction}{0.88}
+\renewcommand{\floatpagefraction}{0.75}
+
+\begin{document}
+
+% ---------------------------------------------------------------- cabeçalho e título
+\twocolumn[
+\begin{@twocolumnfalse}
+\begin{center}
+\IfFileExists{figs/unifor_logo.png}
+  {\includegraphics[height=1.4cm]{figs/unifor_logo.png}\par\vspace{0.2cm}}
+  {\fbox{\parbox{5.5cm}{\centering\footnotesize\color{red}[inserir \texttt{figs/unifor\_logo.png}]}}\par\vspace{0.2cm}}
+
+{\footnotesize\bfseries Universidade de Fortaleza (UNIFOR) \quad$\cdot$\quad Centro de Ciências Tecnológicas\\
+Programa de Pós-Graduação em Informática Aplicada (PPGIA)\par}
+
+\vspace{0.35cm}
+{\LARGE\bfseries A lei de Pareto nas manchas urbanas dos Estados Unidos\par}
+\vspace{0.18cm}
+{\large Cidades definidas por agrupamento de densidade populacional (CCA) sobre o GPW v4\par}
+\vspace{0.25cm}
+{\normalsize\textbf{Thiago de Oliveira Sampaio}\par}
+{\footnotesize Mestrado em Informática Aplicada, pesquisa de dissertação\par}
+\vspace{0.35cm}
+\end{center}
+
+\begin{quote}\small
+\noindent\textbf{Resumo.}
+A lei de Zipf afirma que a população da cidade de posto $r$ decai como $S(r)\propto r^{-\alpha}$, com $\alpha\approx 1$. Esse enunciado é o caso particular $\zeta=1$ da lei de Pareto, na qual a probabilidade de uma cidade superar o tamanho $x$ decai como $P(X\geq x)\propto x^{-\zeta}$, com $\zeta=1/\alpha$. Testar as duas exige uma definição de cidade que não dependa de fronteiras administrativas. Aplicamos o \emph{City Clustering Algorithm} (CCA) ao raster de população GPW v4 (2020) dos Estados Unidos contíguos, obtivemos $8\,401$ manchas urbanas e ajustamos a cauda pelo método de máxima verossimilhança de Clauset, Shalizi e Newman. A lei de Pareto não é rejeitada (KS $=0{,}014$; $p=0{,}74$; $n=1\,780$ manchas na cauda), com expoente $\zeta=0{,}72\pm 0{,}02$, equivalente a $\alpha=1{,}40\pm 0{,}03$. O valor fica distante de $\zeta=1$. Mostramos ainda que $\alpha$ cresce de forma monótona com o parâmetro de aglutinação $\ell$ do CCA: o expoente mede a distribuição de população e, ao mesmo tempo, a definição de cidade adotada.
+
+\vspace{0.15cm}
+\noindent\textbf{Palavras-chave:} lei de Pareto, lei de Zipf, \emph{City Clustering Algorithm} (CCA), GPW v4, manchas urbanas.
+\end{quote}
+\vspace{0.35cm}
+\end{@twocolumnfalse}
+]
+
+% ---------------------------------------------------------------- problema
+\section{Qual é o problema?}
+
+Cidades não são objetos naturalmente delimitados. Os dados oficiais de
+população vêm agregados por unidades administrativas (municípios,
+\emph{counties}, setores censitários) cujas fronteiras foram traçadas por
+motivos históricos e políticos, não pela forma da ocupação humana. Uma região
+metropolitana contínua pode estar repartida em dezenas de municípios, e um
+município grande pode conter vasta área rural. Qualquer lei estatística sobre
+o tamanho das cidades depende, portanto, de uma escolha prévia que normalmente
+fica implícita.
+
+A \textbf{lei de Zipf}~\cite{zipf1949} é o exemplo canônico dessa dependência.
+Na forma de posto e tamanho, a população $S$ da cidade de posto $r$ obedece
+%
+\begin{equation}
+S(r) \;\propto\; r^{-\alpha}, \qquad \alpha \approx 1,
+\label{eq:zipf}
+\end{equation}
+%
+o que equivale a uma densidade $p(x)\propto x^{-\gamma}$. Os expoentes se
+ligam por
+%
+\begin{equation}
+\zeta = \gamma - 1,
+\qquad
+\alpha = \frac{1}{\zeta}.
+\label{eq:mapeamento}
+\end{equation}
+%
+Assim, $\alpha = 1$ exatamente quando $\zeta = 1$ e $\gamma = 2$.
+Aqui $\zeta$ é o expoente da \textbf{lei de Pareto}: a probabilidade de uma
+mancha ter população pelo menos $x$ cai como $P(X\geq x)\propto x^{-\zeta}$.
+Lei de potência, distribuição de Pareto e lei de Zipf são a mesma família
+vista por expoentes diferentes, e Zipf é somente o caso $\zeta=1$~\cite{newman2005}.
+
+Rozenfeld \emph{et al.}~\cite{rozenfeld2011,rozenfeld2008} mostraram que o
+expoente medido muda quando as cidades deixam de ser fronteiras legais e
+passam a ser aglomerados construídos a partir da densidade, e propuseram o
+\emph{City Clustering Algorithm} (CCA) como essa definição. O mesmo
+agrupamento entra no estudo de emissões de CO$_2$~\cite{oliveira2014} e de
+mobilidade e criminalidade~\cite{caminha2017}.
+
+Este trabalho responde a duas perguntas. \textbf{(i)} As manchas urbanas
+produzidas pelo CCA sobre um raster global de população seguem a lei de
+Pareto e, se seguem, o expoente é o de Zipf ($\zeta=1$)?
+\textbf{(ii)} Quanto de $\zeta$ (ou de $\alpha$) é propriedade dos dados e
+quanto é artefato dos parâmetros que definem o que conta como cidade?
+
+% ---- figura
+\begin{figure*}[t]
+\centering
+\IfFileExists{figs/zipf.pdf}
+  {\includegraphics[width=\textwidth]{figs/zipf.pdf}}
+  {\includegraphics[width=\textwidth]{figs/zipf.png}}
+\caption{\textbf{Posto e tamanho, e sensibilidade do CCA.} \textbf{(a)} População contra o posto das $8\,401$ manchas urbanas dos EUA contíguos ($D^{*}=386$\,hab/km$^{2}$, $\ell=3$\,km). Pontos cheios: todas as manchas; círculos abertos: cauda ajustada ($x \ge 5\,061$\,hab, $n=1\,780$); linha azul escura: máxima verossimilhança ($\alpha = 1{,}40 \pm 0{,}03$, isto é $\zeta = 0{,}72$, KS${}=0{,}014$, $p=0{,}74$); tracejado: lei de Zipf ($\zeta=1$). \textbf{(b)} Recorte costeiro do Texas ($190$ manchas; cauda com $n=110$; $\alpha = 1{,}55 \pm 0{,}15$): a janela menor perde poder estatístico. \textbf{(c)} $\alpha$ sobe de $1{,}31$ a $1{,}48$ quando $\ell$ aumenta, com $x_{\min}$ fixo.}
+\label{fig:zipf}
+\end{figure*}
+
+% ---------------------------------------------------------------- método
+\section{O que foi feito}
+
+\paragraph{Dados} Usamos o \emph{Gridded Population of the World} v4
+(GPW v4, revisão 11)~\cite{gpw4}, um raster global de contagem de
+pessoas por pixel para o ano de 2020, com resolução de 30 segundos de arco
+($\approx 1$\,km). O produto redistribui dados censitários numa grade regular,
+e por isso a análise não parte de fronteiras administrativas. O recorte é a caixa
+$[-125{,}0;\,-66{,}9]\times[24{,}5;\,49{,}5]$, que cobre os Estados Unidos
+contíguos.
+
+\paragraph{Definição de cidade (CCA)} Um pixel é urbano quando sua densidade
+supera o limiar $D^{*}$. Pixels urbanos próximos entram na mesma mancha. A
+implementação é uma dilatação binária de $\lceil \ell/\Delta x \rceil - 1$
+pixels ($\Delta x \approx 928$\,m é o lado do pixel), seguida da rotulagem dos
+componentes conexos. Como as duas manchas crescem na dilatação, o vão fechado
+é de cerca de $2\ell$. Com $\ell=3$\,km, isso chega a aproximadamente
+$5{,}6$\,km. A Fig.~\ref{fig:zipf}c varia, portanto, o parâmetro nominal
+$\ell$. A população de cada mancha soma apenas os pixels densos, para que o
+halo da dilatação não infle a contagem.
+Adotamos $D^{*} = 386$\,hab/km$^{2}$, o limiar oficial de área urbana do
+U.S.\ Census Bureau ($1\,000$\,hab/milha$^{2}$)~\cite{census2020} convertido
+para km$^{2}$, e $\ell = 3$\,km. Como a área de um pixel em graus diminui com
+a latitude, o limiar em hab/km$^{2}$ é convertido para hab/pixel linha a linha
+pelo fator $\cos(\mathrm{lat})$. A correção importa numa janela de 25 graus
+de latitude.
+
+\paragraph{Filtro de fronteira} A caixa de recorte é geográfica, não política:
+inclui o norte do México e o sul de Ontário. Sem tratamento, Monterrey
+($8{,}7$\,M) e Toronto ($7{,}1$\,M) apareceriam entre as dez maiores manchas
+do recorte. Manchas cujo centroide cai nessas duas regiões são descartadas
+($579$ de $8\,980$, com $\ell=3$\,km). O corte norte segue o Lago Ontário
+($43{,}35^{\circ}$N) e preserva Detroit, Buffalo, Rochester e Syracuse do lado
+americano.
+
+\paragraph{Ajuste estatístico} Uma reta em escala logarítmica dupla é um
+estimador enviesado do expoente de uma lei de potência. Seguimos o
+procedimento de Clauset, Shalizi e Newman~\cite{clauset2009}: $\gamma$ é
+estimado por máxima verossimilhança no ramo $x \geq x_{\min}$; $x_{\min}$ é
+escolhido de modo a minimizar a distância de Kolmogorov e Smirnov (KS) entre
+as distribuições acumuladas empírica e teórica, em vez de ser fixado no piso
+que o próprio $D^{*}$ impõe, o que seria um corte artificial; a bondade do
+ajuste é medida por \emph{bootstrap} semiparamétrico, em que $p$ é a fração de
+amostras sintéticas de lei de Pareto cuja distância KS supera a observada.
+Nessa convenção, $p>0{,}1$ significa que a hipótese \textbf{não é rejeitada}.
+O expoente $\alpha$ da Eq.~\eqref{eq:zipf} sai de $\gamma$ pela
+Eq.~\eqref{eq:mapeamento}.
+
+
+% ---------------------------------------------------------------- resultados
+\section{Resultados e conclusões}
+
+O CCA identifica $8\,401$ manchas urbanas\footnote{O \emph{notebook} pode devolver $8\,403$: o filtro de fronteira usa o centroide da mancha, e o arredondamento desse centroide, inferior a um pixel, reclassifica duas manchas minúsculas junto à divisa. Nenhum valor ajustado muda.}, que concentram $273{,}7$ milhões de
+habitantes, $69\%$ da população do recorte. As dez maiores correspondem,
+sem nenhuma lista de nomes fornecida ao algoritmo, às aglomerações esperadas:
+Nova York ($29{,}6$\,M), Los Angeles ($17{,}6$\,M), Chicago ($9{,}3$\,M),
+Washington e Baltimore ($8{,}1$\,M), \mbox{Miami} e Fort Lauderdale ($7{,}2$\,M),
+Dallas e Fort Worth ($7{,}0$\,M), São Francisco e San Jose ($6{,}6$\,M),
+Houston ($6{,}5$\,M), Tampa e Orlando ($6{,}5$\,M) e Boston ($5{,}8$\,M).
+Os centroides caem a $0{,}2^{\circ}$ ou menos dos centros reais dessas
+cidades, o que valida o agrupamento. Várias delas são conurbações que o CCA
+funde numa única mancha, porque a ocupação densa é contínua entre os núcleos.
+É isso que separa esta definição das fronteiras administrativas.
+
+O ajuste da Fig.~\ref{fig:zipf}a dá $\gamma = 1{,}716 \pm 0{,}017$, isto é,
+%
+\begin{equation}
+\zeta = 0{,}716 \pm 0{,}017,
+\qquad
+\alpha = 1{,}40 \pm 0{,}03 ,
+\end{equation}
+%
+sobre uma cauda de $n=1\,780$ manchas acima de $x_{\min}=5\,061$ habitantes.
+A distância KS observada, $0{,}014$, fica abaixo do valor crítico
+$1{,}36/\sqrt{n} = 0{,}032$, e o \emph{bootstrap} devolve $p=0{,}74$. A lei
+de Pareto descreve bem a cauda. A máxima verossimilhança e a regressão em
+escala logarítmica dupla concordam ($1{,}40$ e $1{,}39$).
+
+A lei ajustada é a de Pareto, com $\zeta \approx 0{,}72$. A lei de Zipf
+exigiria $\zeta = 1$. A barra $\pm 0{,}017$ é a incerteza do ajuste com
+$(D^{*},\ell)$ fixos. A incerteza que vem da definição de cidade é maior.
+Com $x_{\min}$ fixo, para que a variação não venha do deslocamento da janela,
+a Fig.~\ref{fig:zipf}c mostra $\alpha$ subindo de $1{,}31$ ($\ell=1$\,km) a
+$1{,}48$ ($\ell=8$\,km), ou seja, $\zeta$ entre $0{,}68$ e $0{,}76$. Nenhum
+ponto dessa faixa chega a $\zeta=1$. A incompatibilidade com Zipf se
+mantém em toda a varredura de $(D^{*},\ell)$. Aumentar $\ell$ funde vizinhos numa mancha maior e
+encurta a cauda, de modo que o expoente é propriedade conjunta dos dados e da
+definição operacional de cidade. Relatar um expoente sem relatar
+$(D^{*},\ell)$ deixa o resultado incompleto.
+
+Com $\alpha=1{,}40$, a mancha de posto 2 tem cerca de $2^{-1{,}40}\approx 38\%$
+da população da de posto 1. Na lei de Zipf, essa razão seria a metade. A cauda
+com $\zeta<1$ é mais pesada que a de Zipf, e as maiores manchas são mais
+dominantes. Rozenfeld \emph{et al.}~\cite{rozenfeld2011} já tinham
+observado o mesmo efeito: o expoente depende da definição de cidade, e a
+definição por densidade não recupera $\zeta=1$.
+
+% ---------------------------------------------------------------- refs
+\bibliographystyle{unsrt}
+\bibliography{referencias}
+
+\end{document}

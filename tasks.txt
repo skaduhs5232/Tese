@@ -1,0 +1,30 @@
+gebco - relevo\hidrografia
+gpw4 - pessoas
+noaa - micro (só micro; macro/WAW removido)
+
+recorte: EUA + México + América Central até o Canal do Panamá
+   (-125, 7, -65, 50); América do Sul (lon > -79, lat < 12.6) fora
+
+definir cidades ou manchas urbanas: GPW4 + CCA(D*,L)
+|_ aplicar CCA no GPW4 - estimativa da população, área do aglomerado
+|_ D* e L pela lei de Zipf: variar L de 100 em 100 m e D* de 10 em 10 pessoas/km² até 3000;
+   matriz D* x L colorida pelo expoente de Zipf; escolher onde o expoente fica 1 (rank-size -1)
+
+definir bacias hidrográficas: GEBCO + IPBA(SINKS(píxel da periferia da torção de terra do dado. se vizinho do mar, for terra então é sink))
+
+
+encontrar SINKS das maiores bacias hidrográficas(P=0.90 - encontrar todos os synks que as áreas das bacias correspondem a 90% das áreas analisadas)
+
+
+uma mancha urbana no meio de 2 bacias é dividida pela bacia: cada pedaço conta para a bacia onde está
+
+
+microplastico(NOAA) - para cada bacia, pegar o ponto de lixo mais perto da foz (SINK)
+|_ lixo da bacia = concentração no ponto mais próximo; quantidade = concentração x área da bacia
+|_ raio de aceitação crescendo de 1 em 1 km (até 50 km), testando; escolher onde a maioria dos pontos estiver
+|_ scatter só com bacias de medição garantida (ponto a até 1 km da foz)
+
+
+scatter plot (alometria por bacia)
+|_ eixo X -> população que mora dentro das bacias
+|_ eixo y -> lixo estimado em cada bacia

@@ -1,0 +1,15 @@
+# Core Scientific and Data Analysis Libraries
+numpy
+pandas
+scipy
+matplotlib
+
+# Image Processing and Computer Vision
+scikit-image
+
+# Geospatial Libraries
+rasterio
+rioxarray
+pysheds
+whitebox
+geopy

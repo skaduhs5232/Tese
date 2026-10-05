@@ -1,0 +1,74 @@
+\chapter{Reprodutibilidade}
+\label{apendice:reprodutibilidade}
+
+Todo o processamento desta dissertação está em dois \textit{notebooks} Jupyter, desenvolvidos para o Google Colab, que baixam os dados e o código de terceiros em tempo de execução. Este apêndice lista os arquivos, os parâmetros e as saídas de cada etapa.
+
+\section{Ordem de execução}
+
+\begin{enumerate}
+	\item \texttt{01\_Zipf\_calibracao\_CCA.ipynb}: lê o GPW v4, executa a varredura de $(D^{*}, \ell)$, escolhe o par pelo critério $\Delta$, verifica o resultado com o \texttt{cca\_grid}, ajusta a distribuição das manchas pelo método CSN e grava \texttt{results/cca\_calibracao.json}.
+	\item \texttt{02\_Micro\_Plastic.ipynb}: lê os parâmetros do CCA do arquivo anterior e executa o recorte, o IPBA, a seleção das bacias principais, o CCA, a repartição das manchas, a associação do microplástico às fozes, a varredura do raio e os ajustes de escala. O IPBA, em Python puro, é a etapa mais lenta.
+\end{enumerate}
+
+\section{Dados e código de terceiros}
+
+\begin{itemize}
+	\item GEBCO 2024: lido diretamente da cópia em formato COG em \url{https://data.source.coop/alexgleith/gebco-2024/GEBCO_2024.tif} \cite{gebco2024}.
+	\item GPW v4.11, contagem de população de 2020, 30 segundos de arco \cite{gpw4}.
+	\item Banco de microplásticos marinhos do NCEI/NOAA, exportado em CSV \cite{nyadjro2023}.
+	\item IPBA: \url{https://github.com/erneson/IPBA} \cite{ipba}.
+	\item Pacote CCA com a função \texttt{cca\_grid}: \url{https://github.com/skaduhs5232/CCA}.
+\end{itemize}
+
+\section{Parâmetros}
+
+A \autoref{tab:parametros} lista todos os parâmetros do \textit{pipeline} e a origem de cada valor. Nenhum deles foi ajustado a partir da relação entre população e microplástico.
+
+\begin{table}[ht!]
+	\centering
+	\Caption{\label{tab:parametros}Parâmetros do \textit{pipeline}}
+	\IBGEtab{}{%
+		\small
+		\begin{tabular}{p{4.6cm}p{3.0cm}p{6.4cm}}
+			\toprule
+			\textbf{Parâmetro} & \textbf{Valor} & \textbf{Origem} \\
+			\midrule
+			Caixa de estudo & $[-125, -65] \times [7, 50]$ & Região com maior cobertura do \textit{Nurdle Patrol}; inclui a bacia do Mississippi inteira \\
+			Corte do Canal do Panamá & lon $> -79^\circ$ e lat $< 12{,}6^\circ$ & Exclui a América do Sul sem partir a Cidade do Panamá \\
+			Reamostragem do GEBCO & $8 \times 8$ (2$'$) & Limite de 65.535 \textit{sinks} do IPBA \\
+			Vizinhança dos \textit{sinks} e do IPBA & 4 células & Padrão do IPBA \\
+			Cobertura das bacias principais $P$ & 0,90 & Especificação do trabalho \\
+			Grade de $D^{*}$ & 10 a 3.000 hab/km$^2$, passo 10 & Especificação do trabalho \\
+			Grade de $\ell$ & 100 a 5.000 m, passo 100 & Especificação do trabalho \\
+			$\ell_{\min}$ & 1.400 m & Diagonal entre células do GPW (1.307 m) \\
+			$N$ do estimador de Hill & 50, 100 e 200 & Topo do \textit{ranking} \\
+			$D^{*}$ escolhido & 1.010 hab/km$^2$ & Mínimo de $\Delta$ (\autoref{eq:delta}) \\
+			$\ell$ escolhido & 1.700 m & Mínimo de $\Delta$ (\autoref{eq:delta}) \\
+			Realocação costeira & até 8 células do GPW ($\approx 7$ km) & Diferença de resolução entre GEBCO reamostrado e GPW \\
+			Margem da busca de sítios & 50 km & Maior raio testado \\
+			Raio de aceitação $R$ & 1 a 50 km, passo 1 & Especificação do trabalho \\
+			$R_{\mathrm{maioria}}$ & 38 km & Menor $R$ com $\geq 50\%$ dos sítios \\
+			Reamostragens do \textit{bootstrap} & 10.000 (2.000 na varredura de $R$) & Convenção \\
+			Permutações & 10.000 (2.000 na varredura de $R$) & Convenção \\
+			Reamostragens do teste CSN & 200 & Convenção \\
+			\bottomrule
+		\end{tabular}%
+	}{%
+		\Fonte{elaborado pelo autor.}%
+	}
+\end{table}
+
+\section{Saídas}
+
+As saídas são gravadas na pasta \texttt{results/} com o sufixo \texttt{na\_panama}:
+
+\begin{itemize}
+	\item \texttt{cca\_calibracao.json}: parâmetros escolhidos, expoentes de Hill, $\Delta$, critério e ajuste CSN;
+	\item \texttt{zipf\_matriz\_*.npz} e \texttt{zipf\_curva\_alpha1\_*.csv}: matriz de expoentes e curva $\alpha = 1$;
+	\item \texttt{zipf\_clusters\_*.csv}: todas as manchas urbanas com população, área, centroide e nome;
+	\item \texttt{bacias\_*.csv}: bacias principais com área, população, população urbana, foz, sítio mais próximo, distância e microplástico;
+	\item \texttt{manchas\_por\_bacia\_*.csv}: pedaços das manchas em cada bacia;
+	\item \texttt{varredura\_raio\_*.csv} e \texttt{escala\_pop\_lixo\_*.csv}: varredura do raio e ajustes de escala;
+	\item \texttt{leis\_potencia\_*.csv}: ajustes de cauda;
+	\item figuras em PDF e PNG, as mesmas usadas nesta dissertação.
+\end{itemize}
