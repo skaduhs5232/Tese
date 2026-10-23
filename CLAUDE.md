@@ -48,8 +48,9 @@ IPBA implements the *Invasion Percolation Based Algorithm* for delineating drain
 
 - `notebooks/` — the two analysis notebooks above.
 - `dados/` — `gpw_data/` (GPW v4 raster), `noaa_microplastics.csv` (full NOAA dump; notebooks filter to one method), `archives/` (downloaded zips), `pop_gpw_crop.tif` (old Texas crop). The notebooks' `local()` helper looks in `.`, `..`, `dados/` and `../dados/` before downloading.
-- `results/` — notebook outputs; `results/texas_legado/` holds outputs of the previous Texas-crop / 50 km-radius version (still read by `artigo/gerar_graficos_artigo.py`).
-- `artigo/` — LaTeX article (US Zipf) and Overleaf package.
+- `results/` — notebook outputs (the notebooks write to `notebooks/results/`).
+- `artigo/` — 3-page LaTeX course article on Zipf's law for CCA urban blobs in Brazil, focused on the Nordeste (GPW v4 + IBGE Censo 2022 municipalities). Separate from the thesis crop: `artigo/analise_brasil.py` reuses notebook 01's sweep/Hill/CSN code locally and writes `artigo/resultados_brasil/`; `artigo/gerar_graficos_artigo.py` builds the figure from there. Inputs: `dados/gpw_data/`, `dados/ibge/`.
+- `Tese/` — the dissertation in the UNIFOR uniforTeX2 template; main file `Tese/dissertacao.tex`, built with `latexmk`.
 - `apresentacao/`, `artigos_relacionados/` — slides and reference literature.
 - `requirements.txt` — Python deps for local/offline work (not what Colab uses).
 - `venv/` — local virtualenv; not part of the project's source.

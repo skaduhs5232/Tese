@@ -1,135 +1,130 @@
 """
-Gera os gráficos do artigo da Lei de Zipf em altíssima qualidade (vetorial e 300 DPI),
-com proporções físicas calibradas para a largura do texto no LaTeX (\textwidth = ~17.4 cm),
-com barra de legenda horizontal unificada abaixo dos painéis,
-garantindo 100% de visibilidade de todos os dados sem nenhuma sobreposição.
+Gera a figura do artigo (figs/zipf.pdf e figs/zipf.png) a partir das saídas do analise_brasil.py
+(resultados_brasil/), na largura do texto em duas colunas (~17,4 cm):
+
+(a) mapa das manchas urbanas do Nordeste no par (D*, l) calibrado para o Brasil;
+(b) rank-size das manchas do Nordeste e dos municípios do Censo 2022, com a referência de Zipf;
+(c) alpha das 50, 100 e 200 maiores manchas em função de D*, Nordeste e Brasil, com l calibrado.
 """
 
-import os
 import json
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.colors import LogNorm
+from scipy import ndimage as ndi
+from shapely.geometry import shape
 
-# Diretórios
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ARTIGO_FIGS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'figs')
-RESULTS_DIR = os.path.join(ROOT_DIR, 'results', 'texas_legado')
+import analise_brasil as ab
 
-os.makedirs(ARTIGO_FIGS_DIR, exist_ok=True)
+AQUI = os.path.dirname(os.path.abspath(__file__))
+RES = os.path.join(AQUI, "resultados_brasil")
+FIGS_DIR = os.path.join(AQUI, "figs")
+N_TOPO = (50, 100, 200)
+ESTILO_N = dict(zip(N_TOPO, (":", "-", "--")))
+DILATA_VIS = 2   # pixels; só para as manchas pequenas aparecerem no mapa
+NOMES_MAPA = ("Recife", "Fortaleza", "Salvador", "São Luís", "Teresina", "Natal", "Maceió",
+              "João Pessoa", "Aracaju", "Feira de Santana", "Petrolina", "Juazeiro do Norte", "Imperatriz",
+              "Vitória da Conquista", "Campina Grande", "Mossoró")
 
-# Carrega os dados
-with open(os.path.join(RESULTS_DIR, 'zipf_resumo.json'), 'r', encoding='utf-8') as f:
-    resumo = json.load(f)
+os.makedirs(FIGS_DIR, exist_ok=True)
+resumo = json.load(open(os.path.join(RES, "resumo.json"), encoding="utf-8"))
+D_br, l_br = resumo["br"]["D_star"], resumo["br"]["l_metros"]
+manchas = pd.read_csv(os.path.join(RES, "manchas_br.csv"))
+mun = pd.read_csv(os.path.join(RES, "municipios_censo2022.csv"))
+M = {r: np.load(os.path.join(RES, f"zipf_matriz_{r}.npz")) for r in ("br", "ne")}
 
-df_us = pd.read_csv(os.path.join(RESULTS_DIR, 'zipf_clusters_US.csv'))
-df_tx = pd.read_csv(os.path.join(RESULTS_DIR, 'zipf_clusters_TX.csv'))
-
-# Configuração tipográfica profissional - compatível com LaTeX Computer / Latin Modern
 plt.rcParams.update({
-    'font.family': 'serif',
-    'font.serif': ['Computer Modern Roman', 'Latin Modern Roman', 'DejaVu Serif', 'Times New Roman'],
-    'font.size': 8.5,
-    'axes.labelsize': 9.0,
-    'axes.titlesize': 9.0,
-    'xtick.labelsize': 8.0,
-    'ytick.labelsize': 8.0,
-    'legend.fontsize': 7.4,
-    'axes.grid': True,
-    'grid.alpha': 0.22,
-    'grid.linestyle': ':',
-    'axes.linewidth': 0.75,
-    'lines.linewidth': 1.3,
-    'mathtext.fontset': 'cm'
+    "font.family": "serif",
+    "font.serif": ["Latin Modern Roman", "Computer Modern Roman", "DejaVu Serif", "Times New Roman"],
+    "font.size": 8.0,
+    "axes.labelsize": 8.5,
+    "axes.titlesize": 8.5,
+    "xtick.labelsize": 7.5,
+    "ytick.labelsize": 7.5,
+    "legend.fontsize": 6.6,
+    "axes.linewidth": 0.7,
+    "lines.linewidth": 1.1,
+    "mathtext.fontset": "cm",
 })
+virgula = plt.FuncFormatter(lambda v, _: f"{v:g}".replace(".", ","))
 
-fig, axes = plt.subplots(1, 3, figsize=(6.85, 2.55), dpi=300)
+fig, axes = plt.subplots(1, 3, figsize=(6.85, 2.6), dpi=300, gridspec_kw=dict(width_ratios=(1.25, 1, 1)))
 
-# -------------------------------------------------------------
-# (a) EUA contíguo
-# -------------------------------------------------------------
-fit_us = resumo['US']['fit']
-x_us = np.sort(df_us['pop'].to_numpy())[::-1]
-r_us = np.arange(1, len(x_us) + 1)
-nt_us = fit_us['n']
-xmin_us = int(round(fit_us['xmin']))
-
+# (a) mapa das manchas do Nordeste
 ax = axes[0]
-l1 = ax.loglog(r_us, x_us, 'o', ms=1.8, mfc='#e05a2b', mec='none', alpha=0.45, label='Todas as manchas')[0]
-l2 = ax.loglog(r_us[:nt_us], x_us[:nt_us], 'o', ms=2.0, mfc='none', mec='#111111', mew=0.55, label='Cauda ajustada')[0]
-rr_us = np.logspace(0, np.log10(nt_us), 60)
-a_us = fit_us['alpha']
-l3 = ax.loglog(rr_us, fit_us['xmin'] * (rr_us / nt_us) ** (-a_us), '-', c='#0b2545', lw=1.6, label='Ajuste MLE')[0]
-l4 = ax.loglog(rr_us, fit_us['xmin'] * (rr_us / nt_us) ** (-1.0), '--', c='#666666', lw=1.2, label=r'Zipf ideal ($\alpha = 1$)')[0]
+ne_geo = json.load(open(os.path.join(ab.DADOS, "ibge", "nordeste_ufs.geojson"), encoding="utf-8"))
+for f in ne_geo["features"]:
+    g = shape(f["geometry"])
+    for p in getattr(g, "geoms", [g]):
+        xs, ys = p.exterior.xy
+        ax.fill(xs, ys, fc="#f2f2f2", ec="#a0a0a0", lw=0.35, zorder=0)
+tab = manchas[manchas["ne"]].sort_values("pop")
+sc = ax.scatter(tab["lon"], tab["lat"], s=0.3 + 45 * tab["pop"] / 3.5e6, c=tab["pop"], cmap="YlOrRd",
+                norm=LogNorm(1e4, 4e6), ec="#7a2e0e", lw=0.2, zorder=2)
+ROTULOS = {"Fortaleza": (6, 3), "Recife": (7, 0), "Salvador": (7, -2), "São Luís": (-8, 7),
+           "Teresina": (-30, -5)}
+for _, r in tab.dropna(subset=["nome"]).iterrows():
+    if r["nome"] in ROTULOS:
+        ax.annotate(r["nome"], (r["lon"], r["lat"]), ROTULOS[r["nome"]], textcoords="offset points",
+                    fontsize=5.4, va="center")
+ax.set_xlim(-48.9, -31.0)
+ax.set_ylim(-18.5, -1.0)
+ax.set_aspect("equal")
+ax.set_xticks([-46, -40, -34])
+ax.set_xticklabels(["46°O", "40°O", "34°O"])
+ax.set_yticks([-4, -10, -16])
+ax.set_yticklabels(["4°S", "10°S", "16°S"])
+ax.set_title(f"(a) {len(tab):,} manchas do Nordeste".replace(",", "."))
 
-ax.set_ylim(8e1, 1e9)
-ax.set_xlim(0.7, 1.8e4)
-ax.set_xlabel(r'Posto $r$')
-ax.set_ylabel(r'População $S(r)$')
-ax.set_title(r'(a) EUA contíguo (8.401 manchas)' '\n' r'KS = 0.014 ($p = 0.74$)')
 
-# -------------------------------------------------------------
-# (b) Costa do Texas (recorte da dissertação)
-# -------------------------------------------------------------
-fit_tx = resumo['TX']['fit']
-x_tx = np.sort(df_tx['pop'].to_numpy())[::-1]
-r_tx = np.arange(1, len(x_tx) + 1)
-nt_tx = fit_tx['n']
-xmin_tx = int(round(fit_tx['xmin']))
-
+# (b) rank-size: manchas x municípios, Nordeste
 ax = axes[1]
-ax.loglog(r_tx, x_tx, 'o', ms=2.2, mfc='#2a75d3', mec='none', alpha=0.6)
-ax.loglog(r_tx[:nt_tx], x_tx[:nt_tx], 'o', ms=2.4, mfc='none', mec='#111111', mew=0.55)
-rr_tx = np.logspace(0, np.log10(nt_tx), 60)
-a_tx = fit_tx['alpha']
-ax.loglog(rr_tx, fit_tx['xmin'] * (rr_tx / nt_tx) ** (-a_tx), '-', c='#0b2545', lw=1.6)
-ax.loglog(rr_tx, fit_tx['xmin'] * (rr_tx / nt_tx) ** (-1.0), '--', c='#666666', lw=1.2)
+x = np.sort(manchas.loc[manchas["ne"], "pop"].to_numpy())[::-1]
+y = np.sort(mun.loc[mun["ne"], "pop"].to_numpy())[::-1]
+ax.loglog(np.arange(1, x.size + 1), x, "o", ms=1.8, mfc="#c2410c", mec="none", alpha=0.6,
+          label="manchas")
+ax.loglog(np.arange(1, y.size + 1), y, "s", ms=1.6, mfc="#4b5563", mec="none", alpha=0.55,
+          label="municípios")
+rr = np.logspace(0, 3.3, 30)
+ax.loglog(rr, x[0] / rr, "--", c="k", lw=0.8, label="Zipf")
+csn = resumo["ne_par_br"]["csn_manchas"] if "ne_par_br" in resumo else None
+if csn:
+    nt = int(csn["n"])
+    rq = np.logspace(0, np.log10(nt), 40)
+    ax.loglog(rq, csn["xmin"] * (rq / nt) ** (-csn["alpha"]), "-", c="#1f6fb4", lw=1.0,
+              label=f"CSN: {csn['alpha']:.2f}".replace(".", ","))
+ax.set_xlim(0.8, 3e3)
+ax.set_ylim(5e3, 6e6)
+ax.set_xlabel(r"posto $r$")
+ax.set_ylabel(r"população $S(r)$")
+ax.set_title("(b) posto e tamanho, Nordeste")
+ax.legend(loc="upper right", frameon=False, handlelength=1.6, borderaxespad=0.2, markerscale=2)
 
-ax.set_ylim(4e1, 5e7)
-ax.set_xlim(0.7, 500)
-ax.set_xlabel(r'Posto $r$')
-ax.set_ylabel(r'População $S(r)$')
-ax.set_title(r'(b) Costa do Texas (dissertação)' '\n' r'KS = 0.071 ($p = 0.34$)')
-
-# -------------------------------------------------------------
-# (c) Sensibilidade ao parâmetro l
-# -------------------------------------------------------------
+# (c) alpha_N contra D*, Nordeste e Brasil, l calibrado
 ax = axes[2]
-v_l = resumo['varredura_l']
-ls = np.array(v_l['l_m']) / 1000
-alphas = v_l['alpha']
-erros = v_l['erro']
+D, L = M["br"]["D_star"], M["br"]["l_metros"]
+i = int(np.flatnonzero(L == l_br)[0])
+for r, cor in (("br", "#111111"), ("ne", "#c2410c")):
+    for n in N_TOPO:
+        ax.plot(D, M[r][f"alpha{n}"][i], ls=ESTILO_N[n], c=cor, lw=0.9)
+ax.axhline(1.0, c="#888888", lw=0.6)
+ax.axvline(D_br, c="#1f6fb4", lw=0.6)
+ax.set_xlim(0, 3000)
+ax.set_ylim(0.8, 1.5)
+ax.set_xlabel(r"$D^*$ (hab/km$^2$)")
+ax.set_ylabel(r"$\alpha$ (Hill)")
+ax.set_title(rf"(c) $\ell={l_br / 1000:.1f}$ km".replace(".", "{,}"))
+from matplotlib.lines import Line2D
+alcas = [Line2D([], [], c="#111111", lw=1.2), Line2D([], [], c="#c2410c", lw=1.2)] + \
+        [Line2D([], [], c="#555555", ls=ESTILO_N[n], lw=0.9) for n in N_TOPO]
+ax.legend(alcas, ["Brasil", "Nordeste"] + [f"$N={n}$" for n in N_TOPO], loc="upper right", ncol=3,
+          frameon=False, handlelength=1.3, handletextpad=0.4, columnspacing=0.6, borderaxespad=0.3, fontsize=5.8)
+ax.yaxis.set_major_formatter(virgula)
 
-l5 = ax.errorbar(ls, alphas, yerr=erros, fmt='s-', ms=4.2, c='#0b2545', ecolor='#666666', capsize=2.5, lw=1.3,
-                 label=r'$\alpha(\ell)$ ajustado')
-ax.axhline(1.0, ls='--', c='#666666', lw=1.2)
-ax.set_xscale('log')
-ax.set_xticks(ls)
-ax.get_xaxis().set_major_formatter(plt.matplotlib.ticker.ScalarFormatter())
-ax.set_xlabel(r'$\ell$ (km)')
-ax.set_ylabel(r'Expoente $\alpha$')
-ax.set_ylim(0.92, 1.58)
-ax.set_title(r'(c) Sensibilidade a $\ell$ do CCA' '\n' r'EUA contíguo ($x_{\min}$ fixo)')
-
-# Rótulos diretos junto às curvas para clareza imediata
-ax.text(1.05, 1.02, r'Zipf ($\alpha=1$)', color='#666666', fontsize=7.2, va='bottom')
-ax.text(1.05, 1.34, r'$\alpha(\ell)$', color='#0b2545', fontsize=8.0, fontweight='bold', va='bottom')
-
-# Legenda unificada na parte inferior
-handles = [l1, l2, l3, l4, l5]
-labels = ['Todas as manchas', 'Cauda ajustada', 'Ajuste MLE', r'Zipf ideal ($\alpha = 1$)', r'$\alpha(\ell)$ ajustado']
-fig.legend(handles, labels, loc='lower center', bbox_to_anchor=(0.5, -0.05),
-           ncol=5, frameon=True, framealpha=0.95, edgecolor='#cccccc',
-           fontsize=7.3, handletextpad=0.25, columnspacing=1.1)
-
-plt.tight_layout()
-plt.subplots_adjust(bottom=0.22)
-
-# Exporta em PDF vetorial e PNG de alta resolução
-pdf_path = os.path.join(ARTIGO_FIGS_DIR, 'zipf.pdf')
-png_path = os.path.join(ARTIGO_FIGS_DIR, 'zipf.png')
-
-plt.savefig(pdf_path, bbox_inches='tight')
-plt.savefig(png_path, dpi=300, bbox_inches='tight')
-
-print(f"Figuras atualizadas e salvas em:\n - {pdf_path}\n - {png_path}")
+fig.tight_layout(w_pad=0.5)
+fig.savefig(os.path.join(FIGS_DIR, "zipf.pdf"), bbox_inches="tight")
+fig.savefig(os.path.join(FIGS_DIR, "zipf.png"), dpi=300, bbox_inches="tight")
+print("figs/zipf.pdf e figs/zipf.png atualizados")

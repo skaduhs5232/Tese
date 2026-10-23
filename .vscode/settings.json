@@ -1,0 +1,9 @@
+{
+    "latex-workshop.latex.search.rootFiles.exclude": [
+        "**/lib/**",
+        "**/elementos-pre-textuais/**",
+        "**/elementos-textuais/**",
+        "**/elementos-pos-textuais/**"
+    ],
+    "latex-workshop.latex.autoBuild.run": "onFileChange"
+}

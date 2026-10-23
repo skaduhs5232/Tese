@@ -9,9 +9,9 @@ Este README explica o que os notebooks em [`notebooks/`](notebooks/) fazem, **po
 | `notebooks/01_Zipf_calibracao_CCA.ipynb` | Calibra os parâmetros do CCA ($D^*$, $\ell$) pela lei de Zipf e grava `results/cca_calibracao.json` |
 | `notebooks/02_Micro_Plastic.ipynb` | Pipeline principal: bacias (IPBA), manchas urbanas (CCA), microplástico (NOAA) e alometria população × lixo por bacia |
 | `dados/` | GPW v4 (`gpw_data/`), `noaa_microplastics.csv` e os zips baixados (`archives/`) |
-| `results/` | Saídas dos notebooks; `results/texas_legado/` guarda as saídas da versão antiga (recorte do Texas, raio de 50 km) |
+| `results/` | Saídas dos notebooks (gravadas em `notebooks/results/`) |
 | `IPBA/` | Cópia de referência do [IPBA](https://github.com/erneson/IPBA); os notebooks clonam o repositório em tempo de execução |
-| `artigo/` | Manuscrito LaTeX (Zipf dos EUA) e script das figuras |
+| `artigo/` | Artigo LaTeX da disciplina: lei de Zipf das manchas do CCA no Brasil e no Nordeste (GPW v4 e municípios do Censo 2022), com o script da análise e o da figura |
 | `apresentacao/`, `artigos_relacionados/` | Slides e literatura de apoio |
 
 Os notebooks só rodam no **Google Colab**. Ordem: primeiro o `01`, depois o `02` (enviando o `cca_calibracao.json` gerado pelo `01` para a pasta `results/` do `02`).

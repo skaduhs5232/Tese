@@ -320,3 +320,5 @@ dados/gpw_data/
 dados/archives/
 *.tif
 *.zip
+
+dados/ibge/
