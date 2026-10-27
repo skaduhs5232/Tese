@@ -1,0 +1,8 @@
+numpy
+matplotlib
+pandas
+gdal
+opencv-python
+scipy
+numba
+ipykernel
