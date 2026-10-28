@@ -1,0 +1,62 @@
+{
+  "territorio_id": "africa_madagascar",
+  "nome_pt": "África e Madagascar",
+  "nome_en": "Africa and Madagascar",
+  "bloco_hidrologico": "bloco_afroeurasia_oceania",
+  "bbox": [
+    -26.0,
+    -47.0,
+    63.5,
+    38.0
+  ],
+  "metodo": "zipf_dinamico_ols_r2",
+  "criterio": "min |alpha_OLS(N=100) - 1| sujeito a R2 >= 0.98 e L >= L_min",
+  "D_grade": [
+    100,
+    2000,
+    100
+  ],
+  "L_grade": [
+    1000,
+    5000,
+    500
+  ],
+  "D_star_hab_km2": 300,
+  "l_metros": 3500,
+  "l_km": 3.5,
+  "L_MIN_metros": 2700,
+  "alpha_ols": 1.1450773679675625,
+  "r2_ols": 0.9869752809549707,
+  "alpha_ols_N": {
+    "50": 1.0980220863464623,
+    "100": 1.1450773679675625,
+    "200": 1.1954086981627718
+  },
+  "r2_ols_N": {
+    "50": 0.9752572450888101,
+    "100": 0.9869752809549707,
+    "200": 0.9925992244193907
+  },
+  "restricao_r2_atendida": true,
+  "alpha_hill": {
+    "50": 1.307387465881959,
+    "100": 1.1855156130293913,
+    "200": 1.1760175374662774
+  },
+  "delta_alpha": 0.14507736796756254,
+  "n_manchas_urbanas": 3081,
+  "populacao_urbana_total_hab": 640861879.3665993,
+  "populacao_territorio_total_hab": 1364943855.6657777,
+  "maior_aglomeracao_hab": 88876692.78694077,
+  "csn_zipf": {
+    "xmin": 189777.99892807007,
+    "n": 287,
+    "gamma": 1.8260149123337481,
+    "ks": 0.025934987348569916,
+    "erro_gamma": 0.04875811860916783,
+    "alpha": 1.210631896674468,
+    "erro_alpha": 0.07146134134954388,
+    "alpha_ols": 1.1983891882540567,
+    "r2_ols": 0.9949380589468434
+  }
+}

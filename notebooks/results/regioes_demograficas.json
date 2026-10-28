@@ -1,0 +1,80 @@
+[
+  {
+    "id": "americas_norte_central_caribe",
+    "codigo": 0,
+    "bloco": "bloco_americas",
+    "nome_pt": "América do Norte, Central e Caribe",
+    "nome_en": "North & Central America and Caribbean",
+    "bbox_gpw": [
+      -180.0,
+      7.0,
+      -11.0,
+      84.0
+    ]
+  },
+  {
+    "id": "america_do_sul",
+    "codigo": 1,
+    "bloco": "bloco_americas",
+    "nome_pt": "América do Sul",
+    "nome_en": "South America",
+    "bbox_gpw": [
+      -92.0,
+      -56.5,
+      -25.0,
+      13.0
+    ]
+  },
+  {
+    "id": "europa_mediterraneo",
+    "codigo": 2,
+    "bloco": "bloco_afroeurasia_oceania",
+    "nome_pt": "Europa (até os Urais)",
+    "nome_en": "Europe (to the Urals)",
+    "bbox_gpw": [
+      -32.0,
+      34.0,
+      60.0,
+      84.0
+    ]
+  },
+  {
+    "id": "africa_madagascar",
+    "codigo": 3,
+    "bloco": "bloco_afroeurasia_oceania",
+    "nome_pt": "África e Madagascar",
+    "nome_en": "Africa and Madagascar",
+    "bbox_gpw": [
+      -26.0,
+      -47.0,
+      63.5,
+      38.0
+    ]
+  },
+  {
+    "id": "asia_continental_arquipelagos",
+    "codigo": 4,
+    "bloco": "bloco_afroeurasia_oceania",
+    "nome_pt": "Ásia (Sibéria, Oriente Médio, Índia e Sudeste Asiático)",
+    "nome_en": "Asia (Siberia, Middle East, India and SE Asia)",
+    "bbox_gpw": [
+      25.0,
+      -15.0,
+      180.0,
+      84.0
+    ]
+  },
+  {
+    "id": "oceania_australia",
+    "codigo": 5,
+    "bloco": "bloco_afroeurasia_oceania",
+    "nome_pt": "Austrália, Nova Zelândia e Oceania",
+    "nome_en": "Australia, New Zealand and Oceania",
+    "bbox_gpw": [
+      110.0,
+      -56.0,
+      180.0,
+      0.5
+    ]
+  }
+]

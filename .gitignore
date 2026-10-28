@@ -312,13 +312,15 @@ Desktop.ini
 notebooks/IPBA/
 notebooks/CCA/
 
-IPBA
+/IPBA
 CCA
 
 
 dados/gpw_data/
-dados/archives/
+dados/archives
+/dados/ibge/
+/dados/noaa_microplastic
 *.tif
 *.zip
 
-dados/ibge/
+

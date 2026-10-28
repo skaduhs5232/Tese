@@ -1,0 +1,15 @@
+{
+  "n_total": 29076,
+  "n_ocean_water": 16988,
+  "n_costeiro": 12088,
+  "por_meio": {
+    "Nurdle Patrol": 10615,
+    "Beach": 893,
+    "Ocean sediment": 580
+  },
+  "por_unidade": {
+    "pieces/10 mins": 10615,
+    "pieces/m3": 893,
+    "pieces kg-1 d.w.": 580
+  }
+}

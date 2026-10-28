@@ -1,0 +1,62 @@
+{
+  "territorio_id": "america_do_sul",
+  "nome_pt": "América do Sul",
+  "nome_en": "South America",
+  "bloco_hidrologico": "bloco_americas",
+  "bbox": [
+    -92.0,
+    -56.5,
+    -25.0,
+    13.0
+  ],
+  "metodo": "zipf_dinamico_ols_r2",
+  "criterio": "min |alpha_OLS(N=100) - 1| sujeito a R2 >= 0.98 e L >= L_min",
+  "D_grade": [
+    100,
+    2000,
+    100
+  ],
+  "L_grade": [
+    1000,
+    5000,
+    500
+  ],
+  "D_star_hab_km2": 100,
+  "l_metros": 5000,
+  "l_km": 5.0,
+  "L_MIN_metros": 2700,
+  "alpha_ols": 0.9998132882529805,
+  "r2_ols": 0.9824990838215789,
+  "alpha_ols_N": {
+    "50": 0.9005991599412938,
+    "100": 0.9998132882529805,
+    "200": 1.086847560911961
+  },
+  "r2_ols_N": {
+    "50": 0.9754202566264577,
+    "100": 0.9824990838215789,
+    "200": 0.9871370018624064
+  },
+  "restricao_r2_atendida": true,
+  "alpha_hill": {
+    "50": 1.000423375261021,
+    "100": 1.0865865314060972,
+    "200": 1.203688318518639
+  },
+  "delta_alpha": 0.00018671174701945237,
+  "n_manchas_urbanas": 9598,
+  "populacao_urbana_total_hab": 351774357.1721698,
+  "populacao_territorio_total_hab": 458604074.3146863,
+  "maior_aglomeracao_hab": 28569258.998586643,
+  "csn_zipf": {
+    "xmin": 9344.894459843636,
+    "n": 1991,
+    "gamma": 1.7836920870013553,
+    "ks": 0.013429230640976675,
+    "erro_gamma": 0.017563450120202228,
+    "alpha": 1.2760113526554857,
+    "erro_alpha": 0.028596896813043414,
+    "alpha_ols": 1.2630900197438766,
+    "r2_ols": 0.99688687235828
+  }
+}

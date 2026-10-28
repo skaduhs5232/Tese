@@ -1,0 +1,63 @@
+{
+  "territorio_id": "oceania_australia",
+  "nome_pt": "Austrália, Nova Zelândia e Oceania",
+  "nome_en": "Australia, New Zealand and Oceania",
+  "bloco_hidrologico": "bloco_afroeurasia_oceania",
+  "bbox": [
+    110.0,
+    -56.0,
+    180.0,
+    0.5
+  ],
+  "metodo": "zipf_dinamico_ols_r2",
+  "criterio": "min |alpha_OLS(N=100) - 1| sujeito a R2 >= 0.98 e L >= L_min",
+  "D_grade": [
+    100,
+    2000,
+    100
+  ],
+  "L_grade": [
+    1000,
+    5000,
+    500
+  ],
+  "D_star_hab_km2": 700,
+  "l_metros": 3000,
+  "l_km": 3.0,
+  "L_MIN_metros": 2700,
+  "alpha_ols": 1.2324281403181065,
+  "r2_ols": 0.9825952810578554,
+  "alpha_ols_N": {
+    "50": 1.317336868564629,
+    "100": 1.2324281403181065,
+    "200": 1.302673092422634
+  },
+  "r2_ols_N": {
+    "50": 0.9747309485899383,
+    "100": 0.9825952810578554,
+    "200": 0.9893858661809398
+  },
+  "restricao_r2_atendida": true,
+  "alpha_hill": {
+    "50": 1.1221978886355342,
+    "100": 1.2435870872360746,
+    "200": 1.4342329724106322
+  },
+  "delta_alpha": 0.23242814031810655,
+  "n_manchas_urbanas": 352,
+  "populacao_urbana_total_hab": 18926486.0937947,
+  "populacao_territorio_total_hab": 37427291.96843083,
+  "maior_aglomeracao_hab": 3652953.078382589,
+  "csn_zipf": {
+    "xmin": 17444.655723571777,
+    "n": 97,
+    "gamma": 1.8661639158476961,
+    "ks": 0.04425396832203665,
+    "erro_gamma": 0.0879456210333077,
+    "alpha": 1.1545158851616686,
+    "erro_alpha": 0.11722332765847461,
+    "alpha_ols": 1.2318948383870476,
+    "r2_ols": 0.9820039101180252
+  },
+  "nota_macrocefalia": "A Austrália concentra a população em 5 capitais costeiras (Sydney, Melbourne, Brisbane, Perth, Adelaide) com interior desértico; a curva rank-tamanho é mais íngreme que Zipf (alpha > 1), fenômeno de macrocefalia urbana documentado na literatura."
+}

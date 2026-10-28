@@ -1,0 +1,62 @@
+{
+  "territorio_id": "asia_continental_arquipelagos",
+  "nome_pt": "Ásia (Sibéria, Oriente Médio, Índia e Sudeste Asiático)",
+  "nome_en": "Asia (Siberia, Middle East, India and SE Asia)",
+  "bloco_hidrologico": "bloco_afroeurasia_oceania",
+  "bbox": [
+    25.0,
+    -15.0,
+    180.0,
+    84.0
+  ],
+  "metodo": "zipf_dinamico_ols_r2",
+  "criterio": "min |alpha_OLS(N=100) - 1| sujeito a R2 >= 0.98 e L >= L_min",
+  "D_grade": [
+    100,
+    2000,
+    100
+  ],
+  "L_grade": [
+    1000,
+    5000,
+    500
+  ],
+  "D_star_hab_km2": 700,
+  "l_metros": 3500,
+  "l_km": 3.5,
+  "L_MIN_metros": 2700,
+  "alpha_ols": 0.9986206322351379,
+  "r2_ols": 0.9881665518378453,
+  "alpha_ols_N": {
+    "50": 0.98383569633249,
+    "100": 0.9986206322351379,
+    "200": 1.05698781919196
+  },
+  "r2_ols_N": {
+    "50": 0.9743359908556346,
+    "100": 0.9881665518378453,
+    "200": 0.9911435096904578
+  },
+  "restricao_r2_atendida": true,
+  "alpha_hill": {
+    "50": 0.9837445180913132,
+    "100": 0.9979599044609044,
+    "200": 1.1469479873434298
+  },
+  "delta_alpha": 0.0013793677648621383,
+  "n_manchas_urbanas": 4001,
+  "populacao_urbana_total_hab": 2472398243.2629504,
+  "populacao_territorio_total_hab": 4767091787.827341,
+  "maior_aglomeracao_hab": 624928902.0937047,
+  "csn_zipf": {
+    "xmin": 150787.39414978027,
+    "n": 1057,
+    "gamma": 1.8130787928926086,
+    "ks": 0.014285844518670793,
+    "erro_gamma": 0.025008931677004364,
+    "alpha": 1.2298931035237073,
+    "erro_alpha": 0.03782943653789997,
+    "alpha_ols": 1.1975546544014732,
+    "r2_ols": 0.9957186069310974
+  }
+}

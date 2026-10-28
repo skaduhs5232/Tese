@@ -1,0 +1,437 @@
+{
+  "fonte_gebco": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\gebco_2026_sub_ice_geotiff.tif",
+  "dimensoes_globais_hw": [
+    5400,
+    10800
+  ],
+  "resolucao_graus": [
+    0.03333333333333333,
+    0.03333333333333333
+  ],
+  "h_star_metros": 0,
+  "total_clusters_globais": 4735,
+  "area_emersa_global_km2": 149489637.24,
+  "blocos_hidrologicos": [
+    {
+      "id": "bloco_americas",
+      "nome_pt": "Bloco Ocidental: Américas (Norte, Central, Caribe e Sul)",
+      "nome_en": "Western Block: The Americas",
+      "criterio_centroide_lon_lat": [
+        -175.0,
+        -56.0,
+        -25.0,
+        75.0
+      ],
+      "n_massas_terra": 1526,
+      "area_esferica_km2": 41890921.54,
+      "bbox_lon_lat": [
+        -175.3,
+        -56.0,
+        -11.5,
+        83.7
+      ],
+      "shape_hw": [
+        4191,
+        4914
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\bloco_americas.tif"
+    },
+    {
+      "id": "bloco_afroeurasia_oceania",
+      "nome_pt": "Bloco Oriental: Afro-Eurásia e Oceania",
+      "nome_en": "Eastern Block: Afro-Eurasia and Oceania",
+      "criterio_centroide_lon_lat": [
+        -25.0,
+        -50.0,
+        180.0,
+        75.0
+      ],
+      "n_massas_terra": 2669,
+      "area_esferica_km2": 93187201.06,
+      "bbox_lon_lat": [
+        -25.1333,
+        -49.7667,
+        190.4,
+        77.7667
+      ],
+      "shape_hw": [
+        3826,
+        6466
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\bloco_afroeurasia_oceania.tif"
+    }
+  ],
+  "macro_territorios": [
+    {
+      "id": "americas_norte_central_caribe",
+      "nome_pt": "América do Norte, Central e Caribe (até o Canal do Panamá)",
+      "nome_en": "North & Central America and Caribbean",
+      "n_pixels_emersos": 2912802,
+      "n_ilhas_percoladas": 1239,
+      "area_esferica_km2": 22761235.8,
+      "bbox_lon_lat": [
+        -169.0333,
+        7.1667,
+        -49.9667,
+        83.1667
+      ],
+      "shape_hw": [
+        2280,
+        3572
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\territorio_americas_norte_central_caribe.tif"
+    },
+    {
+      "id": "america_do_sul",
+      "nome_pt": "América do Sul",
+      "nome_en": "South America",
+      "n_pixels_emersos": 1394282,
+      "n_ilhas_percoladas": 204,
+      "area_esferica_km2": 17883597.44,
+      "bbox_lon_lat": [
+        -81.3667,
+        -56.0,
+        -32.3667,
+        12.7667
+      ],
+      "shape_hw": [
+        2063,
+        1470
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\territorio_america_do_sul.tif"
+    },
+    {
+      "id": "europa_mediterraneo",
+      "nome_pt": "Europa e Bacia do Mediterrâneo",
+      "nome_en": "Europe and Mediterranean Basin",
+      "n_pixels_emersos": 1119325,
+      "n_ilhas_percoladas": 645,
+      "area_esferica_km2": 9321514.59,
+      "bbox_lon_lat": [
+        -25.0333,
+        34.4667,
+        45.0333,
+        72.0333
+      ],
+      "shape_hw": [
+        1127,
+        2102
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\territorio_europa_mediterraneo.tif"
+    },
+    {
+      "id": "africa_madagascar",
+      "nome_pt": "África e Madagascar",
+      "nome_en": "Africa and Madagascar",
+      "n_pixels_emersos": 2615866,
+      "n_ilhas_percoladas": 243,
+      "area_esferica_km2": 33862642.73,
+      "bbox_lon_lat": [
+        -18.2,
+        -34.8667,
+        52.5333,
+        37.5333
+      ],
+      "shape_hw": [
+        2172,
+        2122
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\territorio_africa_madagascar.tif"
+    },
+    {
+      "id": "asia_continental_arquipelagos",
+      "nome_pt": "Ásia Continental, Índia e Sudeste Asiático",
+      "nome_en": "Continental Asia, India and SE Asian Archipelagos",
+      "n_pixels_emersos": 3978677,
+      "n_ilhas_percoladas": 1382,
+      "area_esferica_km2": 44791069.96,
+      "bbox_lon_lat": [
+        25.9667,
+        -11.5333,
+        150.0333,
+        55.0333
+      ],
+      "shape_hw": [
+        1997,
+        3722
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\territorio_asia_continental_arquipelagos.tif"
+    },
+    {
+      "id": "oceania_australia",
+      "nome_pt": "Austrália, Nova Zelândia e Oceania",
+      "nome_en": "Australia, New Zealand and Oceania",
+      "n_pixels_emersos": 774433,
+      "n_ilhas_percoladas": 732,
+      "area_esferica_km2": 9656378.68,
+      "bbox_lon_lat": [
+        109.9667,
+        -47.3333,
+        180.0333,
+        0.0333
+      ],
+      "shape_hw": [
+        1421,
+        2102
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\territorio_oceania_australia.tif"
+    }
+  ],
+  "top_ilhas_percoladas": [
+    {
+      "rank": 1,
+      "cluster_id": 5550022,
+      "n_pixels": 8043769,
+      "area_esferica_km2": 80168173.21,
+      "bbox_lon_lat": [
+        -17.5333,
+        -34.8667,
+        190.4,
+        77.7667
+      ],
+      "shape_hw": [
+        3379,
+        6238
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank01_id5550022.tif"
+    },
+    {
+      "rank": 2,
+      "cluster_id": 6276352,
+      "n_pixels": 3732161,
+      "area_esferica_km2": 38095774.47,
+      "bbox_lon_lat": [
+        -168.1667,
+        -53.9333,
+        -34.7333,
+        74.2333
+      ],
+      "shape_hw": [
+        3845,
+        4003
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank02_id6276352.tif"
+    },
+    {
+      "rank": 3,
+      "cluster_id": 50358017,
+      "n_pixels": 5971803,
+      "area_esferica_km2": 13774629.93,
+      "bbox_lon_lat": [
+        -180.0333,
+        -90.0333,
+        180.0333,
+        -63.1667
+      ],
+      "shape_hw": [
+        806,
+        10802
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank03_id50358017.tif"
+    },
+    {
+      "rank": 4,
+      "cluster_id": 32733377,
+      "n_pixels": 618550,
+      "area_esferica_km2": 7641044.81,
+      "bbox_lon_lat": [
+        113.1333,
+        -39.1667,
+        153.6667,
+        -10.6667
+      ],
+      "shape_hw": [
+        855,
+        1216
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank04_id32733377.tif"
+    },
+    {
+      "rank": 5,
+      "cluster_id": 2056461,
+      "n_pixels": 597272,
+      "area_esferica_km2": 2152289.08,
+      "bbox_lon_lat": [
+        -73.0333,
+        59.7333,
+        -11.5,
+        83.7
+      ],
+      "shape_hw": [
+        719,
+        1846
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank05_id2056461.tif"
+    },
+    {
+      "rank": 6,
+      "cluster_id": 29407016,
+      "n_pixels": 59331,
+      "area_esferica_km2": 812680.76,
+      "bbox_lon_lat": [
+        130.6,
+        -10.7333,
+        150.8333,
+        -0.3
+      ],
+      "shape_hw": [
+        313,
+        607
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank06_id29407016.tif"
+    },
+    {
+      "rank": 7,
+      "cluster_id": 27008920,
+      "n_pixels": 54616,
+      "area_esferica_km2": 751210.0,
+      "bbox_lon_lat": [
+        108.8,
+        -4.2333,
+        119.3,
+        7.0667
+      ],
+      "shape_hw": [
+        339,
+        315
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank07_id27008920.tif"
+    },
+    {
+      "rank": 8,
+      "cluster_id": 33044078,
+      "n_pixels": 46002,
+      "area_esferica_km2": 596619.74,
+      "bbox_lon_lat": [
+        43.2,
+        -25.6333,
+        50.5333,
+        -11.9333
+      ],
+      "shape_hw": [
+        411,
+        220
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank08_id33044078.tif"
+    },
+    {
+      "rank": 9,
+      "cluster_id": 5586673,
+      "n_pixels": 107535,
+      "area_esferica_km2": 541894.25,
+      "bbox_lon_lat": [
+        -90.1,
+        61.8333,
+        -61.2333,
+        73.9
+      ],
+      "shape_hw": [
+        362,
+        866
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank09_id5586673.tif"
+    },
+    {
+      "rank": 10,
+      "cluster_id": 27461904,
+      "n_pixels": 32070,
+      "area_esferica_km2": 440996.12,
+      "bbox_lon_lat": [
+        95.1667,
+        -5.9667,
+        106.1333,
+        5.7
+      ],
+      "shape_hw": [
+        350,
+        329
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank10_id27461904.tif"
+    },
+    {
+      "rank": 11,
+      "cluster_id": 15756043,
+      "n_pixels": 24451,
+      "area_esferica_km2": 271945.68,
+      "bbox_lon_lat": [
+        129.3333,
+        30.9667,
+        142.1,
+        41.5667
+      ],
+      "shape_hw": [
+        318,
+        383
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank11_id15756043.tif"
+    },
+    {
+      "rank": 12,
+      "cluster_id": 5261834,
+      "n_pixels": 50797,
+      "area_esferica_km2": 228253.63,
+      "bbox_lon_lat": [
+        -119.1667,
+        68.4,
+        -100.8333,
+        73.8
+      ],
+      "shape_hw": [
+        162,
+        550
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank12_id5261834.tif"
+    },
+    {
+      "rank": 13,
+      "cluster_id": 10459698,
+      "n_pixels": 28174,
+      "area_esferica_km2": 227902.47,
+      "bbox_lon_lat": [
+        -6.8,
+        49.9333,
+        1.8,
+        58.7
+      ],
+      "shape_hw": [
+        263,
+        258
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank13_id10459698.tif"
+    },
+    {
+      "rank": 14,
+      "cluster_id": 2314682,
+      "n_pixels": 89406,
+      "area_esferica_km2": 206804.03,
+      "bbox_lon_lat": [
+        -92.0,
+        76.1,
+        -61.0667,
+        83.1667
+      ],
+      "shape_hw": [
+        212,
+        928
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank14_id2314682.tif"
+    },
+    {
+      "rank": 15,
+      "cluster_id": 29352692,
+      "n_pixels": 12640,
+      "area_esferica_km2": 173840.69,
+      "bbox_lon_lat": [
+        118.7333,
+        -5.7333,
+        125.3,
+        1.7667
+      ],
+      "shape_hw": [
+        225,
+        197
+      ],
+      "arquivo_tif": "notebooks\\gebco_cluster_dvider\\datasets\\processed\\land\\gebco_2026_island_rank15_id29352692.tif"
+    }
+  ]
+}

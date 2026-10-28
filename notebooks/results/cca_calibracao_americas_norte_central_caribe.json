@@ -1,0 +1,62 @@
+{
+  "territorio_id": "americas_norte_central_caribe",
+  "nome_pt": "América do Norte, Central e Caribe",
+  "nome_en": "North & Central America and Caribbean",
+  "bloco_hidrologico": "bloco_americas",
+  "bbox": [
+    -180.0,
+    7.0,
+    -11.0,
+    84.0
+  ],
+  "metodo": "zipf_dinamico_ols_r2",
+  "criterio": "min |alpha_OLS(N=100) - 1| sujeito a R2 >= 0.98 e L >= L_min",
+  "D_grade": [
+    100,
+    2000,
+    100
+  ],
+  "L_grade": [
+    1000,
+    5000,
+    500
+  ],
+  "D_star_hab_km2": 100,
+  "l_metros": 4000,
+  "l_km": 4.0,
+  "L_MIN_metros": 2700,
+  "alpha_ols": 0.9969114036825517,
+  "r2_ols": 0.9862091970640858,
+  "alpha_ols_N": {
+    "50": 0.8902577598028207,
+    "100": 0.9969114036825517,
+    "200": 1.1204625021642078
+  },
+  "r2_ols_N": {
+    "50": 0.9888211922306749,
+    "100": 0.9862091970640858,
+    "200": 0.9831842948583974
+  },
+  "restricao_r2_atendida": true,
+  "alpha_hill": {
+    "50": 0.8624072470229485,
+    "100": 1.0548751321273866,
+    "200": 1.2131538589132655
+  },
+  "delta_alpha": 0.003088596317448289,
+  "n_manchas_urbanas": 15348,
+  "populacao_urbana_total_hab": 527284575.5219885,
+  "populacao_territorio_total_hab": 619359507.6383176,
+  "maior_aglomeracao_hab": 49626606.80342986,
+  "csn_zipf": {
+    "xmin": 4377.447079658508,
+    "n": 3740,
+    "gamma": 1.730746399372135,
+    "ks": 0.011414067016133567,
+    "erro_gamma": 0.011948981342877887,
+    "alpha": 1.3684638074976634,
+    "erro_alpha": 0.022376776017292467,
+    "alpha_ols": 1.3562508245339364,
+    "r2_ols": 0.9976057566929842
+  }
+}

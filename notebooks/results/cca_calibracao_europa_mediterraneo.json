@@ -1,0 +1,62 @@
+{
+  "territorio_id": "europa_mediterraneo",
+  "nome_pt": "Europa (até os Urais)",
+  "nome_en": "Europe (to the Urals)",
+  "bloco_hidrologico": "bloco_afroeurasia_oceania",
+  "bbox": [
+    -32.0,
+    34.0,
+    60.0,
+    84.0
+  ],
+  "metodo": "zipf_dinamico_ols_r2",
+  "criterio": "min |alpha_OLS(N=100) - 1| sujeito a R2 >= 0.98 e L >= L_min",
+  "D_grade": [
+    100,
+    2000,
+    100
+  ],
+  "L_grade": [
+    1000,
+    5000,
+    500
+  ],
+  "D_star_hab_km2": 100,
+  "l_metros": 2500,
+  "l_km": 2.5,
+  "L_MIN_metros": 2500,
+  "alpha_ols": 0.9989028747874759,
+  "r2_ols": 0.9890363271003657,
+  "alpha_ols_N": {
+    "50": 0.9833402170866681,
+    "100": 0.9989028747874759,
+    "200": 1.0508605901345793
+  },
+  "r2_ols_N": {
+    "50": 0.9789518536066415,
+    "100": 0.9890363271003657,
+    "200": 0.9925801564055533
+  },
+  "restricao_r2_atendida": true,
+  "alpha_hill": {
+    "50": 0.9216490565714827,
+    "100": 1.114597915395231,
+    "200": 1.0466055603972562
+  },
+  "delta_alpha": 0.0010971252125241415,
+  "n_manchas_urbanas": 9712,
+  "populacao_urbana_total_hab": 554880897.2373928,
+  "populacao_territorio_total_hab": 721259578.6052873,
+  "maior_aglomeracao_hab": 97391669.58401048,
+  "csn_zipf": {
+    "xmin": 50502.741970062256,
+    "n": 870,
+    "gamma": 1.8265839925153897,
+    "ks": 0.02928307418651832,
+    "erro_gamma": 0.028023821900093143,
+    "alpha": 1.2097984101493249,
+    "erro_alpha": 0.04101600743303687,
+    "alpha_ols": 1.138773491639522,
+    "r2_ols": 0.9955161811218001
+  }
+}

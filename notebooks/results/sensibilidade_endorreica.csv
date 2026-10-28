@@ -1,0 +1,11 @@
+bloco_id,area_min_km2,prof_min_m,n_candidatas,n_endorreicas,area_endorreica_km2,sistemas_sem_correspondencia
+bloco_americas,500.0,20.0,955,6,887120.0064005731,Laguna Mar Chiquita
+bloco_americas,5000.0,20.0,70,6,887120.0064005731,Laguna Mar Chiquita
+bloco_americas,1000.0,10.0,526,7,1261679.2990743364,
+bloco_americas,1000.0,50.0,321,6,887120.0064005731,Laguna Mar Chiquita
+bloco_americas,1000.0,20.0,465,6,887120.0064005731,Laguna Mar Chiquita
+bloco_afroeurasia_oceania,500.0,20.0,2167,31,18196327.877086725,Lake Torrens
+bloco_afroeurasia_oceania,5000.0,20.0,239,31,19771853.86932434,Lake Torrens
+bloco_afroeurasia_oceania,1000.0,10.0,1192,32,19316450.381174833,
+bloco_afroeurasia_oceania,1000.0,50.0,785,28,19140235.458649185,Lake Tengiz;Lake Torrens
+bloco_afroeurasia_oceania,1000.0,20.0,1092,31,19082590.762000054,Lake Torrens
