@@ -1,0 +1,12 @@
+[submodule "externos/GebcoCutter"]
+	path = externos/GebcoCutter
+	url = https://github.com/skaduhs5232/GebcoCutter.git
+	ignore = untracked
+[submodule "externos/CCA"]
+	path = externos/CCA
+	url = https://github.com/skaduhs5232/CCA.git
+	ignore = untracked
+[submodule "externos/IPBA"]
+	path = externos/IPBA
+	url = https://github.com/erneson/IPBA.git
+	ignore = untracked
