@@ -1,0 +1,633 @@
+﻿RESEARCH ARTICLE
+
+Human mobility in large cities as a proxy for
+crime
+
+Carlos Caminha1*, Vasco Furtado1, Tarcisio H. C. Pequeno1, Caio Ponte1,
+Hygor P. M. Melo2,3, Erneson A. Oliveira1,3, José S. Andrade Jr.3
+
+1 Programa de Pós Graduação em Informática Aplicada, Universidade de Fortaleza, Fortaleza, Ceará, Brasil,
+2 Departamento de Ensino, Instituto Federal de Educação, Ciência e Tecnologia do Ceará, Crateús, Ceará,
+Brasil, 3 Departamento de Fı́sica, Universidade Federal do Ceará, Fortaleza, Ceará, Brasil
+
+* caminha@unifor.br
+a1111111111
+a1111111111
+a1111111111
+a1111111111 Abstract
+a1111111111
+
+We investigate at the subscale of the neighborhoods of a highly populated city the inci-
+
+dence of property crimes in terms of both the resident and the floating population. Our
+
+results show that a relevant allometric relation could only be observed between property
+
+crimes and floating population. More precisely, the evidence of a superlinear behavior indi-
+OPENACCESS
+
+cates that a disproportional number of property crimes occurs in regions where an
+Citation: Caminha C, Furtado V, Pequeno THC, increased flow of people takes place in the city. For comparison, we also found that the
+Ponte C, Melo HPM, Oliveira EA, et al. (2017)
+
+number of crimes of peace disturbance only correlates well, and in a superlinear fashion
+Human mobility in large cities as a proxy for crime.
+
+PLoS ONE 12(2): e0171609. doi:10.1371/journal. too, with the resident population. Our study raises the interesting possibility that the super-
+
+pone.0171609 linearity observed in previous studies [Bettencourt et al., Proc. Natl. Acad. Sci. USA 104,
+
+Editor: Luı́s A. Nunes Amaral, Northwestern 7301 (2007) and Melo et al., Sci. Rep. 4, 6239 (2014)] for homicides versus population at
+
+University, UNITED STATES the city scale could have its origin in the fact that the floating population, and not the resi-
+
+Received: October 21, 2016 dent one, should be taken as the relevant variable determining the intrinsic microdynami-
+
+cal behavior of the system.
+Accepted: January 23, 2017
+
+Published: February 3, 2017
+
+Copyright: © 2017 Caminha et al. This is an open
+
+access article distributed under the terms of the
+
+Creative Commons Attribution License, which Introduction
+permits unrestricted use, distribution, and
+
+reproduction in any medium, provided the original The dynamics of crime and the impact of social relations on the increase of violence has been
+author and source are credited. the object of study in several areas such as Social Sciences [1], Criminology [2–4], Comput-
+
+Data Availability Statement: All relevant data are ing [5–9], Economics [10] and Physics [11–17]. When, in the 1950s, Naroll and Bertalanffy
+
+within the paper and its Supporting Information [18] utilized the concept of allometry—a term originally coined in the field of Biology to
+files. describe scaling laws, e.g., the relationship between mass and metabolic rate of organisms
+
+Funding: JSA, CC, VF, THCP, CP, EAO and HPMM [19]—so as to adapt it to the social context, a particularly promising line of research was
+
+have been funded by the Brazilian Agencies: opened, which today arouses interest of scientists from wide-ranging areas [11, 20–32]. In
+Conselho Nacional de Desenvolvimento Cientı́fico e 2007, Bettencourt et al. [21] revealed that allometric relationships are statistically present in
+Tecnológico (www.cnpq.br), Coordenação de many aspects of city infrastructures and dynamics. These allometric relationships could be
+Aperfeiçoamento de Pessoal de Nı́vel Superior
+
+described by a power law function, Y = aXβ, where usually X is the population, Y is a social
+(www.capes.gov.br) and Fundação Cearense de
+
+indicator, a is a constant and β is the allometric exponent. In particular, they observed a
+Apoio ao Desenvolvimento Cientı́fico e Tecnológico
+
+(www.funcap.ce.gov.br). JSA has also been funded characteristic superlinear relation between the number of serious crimes and the resident
+by the National Institute of Science and Technology population in the United States (US) cities which clearly denotes the an intricate social
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 1 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+for Complex Systems (www.cbpf.br/inct-sc). The mechanism behind the dynamics of violence. Recently, Bettencourt et al. [22] and Melo et al.
+funders had no role in study design, data collection [11] provided strong quantitative evidence showing that an similar behavior can also be
+and analysis, decision to publish, or preparation of
+
+observed in Brazil.
+the manuscript.
+
+Despite the importance of the results presented in the aforementioned studies, their
+Competing Interests: The authors have declared impacts on urban planning, more specifically, on the development of public safety policies,
+that no competing interests exist.
+
+are limited due to its purely descriptive nature, which prevents a deeper understanding of
+the organic causes leading to such a disproportional behavior. In this way, a microdynamical
+approach based on the interactions between local neighborhoods within metropolitan areas
+certainly represents a more realist view to the problem. Our research motivation is aimed at
+elucidating issues related to the understanding of the impacts of the influence of social rela-
+tions on Crime. In Criminology, the role of urban space and its social relations has been pre-
+viously emphasized to explain the origin of Crime [2, 4]. Particularly, the routine activity
+theory, proposed by Cohen and Felson [2], states that crimes, more specifically property
+crimes, such as robbery and theft, occur by the convergence of the routines of an offender,
+motivated to commit a crime, and an unprotected victim. In this context, can we explain the
+occurrence of crimes in different areas of the city based on the current population present in
+the corresponding urban sub-clusters? Is this effective population equally important for any
+type of crime? How can we systematically delimit the boundaries of these local neighbor-
+hoods so that the social influence—the inherent correlations among social indicators—be
+accounted for in a consistent way?
+
+In order to answer these questions, we used actual georeferenced data of crimes committed,
+and of resident and floating populations for census tracts in the city of Fortaleza, Brazil. The
+concept of resident population has been widely used to understand the effects that the growth
+of major cities has on social and environmental indicators. In particular, Bettencourt et al. [21]
+showed that the number of homicides scales superlinearly with the population of cities in the
+US. Subsequently, Melo et al. [11] confirmed this behaviour for Brazilian cities, but also dem-
+onstrated that suicides scale sublinearly with their resident populations. Additionally, Oliveira
+et al. [20] found a superlinear allometric relationship between the resident population and
+CO2 emissions; this study also raised the issue that the allometric exponents may undergo
+endogenous trends depending on the respective definition of urban agglomerates. Regarding
+the floating population, it takes into account the complex dynamics of urban mobility, i.e., it
+has a transient characteristic within the city. To measure social influence quantitatively in
+urban sub-clusters, we delimited their boundaries beyond the mere administrative divisions, e.
+g. division by neighborhoods or census tracts, by using the City Clustering Algorithm [33–40].
+This model defines these boundaries by population density and the level of commuting
+between areas of the city.
+
+In the present study, we identified that the incidence of property crimes has a superlinear
+allometric relationship, with the floating population in certain areas of the city. This result
+implies that the increased flow of people in a particular area of the city will take place at the
+cost of a proportionally greater rate of property crime happening in the region. More impor-
+tant, this superlinear behavior at the subscale of the city neighborhood provides a plausible
+explanation for the allometry of serious crimes found in [11, 21]. Precisely, the floating popu-
+lation being systematically larger that the resident one should lead to the disproportional
+behavior observed for serious crimes and (resident) population at the city scale. We also
+found a superlinear allometric relationship between the number of crimes of disturbing the
+peace and the resident population. This result shows that the effect of social influence must
+be adequately correlated with resident or floating population, depending on the type of
+crime considered.
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 2 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Datasets
+
+In order to quantify the effects of the social influence on the police calls within a large metrop-
+olis, we used three georeferenced datasets for the Brazilian city of Fortaleza: From the first, we
+obtain the resident population (POP), defined by the number of residents per census tract—
+Administrative territorial unit established for the purposes of cadastral control—and provided
+by the Brazilian Institute of Geography and Statistics (IBGE) [41]. In all, Fortaleza has 3043
+census tracts, with approximately 2,400,000 residents, spread over an area of 314 square kilo-
+meters (km2) in year 2010. From the second, we estimate the floating population (FLO) for
+each census tract through a flow network built on data of the bus system provided by the For-
+taleza’s city hall for the year 2015 [42]. FLO was measured by the number of people who pass
+through a census tract in one day. The city of Fortaleza has 2034 buses circulating along 359
+bus lines serving approximately 700,000 people who use the city’s mass transit system on a
+daily basis. In the case of Fortaleza, buses still represent the main means of public transporta-
+tion. The process of generating of the flow network will be detailed in the Supporting Informa-
+tion (see S1 Appendix). Finally, we obtain the Crime dataset from the Integrated Coordination
+Office of Public Safety Operations (CIOPS) [43], provides the geographic locations of 81,911
+calls to the “190” (phone number for emergency) service about property crimes (PC) and
+53,849 calls to the same service about disturbing the peace (DP). These calls were made to
+police between August 2005 and July 2007. Here we assume that massive changes in the urban
+environment of the city have not been produced in the period under investigation (5 to 8
+years). This would not be that case if the society were facing a severe social rupture due, for
+example, to natural disasters, economic embargoes or wars. See S1 Appendix for information
+about all datasets utilized in this study, including the URL for downloading.
+
+The color maps show in Fig 1(a)–1(d) provide the local density in logarithmic scale of POP,
+FLO, DP and PC, respectively, for the city of Fortaleza. We can clearly identify stronger spatial
+correlations between POP and DP as well as between FLO and PC. In special, there is an evi-
+dent higher incidence of hot spots in (b) and (d) than in (a) and (c). Also, at the downtown
+area, highlighted by black circles on each map, the high density of FLO is compatible with the
+high rates of PC rate, while low POP densities seem to explain the low frequency of DP
+complaints.
+
+In spite of seeming trivial to suggest that there are correlations between POP and DP, as
+well as FLO and PC from the density maps shown in Fig 1, the respective scattering plots of
+the Fig 2 fail to capture the spatial correlations presented in Fig 1 due to the non-aggregation
+of the datasets of both populations. Actually, we conjecture that such correlations exist indeed.
+The most census tracts have a small area, sometimes the size of one city block, and it is likely
+that such an agglomeration scale is insufficient to capture the correlations and therefore reveal
+the impact of social influence on DP and PC, additionally the population tends to be equally
+distributed among its census tracks and this probably also has influence over the weak correla-
+tion presented in the Fig 2. Based on this hypothesis, we considered coarse-grainning these
+spatial properties of Fortaleza into clusters, using the census tracts grid as a maximal resolution
+base. This clustering aims to find the boundaries of the flow of people and the residential areas
+of the city.
+
+Methods
+
+To define the boundaries beyond administrative delineations, we considered the notion of spa-
+tial continuity through the aggregation of census tracts that are near one another using the
+City Clustering Algorithm (CCA) [33–40]. The CCA constructs the population boundaries of
+an urban area considering two parameters, namely, a population density threshold, D, and a
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 3 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Fig 1. The density maps for the city of Fortaleza (Brazil) in logarithmic scale. (a) The resident population (POP) by square kilometers
+(km2). (b) The floating population (FLO) by km2. (c) The disturbing the peace (DP) complaints by km2. (d) The property crimes (PC) by km2.
+The black circle highlights the downtown area of the city. This region has a low density of residents and disturbing the peace calls, and is
+dense in the flow of people and property crimes.
+
+doi:10.1371/journal.pone.0171609.g001
+
+distance threshold, ℓ. For the i–th census tract, the population density Di is located in its geo-
+metric center; if Di > D, then the i–th census tract is considered populated. The length ℓ rep-
+resents a cutoff distance between census tracts to consider them as spatially contiguous, i.e., all
+of the nearest neighboring census tracts that are at distances smaller than ℓ are clustered.
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 4 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Fig 2. Scattering plots by census tracts. (a)-(d) All the plots between resident population (POP) and floating population (FLO) with police
+calls for disturbing the peace (DP) and for property crimes (PC) show uncorrelated behavior with the determination coefficients [44, 45]R2 <
+0.15.
+
+doi:10.1371/journal.pone.0171609.g002
+
+Hence, a cluster made by the CCA is defined by populated areas within a distance less than ℓ,
+as seen schematically in Fig 3. Previous studies [20, 37, 39] have demonstrated that the results
+produced by the CCA can be weakly dependent on D and ℓ for some range of parameter val-
+ues. Here ℓ will be quantified in meters (m) and D in inhabitants by km2.
+
+Although the algorithm begins collating an arbitrary seed census tract, it does not produce
+distinct clusters when varying this seed; the two factors that are responsible for clustering
+behavior are the parameters ℓ and D.
+
+In order to determine the effect of the parameterization on the value of the exponent β, we
+sought a range within the parameters where β has low sensitivity to this variation. Fig 4 shows
+the behavior of exponent β in function of the variation of the CCA parameters. This result
+could be compared with the variation of the allometric exponent for different process of urban
+agglomeration [27, 29]. As shown in Fig 4a and 4b, the value of the parameter β obtained from
+the least-square regressions to the data of POP against DP remains practically insensitive to
+the CCA parameters in the range 180 ℓ 300, regardless of the values of D adopted in the
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 5 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Fig 3. The scheme of the City Clustering Algorithm (CCA). Each polygon represents a clustering unit, specifically in our case, they represent census
+tracts. The light blue polygons are candidates for clustering (Di >D*); in contrast, the gray polygons cannot be clustered (DiD*). (a) The red dot represents
+the geometric center of the i–th census tract and the black circle with radius ℓ seeks neighbors belonging to the same cluster. (b)-(c) The same search
+operation is made for the other census tracts and is done until there are no more neighbors within the radius of operation. (d) The algorithm finishes running
+and the cluster is found.
+
+doi:10.1371/journal.pone.0171609.g003
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 6 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Fig 4. Behavior of exponent β by varying the parameters of the City Clustering Algorithm (CCA), ℓ and D*. (a) The variation of β in correlation
+between the resident population (POP) and the disturbing the peace (DP) complaints is illustrated; (b) The variation is illustrated for correlations between the
+floating population (FLO) and the property crimes (PC). Both in (a) and (b), the x-axis represents ℓ, and this parameter was varied from 0 to 800 meters (m)
+(moment when the largest cluster consumes nearly the entire city); exponent β is shown on the y-axis. The colors of the lines represent the variation of the
+parameter D*, which corresponds to the resident population density in (a) and the floating population density in (b); this parameter was varied from 1000 to
+8000. The shadows represent the standard error of coefficient β. It was not necessary to use values larger than 8000 because many census tracts start
+being discarded and the CCA can no longer form clusters. The graphs also show red dashed lines; between these lines is highlighted the range where,
+regardless of the parameterization, the exponent β has smaller ranges of variation. Finally, the dotted black line highlights exponent β = 1, in which the
+relationship between variables is isometric, in both graphs the exponent oscillates to low values of ℓ; in (a), the relationship is superlinear starting at ℓ 180
+m; however in (b), superlinearity appears at ℓ 320 m (see S1 Appendix for the plots POP vs PC and FLO vs DP).
+
+doi:10.1371/journal.pone.0171609.g004
+
+estimation process. Moreover, the resulting average β = 1.17 ± 0.06 provides strong evidence
+to support a superlinear type of relation between these two variables. An entirely similar
+behavior can be observed for FLO against DP, but now the exponent β remains practically
+invariant within the range 320 ℓ 510. The resulting average value of β = 1.14 ± 0.04 also
+indicates the presence of a superlinear allometric relation.
+
+At this point, it is necessary to determine a suitable criteria for selecting an adequate value
+of the parameter D. While lower values of ℓ lead to the formation of a larger number of CCA
+clusters, reduced values of D tend to eliminate fewer census tracts from the map, thereby
+including a larger portion of in the population under analysis. Here we propose that a proper
+choice of D would be associated with a more homogeneous spatial distribution of the popula-
+tion [20]. More precisely, we seek for CCA clusters whose areas should scale as close to isomet-
+rically as possible with the population data, namely, as Y = aXα, with α 1, where X is the
+population, Y is the area (ARE) of the clusters km2, and a is constant.
+
+In order to follow the procedure previously described, we obtain from Fig 5a that ℓ = 270
+and D = 6000 correspond to the pair of CCA parameter values leading to the closest to iso-
+metric relation found between ARE and POP. In the case of ARE and FLO, the values are ℓ =
+320 and D = 2000, as depicted in Fig 5b (see S1 Appendix).
+
+Results
+
+The census tracts were grouped, using the CCA, by POP and FLO (Fig 6). In the Fig 6a, the
+division achieved by POP is illustrated; the city was divided using ℓ = 270 m and D = 6000
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 7 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Fig 5. Behavior of exponent αwhen varying the City Clustering Algorithm (CCA) parameters ℓ and D*. (a) The variation of α in correlations between
+the resident population (POP) and the area (ARE) in square kilometers (km2) of clusters discovered with the CCA. (b) The variation for correlations between
+the floating population (FLO) and ARE. In (a) and (b), the x-axis represents the parameter ℓ, and the y-axis represents the exponent α. The line colors
+represent the variation of the parameter D*.
+
+doi:10.1371/journal.pone.0171609.g005
+
+resident people per km2. In the Fig 6b, we show the division achieved by FLO, using ℓ = 320 m
+and D = 2000 floating people per km2 per day. We emphasize that there are bigger gaps in the
+POP map (Fig 6a) than in the FLO map (Fig 6b). The reason for such behavior is the fact that
+Fortaleza has commercial regions, i.e., regions where there is not a large presence of residents.
+
+Fig 6. The City Clustering Algorithm (CCA) applied to resident population (POP) and to floating population (FLO). Each color
+represents a cluster; the light gray areas correspond to census tracts that were not grouped because they have Di <D*. (a) The population
+density was used in order to find the boundaries of the clusters with ℓ = 270 m and D* = 6000 resident people per km2. (b) The division found
+by considering urban mobility is shown; the map illustrated here was generated for ℓ = 320 m and D* = 2000 floating people per km2 in one
+day in Fortaleza.
+
+doi:10.1371/journal.pone.0171609.g006
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 8 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Fig 7. Scattering plots by City Clustering Algorithm (CCA). The red lines represent the simple linear regressions applied to the data, the blue
+continuous lines represent the Nadaraya-Watson method [46, 47] and the blue dashed lines delimit the 95% confidence interval (CI) estimated by
+bootstrap. (a) A superlinear relationship was found, with exponent β = 1.15 ± 0.04, between the floating population (FLO) and the property crimes (PC).
+(b) A superlinear relationship was also found between the resident population (POP) and the disturbing the peace (DP) complaints, with exponent β =
+1.18 ± 0.04. (c)-(d) The scattering plots of DP with FLO and PC with POP show an isometric relation was found between the variables, but with lower
+correlations than (a) and (b). The R2 is defined as determination coefficient [44, 45].
+
+doi:10.1371/journal.pone.0171609.g007
+
+Regarding floating people, there are people moving practically throughout the entire city, both
+in commercial areas and in residential areas.
+
+As compared to the results shown in Fig 2, the application of the CCA to the data discloses
+a rather different scenario for the correlations among the variables investigated here. First, as
+shown in Fig 7a and 7b, superlinear relations in terms of power laws, Y = aXβ, are revealed
+between PC and FLO as well as between DP and POP, with exponents β = 1.15 ± 0.04 and β =
+1.18 ± 0.04, respectively. In contrast, the relations obtained between DP and FLO and PC and
+POP are closer to isometric (linear), with exponents β = 0.93 ± 0.10 and β = 1.01 ± 0.06 respec-
+tively, although the low values of the corresponding determination coefficients indicate that
+these results should be interpreted with caution.
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 9 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Conclusion
+
+In this paper, we found allometric laws within a city using the CCA technique [33–40]. to
+determine intracity clusters. The volume of social influence was measured in various locali-
+ties of the city based on the presence of residents and the flow of passers-by through the cen-
+sus tracts. Unlike intercity studies, where social influence was measured only by the presence
+of residents, we propose that, within a city, human mobility should be considered to under-
+stand the dynamics of social indicators, such as criminal activity. Our results show that the
+incidence of property crimes grows superlinearly as a power law with the floating population,
+with allometric exponent β = 1.15 ± 0.04. Therefore, the increase of the flow of people in a
+region of the city leads to a disproportionally higher number of this type of crime. Our
+results are in agreement with the routine activities hypothesis [2], which states that a crime
+occurs by the convergence of the routines of a motivated offender and an unprotected victim,
+as well as the absence of a guardian able to prevent the transgression. Apart from providing
+quantitative support for such hypothesis, namely, that the convergence of the routines of all
+agents increases the number of crimes, our study also indicates the remarkable fact that this
+increase is non-linear (β> 1). This result is in clear contrast with the incidence of crimes
+related with peace disturbance, where an allometric relation can also be detected, but with
+the resident population (POP) instead. We hope the our results could shed some light on the
+understanding of crimes inside urban areas, as well as assist eventual violence mitigation
+policies.
+
+The findings described in this paper bring alternatives to implementing innovative prac-
+tices to decision makers within cities. The most obvious of these relates to the fact that, by
+showing the correlation of different types of crimes with the home population but also with
+the floating population, it is also clear that the police force allocation strategies should be
+implemented via the analysis of different cluster configurations that depend on the type of
+crime. For example, the allocation of community policing, more appropriate to resolve con-
+flicts that potentially can emerge from the disturbance of people’s peace, must be planned
+from a cluster configuration and a hot spot analysis that were produced from the perspective
+of the density of resident population. When it is necessary to establish a policy for allocating a
+uniformed police in order to mitigate crimes against property, the allocation of the police
+force must be conducted from an analysis from the movement of people.
+
+In addition to these police allocation strategies, the results described herein provide
+important indicators for the creation of public policies for land use and environmental
+design in general. Work in this line has been developed such as in Ref. [48] where a frame-
+work has been proposed to associate the physical spaces and the feeling of safety as well as
+[49], who launched the environmental criminology putting focus of criminological study on
+environmental or context factors that can influence criminal activity. These include space
+(geography), time, law, offender, and target or victim. These five components are a neces-
+sary and sufficient condition, for without one, the other four, even together, will not consti-
+tute a criminal incident. The discovery demonstrated in the article that there is a superlinear
+relationship between crime and population (resident or floating) in clusters within cities
+strengthens the claim that changes in urban form can lead to reduced crime as discussed in
+Ref. [50]. In this context, we believe that there are two possible strategies to reduce crimes in
+the cities. In a short period of time, one could try to modify the route of public transporta-
+tion in order to avoid a high spatial-temporal convergence of people. In a long period of
+time, by stimulating with tax breaks, for example, the existence of of several autonomous
+centers in the city, this would certainly reduce the commuting among these highly conver-
+gent centers.
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 10 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+Supporting information
+
+S1 Appendix. The urban mobility data processing, lack of correlation between POP vs PC
+and FLO vs DP, additional information about the choosing of ℓ and D and data summary.
+
+(PDF)
+
+Author contributions
+
+Conceptualization: CC VF THCP CP HPMM EAO JSA.
+
+Data curation: CC CP HPMM EAO.
+
+Formal analysis: CC VF THCP CP HPMM EAO JSA.
+
+Funding acquisition: VF THCP JSA.
+
+Investigation: CC VF THCP CP HPMM EAO JSA.
+
+Methodology: CC VF THCP CP HPMM EAO JSA.
+
+Project administration: VF THCP JSA.
+
+Resources: VF THCP JSA.
+
+Software: CC CP HPMM EAO.
+
+Supervision: VF THCP JSA.
+
+Validation: CC VF THCP CP HPMM EAO JSA.
+
+Visualization: CC VF THCP CP HPMM EAO JSA.
+
+Writing – original draft: CC VF THCP CP HPMM EAO JSA.
+
+Writing – review & editing: CC VF THCP CP HPMM EAO JSA.
+
+References
+1. Michael J, Adler MJ. Crime, law and social science. International library of psychology, philosophy, and
+
+scientific method. K. Paul, Trench, Trubner & co. ltd.; 1933.
+
+2. Cohen LE, Felson M. Social Change and Crime Rate Trends: A Routine Activity Approach. American
+Sociological Review. 1979; 44(4):588–608. doi: 10.2307/2094589
+
+3. Felson M. Crime and Everyday Life. SAGE Publications; 2002.
+
+4. Clarke RVG, Felson M. Routine Activity and Rational Choice. Advances in Criminological Theory.
+Transaction Publishers; 1993.
+
+5. Guedes R, Furtado V, Pequeno T. Multiagent models for police resource allocation and dispatch. In:
+Intelligence and Security Informatics Conference (JISIC), 2014 IEEE Joint. IEEE; 2014. p. 288–291.
+
+6. Wang T, Rudin C, Wagner D, Sevieri R. In: Blockeel H, Kersting K, Nijssen S, Železný F, editors. Learn-
+ing to Detect Patterns of Crime. Berlin, Heidelberg: Springer Berlin Heidelberg; 2013. p. 515–530.
+
+7. Kiani R, Mahdavi S, Keshavarzi A. Analysis and Prediction of Crimes by Clustering and Classification.
+Analysis. 2015; 4(8).
+
+8. Caminha C, Furtado V. Modeling User Reports in Crowdmaps as a Complex Network. In: Proceedings
+of 21st International World Wide Web Conference. Citeseer; 2012.
+
+9. Furtado V, Caminha C, Ayres L, Santos H. Open government and citizen participation in law enforce-
+ment via crowd mapping. IEEE Intelligent Systems. 2012; 27(4):63–69. doi: 10.1109/MIS.2012.80
+
+10. Wang F. Geographic information systems and crime analysis. IGI Global; 2005.
+
+11. Melo HPM, Moreira AA, Batista É, Makse HA, Andrade JS. Statistical signs of social influence on sui-
+cides. Scientific reports. 2014; 4. doi: 10.1038/srep06239 PMID: 25174706
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 11 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+12. Alves LG, Ribeiro HV, Lenzi EK, Mendes RS. Distance to the scaling law: a useful approach for unveil-
+ing relationships between crime and urban metrics. PLoS One. 2013; 8(8):e69580. doi: 10.1371/
+journal.pone.0069580 PMID: 23940525
+
+13. Alves LG, Ribeiro HV, Mendes RS. Scaling laws in the dynamics of crime growth rate. Physica A: Statis-
+tical Mechanics and its Applications. 2013; 392(11):2672–2679. doi: 10.1016/j.physa.2013.02.002
+
+14. D’Orsogna MR, Perc M. Statistical physics of crime: A review. Physics of life reviews. 2015; 12:1–21.
+doi: 10.1016/j.plrev.2014.11.001 PMID: 25468514
+
+15. Alves L, Lenzi E, Mendes R, Ribeiro H. Spatial correlations, clustering and percolation-like transitions in
+homicide crimes. EPL (Europhysics Letters). 2015; 111(1):18002. doi: 10.1209/0295-5075/111/18002
+
+16. Short MB, D’ORSOGNA MR, Pasour VB, Tita GE, Brantingham PJ, Bertozzi AL, et al. A statistical
+model of criminal behavior. Mathematical Models and Methods in Applied Sciences. 2008; 18
+(supp01):1249–1267. doi: 10.1142/S0218202508003029
+
+17. Short MB, Brantingham PJ, Bertozzi AL, Tita GE. Dissipation and displacement of hotspots in reaction-
+diffusion models of crime. Proceedings of the National Academy of Sciences. 2010; 107(9):3961–3965.
+doi: 10.1073/pnas.0910921107
+
+18. Von Bertalanffy L, Rapoport A. General systems. JSTOR; 1963.
+
+19. Kleiber M. Body size and metabolism. ENE. 1932; 1:E9.
+
+20. Oliveira EA, Andrade JS Jr, Makse HA. Large cities are less green. Scientific reports. 2014; 4. doi: 10.
+1038/srep04235
+
+21. Bettencourt LM, Lobo J, Helbing D, Kühnert C, West GB. Growth, innovation, scaling, and the pace of
+life in cities. Proceedings of the national academy of sciences. 2007; 104(17):7301–7306. doi: 10.1073/
+pnas.0610172104
+
+22. Bettencourt LM, Lobo J, Strumsky D, West GB. Urban scaling and its deviations: Revealing the struc-
+ture of wealth, innovation and crime across cities. PloS One. 2010; 5(11):e13541. doi: 10.1371/journal.
+pone.0013541 PMID: 21085659
+
+23. Gomez-Lievano A, Youn H, Bettencourt LM. The statistics of urban scaling and their connection to
+Zipf’s law. PLoS One. 2012; 7(7):e40393. doi: 10.1371/journal.pone.0040393 PMID: 22815745
+
+24. Ignazzi CA. Scaling laws, economic growth, education and crime: evidence from Brazil. L’Espace géo-
+graphique. 2014; 43(4):324–337.
+
+25. Hanley QS, Lewis D, Ribeiro HV. Rural to urban population density scaling of crime and property trans-
+actions in English and Welsh Parliamentary Constituencies. PloS One. 2016; 11(2):e0149546. doi: 10.
+1371/journal.pone.0149546 PMID: 26886219
+
+26. Alves LG, Mendes RS, Lenzi EK, Ribeiro HV. Scale-adjusted metrics for predicting the evolution of
+urban indicators and quantifying the performance of cities. PloS One. 2015; 10(9):e0134862. doi: 10.
+1371/journal.pone.0134862 PMID: 26356081
+
+27. Arcaute E, Hatna E, Ferguson P, Youn H, Johansson A, Batty M. Constructing cities, deconstructing
+scaling laws. Journal of The Royal Society Interface. 2015; 12(102):20140745. doi: 10.1098/rsif.2014.
+0745
+
+28. Arcaute E, Molinero C, Hatna E, Murcio R, Vargas-Ruiz C, Masucci AP, et al. Cities and regions in Brit-
+ain through hierarchical percolation. Open Science. 2016; 3(4):150691.
+
+29. Cottineau C, Finance O, Hatna E, Arcaute E, Batty M. Defining urban agglomerations to detect agglom-
+eration economies. arXiv preprint arXiv:160105664. 2016;.
+
+30. Leitão JC, Miotto JM, Gerlach M, Altmann EG. Is this scaling nonlinear? Royal Society Open Science.
+2016; 3(7). doi: 10.1098/rsos.150649 PMID: 27493764
+
+31. Bettencourt LM. The origins of scaling in cities. science. 2013; 340(6139):1438–1441. doi: 10.1126/
+science.1235823 PMID: 23788793
+
+32. Arbesman S, Kleinberg JM, Strogatz SH. Superlinear scaling for innovation in cities. Physical Review E.
+2009; 79(1):016115. doi: 10.1103/PhysRevE.79.016115
+
+33. Makse HA, Andrade JS, Batty M, Havlin S, Stanley HE, et al. Modeling urban growth patterns with cor-
+related percolation. Physical Review E. 1998; 58(6):7054. doi: 10.1103/PhysRevE.58.7054
+
+34. Rozenfeld HD, Rybski D, Andrade JS, Batty M, Stanley HE, Makse HA. Laws of population growth. Pro-
+ceedings of the National Academy of Sciences. 2008; 105(48):18702–18707. doi: 10.1073/pnas.
+0807435105
+
+35. Giesen K, Zimmermann A, Suedekum J. The size distribution across all cities–double Pareto lognormal
+strikes. Journal of Urban Economics. 2010; 68(2):129–137. doi: 10.1016/j.jue.2010.03.007
+
+36. Rozenfeld HD, Rybski D, Gabaix X, Makse HA. The area and population of cities: New insights from a
+different perspective on cities. The American Economic Review. 2011; 101(5):2205–2225. doi: 10.
+1257/aer.101.5.2205
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 12 / 13
+
+
+
+Human mobility in large cities as a proxy for crime
+
+37. Duranton G, Puga D. The growth of cities. 2013;.
+
+38. Gallos LK, Barttfeld P, Havlin S, Sigman M, Makse HA. Collective behavior in the spatial spreading of
+obesity. Scientific reports. 2012; 2. doi: 10.1038/srep00454 PMID: 22822425
+
+39. Duranton G. Delineating metropolitan areas: Measuring spatial labour market networks through com-
+muting patterns. In: The Economics of Interfirm Networks. Springer; 2015. p. 107–133.
+
+40. Eeckhout J. Gibrat’s law for (all) cities. The American Economic Review. 2004; 94(5):1429–1451. doi:
+10.1257/0002828043052303
+
+41. Instituto Brasileiro de Geografia e Estatistica (IBGE);. Available: http://www.ibge.gov.br/english/.
+
+42. Fortaleza Dados Abertos;. Available: http://dados.fortaleza.ce.gov.br/catalogo/dataset/dados-de-
+onibus-11-03-2015.
+
+43. Coordenadoria Integrada de Operações de Segurança (CIOPS);. Available: http://dados.fortaleza.ce.
+gov.br/dataset/8e995f96-423c-41f3-ba33-9ffe94aec2a8/resource/de4e876a-ee24-4d6e-9722-
+db9dc454bbe6/download/policecalls.csv.
+
+44. Rawlings JO, Pantula SG, Dickey DA. Applied regression analysis: a research tool. Springer Science &
+Business Media; 2001.
+
+45. Montgomery DC, Peck EA, Vining GG. Introduction to linear regression analysis. John Wiley & Sons;
+2015.
+
+46. Nadaraya EA. On estimating regression. Theory of Probability & Its Applications. 1964; 9(1):141–142.
+doi: 10.1137/1109020
+
+47. Watson GS. Smooth regression analysis. Sankhyā: The Indian Journal of Statistics, Series A. 1964; p.
+359–372.
+
+48. Taylor RB, Harrell A. Physical environment and crime. US Department of Justice, Office of Justice Pro-
+grams, National Institute of Justice; 1996.
+
+49. Brantingham PJ, Brantingham PL. Environmental criminology. Sage Publications Beverly Hills, CA;
+1981.
+
+50. Kinney JB, Brantingham PL, Wuschke K, Kirk MG, Brantingham PJ. Crime attractors, generators and
+detractors: land use and urban crime opportunities. Built environment. 2008; 34(1):62–74. doi: 10.2148/
+benv.34.1.62
+
+PLOS ONE | DOI:10.1371/journal.pone.0171609 February 3, 2017 13 / 13

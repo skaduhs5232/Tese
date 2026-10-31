@@ -1,0 +1,51 @@
+Dataset,Cenário,População,Métrica MP,N,Beta_OLS,R2,Pearson_r,p_val,Theil_Beta,Siegel_Beta,Spearman_rho,Spearman_p
+Nurdle Patrol (Pellets),1. Bruto (Todas as bacias),urban_population,nurdles_sum,60,0.137,0.0078,+0.088,0.5023,0.225,0.367,+0.134,0.3090
+Nurdle Patrol (Pellets),1. Bruto (Todas as bacias),urban_population,nurdles_mean,60,0.061,0.0037,+0.061,0.6440,0.017,0.130,+0.040,0.7614
+Nurdle Patrol (Pellets),1. Bruto (Todas as bacias),urban_population,nurdles_median,54,0.029,0.0016,+0.041,0.7712,-0.000,0.000,+0.025,0.8591
+Nurdle Patrol (Pellets),1. Bruto (Todas as bacias),total_population,nurdles_sum,129,0.179,0.0232,+0.152,0.0846,0.178,0.215,+0.155,0.0785
+Nurdle Patrol (Pellets),1. Bruto (Todas as bacias),total_population,nurdles_mean,129,0.009,0.0001,+0.011,0.9010,0.048,0.109,+0.051,0.5641
+Nurdle Patrol (Pellets),1. Bruto (Todas as bacias),total_population,nurdles_median,109,-0.088,0.0185,-0.136,0.1583,0.000,0.000,-0.045,0.6408
+Nurdle Patrol (Pellets),2. Sem Outliers Agudos (z <= 3),urban_population,nurdles_mean,59,0.032,0.0015,+0.039,0.7698,0.006,0.102,+0.031,0.8153
+Nurdle Patrol (Pellets),2. Sem Outliers Agudos (z <= 3),urban_population,nurdles_median,53,0.019,0.0008,+0.027,0.8454,0.000,0.000,+0.013,0.9248
+Nurdle Patrol (Pellets),2. Sem Outliers Agudos (z <= 3),total_population,nurdles_mean,128,-0.035,0.0021,-0.045,0.6102,0.027,0.082,+0.030,0.7354
+Nurdle Patrol (Pellets),2. Sem Outliers Agudos (z <= 3),total_population,nurdles_median,108,-0.103,0.0252,-0.159,0.1006,0.000,0.000,-0.065,0.5064
+Nurdle Patrol (Pellets),3. Amostragem Mínima (N_samples >= 3),urban_population,nurdles_mean,47,0.005,0.0000,+0.005,0.9759,-0.001,0.049,-0.013,0.9311
+Nurdle Patrol (Pellets),3. Amostragem Mínima (N_samples >= 3),urban_population,nurdles_median,41,-0.013,0.0003,-0.017,0.9142,0.000,0.040,-0.026,0.8735
+Nurdle Patrol (Pellets),3. Amostragem Mínima (N_samples >= 3),total_population,nurdles_mean,90,0.068,0.0058,+0.076,0.4738,0.085,0.146,+0.079,0.4579
+Nurdle Patrol (Pellets),3. Amostragem Mínima (N_samples >= 3),total_population,nurdles_median,70,-0.061,0.0090,-0.095,0.4357,0.000,0.000,-0.050,0.6815
+Nurdle Patrol (Pellets),4. Golfo (Polo Petroquímico),urban_population,nurdles_sum,9,0.688,0.1432,+0.378,0.3152,1.055,1.087,+0.367,0.3317
+Nurdle Patrol (Pellets),4. Golfo (Polo Petroquímico),urban_population,nurdles_mean,9,0.575,0.1677,+0.410,0.2737,0.528,0.528,+0.433,0.2440
+Nurdle Patrol (Pellets),4. Golfo (Polo Petroquímico),total_population,nurdles_sum,31,0.535,0.1792,+0.423,0.0177,0.409,0.231,+0.297,0.1043
+Nurdle Patrol (Pellets),4. Golfo (Polo Petroquímico),total_population,nurdles_mean,31,0.345,0.1365,+0.369,0.0408,0.271,0.264,+0.359,0.0474
+Nurdle Patrol (Pellets),5. Fora do Golfo (Urbano Geral),urban_population,nurdles_sum,51,0.167,0.0159,+0.126,0.3782,0.267,0.374,+0.190,0.1825
+Nurdle Patrol (Pellets),5. Fora do Golfo (Urbano Geral),urban_population,nurdles_mean,51,0.046,0.0033,+0.057,0.6900,0.021,0.070,+0.053,0.7137
+Nurdle Patrol (Pellets),5. Fora do Golfo (Urbano Geral),total_population,nurdles_sum,98,0.038,0.0012,+0.034,0.7393,0.075,0.190,+0.084,0.4093
+Nurdle Patrol (Pellets),5. Fora do Golfo (Urbano Geral),total_population,nurdles_mean,98,-0.119,0.0233,-0.153,0.1332,-0.030,0.000,-0.053,0.6071
+Ocean Water (Redes Neuston),1. Bruto (Todas as bacias),urban_population,nurdles_sum,18,-0.545,0.0727,-0.270,0.2793,-0.394,-0.247,-0.369,0.1324
+Ocean Water (Redes Neuston),1. Bruto (Todas as bacias),urban_population,nurdles_mean,18,-0.460,0.0740,-0.272,0.2749,-0.373,-0.360,-0.481,0.0435
+Ocean Water (Redes Neuston),1. Bruto (Todas as bacias),urban_population,nurdles_median,18,-0.465,0.0872,-0.295,0.2343,-0.315,-0.324,-0.528,0.0242
+Ocean Water (Redes Neuston),1. Bruto (Todas as bacias),total_population,nurdles_sum,48,0.177,0.0091,+0.096,0.5180,0.000,-0.000,-0.029,0.8457
+Ocean Water (Redes Neuston),1. Bruto (Todas as bacias),total_population,nurdles_mean,48,0.160,0.0111,+0.106,0.4752,0.000,0.060,-0.003,0.9816
+Ocean Water (Redes Neuston),1. Bruto (Todas as bacias),total_population,nurdles_median,47,0.126,0.0106,+0.103,0.4904,-0.000,0.052,+0.010,0.9473
+Ocean Water (Redes Neuston),2. Sem Outliers Agudos (z <= 3),urban_population,nurdles_mean,17,-0.250,0.0899,-0.300,0.2424,-0.360,-0.347,-0.486,0.0479
+Ocean Water (Redes Neuston),2. Sem Outliers Agudos (z <= 3),urban_population,nurdles_median,17,-0.253,0.2453,-0.495,0.0432,-0.293,-0.322,-0.533,0.0276
+Ocean Water (Redes Neuston),2. Sem Outliers Agudos (z <= 3),total_population,nurdles_mean,45,-0.040,0.0018,-0.042,0.7829,-0.038,0.004,-0.075,0.6244
+Ocean Water (Redes Neuston),2. Sem Outliers Agudos (z <= 3),total_population,nurdles_median,45,-0.069,0.0097,-0.098,0.5199,-0.012,-0.000,-0.062,0.6866
+Ocean Water (Redes Neuston),3. Amostragem Mínima (N_samples >= 3),urban_population,nurdles_mean,5,-0.467,0.0325,-0.180,0.7717,0.010,0.699,-0.100,0.8729
+Ocean Water (Redes Neuston),3. Amostragem Mínima (N_samples >= 3),urban_population,nurdles_median,5,-0.714,0.0713,-0.267,0.6642,-0.344,-0.106,-0.600,0.2848
+Ocean Water (Redes Neuston),3. Amostragem Mínima (N_samples >= 3),total_population,nurdles_mean,13,0.975,0.1846,+0.430,0.1429,0.815,1.206,+0.412,0.1618
+Ocean Water (Redes Neuston),3. Amostragem Mínima (N_samples >= 3),total_population,nurdles_median,12,0.929,0.2267,+0.476,0.1177,0.471,0.648,+0.490,0.1063
+Beach (Lixo de Praia),1. Bruto (Todas as bacias),urban_population,nurdles_sum,13,0.048,0.0017,+0.041,0.8951,-0.036,0.012,-0.022,0.9432
+Beach (Lixo de Praia),1. Bruto (Todas as bacias),urban_population,nurdles_mean,13,-0.015,0.0003,-0.016,0.9588,-0.036,0.012,-0.022,0.9432
+Beach (Lixo de Praia),1. Bruto (Todas as bacias),urban_population,nurdles_median,13,-0.016,0.0003,-0.018,0.9539,0.000,0.000,-0.080,0.7942
+Beach (Lixo de Praia),1. Bruto (Todas as bacias),total_population,nurdles_sum,26,0.043,0.0014,+0.038,0.8554,0.066,0.040,+0.044,0.8293
+Beach (Lixo de Praia),1. Bruto (Todas as bacias),total_population,nurdles_mean,26,0.056,0.0045,+0.067,0.7459,0.072,0.053,+0.094,0.6465
+Beach (Lixo de Praia),1. Bruto (Todas as bacias),total_population,nurdles_median,24,-0.025,0.0011,-0.033,0.8779,0.000,-0.000,+0.003,0.9887
+Beach (Lixo de Praia),2. Sem Outliers Agudos (z <= 3),urban_population,nurdles_mean,13,-0.015,0.0003,-0.016,0.9588,-0.036,0.012,-0.022,0.9432
+Beach (Lixo de Praia),2. Sem Outliers Agudos (z <= 3),urban_population,nurdles_median,13,-0.016,0.0003,-0.018,0.9539,0.000,0.000,-0.080,0.7942
+Beach (Lixo de Praia),2. Sem Outliers Agudos (z <= 3),total_population,nurdles_mean,26,0.056,0.0045,+0.067,0.7459,0.072,0.053,+0.094,0.6465
+Beach (Lixo de Praia),2. Sem Outliers Agudos (z <= 3),total_population,nurdles_median,24,-0.025,0.0011,-0.033,0.8779,0.000,-0.000,+0.003,0.9887
+Beach (Lixo de Praia),3. Amostragem Mínima (N_samples >= 3),urban_population,nurdles_mean,12,-0.121,0.0299,-0.173,0.5909,-0.063,-0.071,-0.084,0.7954
+Beach (Lixo de Praia),3. Amostragem Mínima (N_samples >= 3),urban_population,nurdles_median,12,-0.117,0.0281,-0.168,0.6024,-0.058,-0.042,-0.155,0.6294
+Beach (Lixo de Praia),3. Amostragem Mínima (N_samples >= 3),total_population,nurdles_mean,23,0.152,0.0421,+0.205,0.3476,0.083,0.009,+0.169,0.4421
+Beach (Lixo de Praia),3. Amostragem Mínima (N_samples >= 3),total_population,nurdles_median,21,0.062,0.0110,+0.105,0.6504,0.000,0.000,+0.051,0.8260

@@ -1,0 +1,75 @@
+================================================================================
+ARTIGO RELACIONADO: METODOLOGIA NURDLE PATROL / NOAA CITIZEN SCIENCE
+================================================================================
+
+Título:
+  Measuring plastic pellet (nurdle) abundance on shorelines throughout the
+  Gulf of Mexico using citizen scientists: Establishing a platform for
+  policy-relevant research
+
+Autores:
+  Jace W. Tunnell (a), Kelly H. Dunning (b), Lindsay P. Scheef (a),
+  Kathleen M. Swanson (a)
+  (a) University of Texas at Austin Marine Science Institute, Mission-Aransas
+      National Estuarine Research Reserve, Port Aransas, TX, USA
+  (b) School of Forestry and Wildlife Sciences, Auburn University, AL, USA
+
+Periódico / Ano / DOI:
+  Marine Pollution Bulletin, Volume 151, Fevereiro de 2020, Artigo 110794
+  DOI: https://doi.org/10.1016/j.marpolbul.2019.110794
+  URL: https://www.sciencedirect.com/science/article/pii/S0025326X19309506
+  Dataset NOAA NCEI Accession: 0259486 (https://doi.org/10.25921/ccz7-mq57)
+  Dataset Harmonizado NOAA NCEI Accession: 0306475 (https://doi.org/10.25921/v8gj-k896)
+
+--------------------------------------------------------------------------------
+1. RESUMO (ABSTRACT)
+--------------------------------------------------------------------------------
+There is an increasing awareness of microplastics within the global problem of
+marine plastic pollution. In 2018, small plastic pellets or "nurdles" were
+observed on the beaches of Corpus Christi, Texas. A citizen science project,
+"Nurdle Patrol," was established by the Mission-Aransas National Estuarine
+Research Reserve to monitor the presence of nurdles, with volunteer interest
+enabling this project to expand across the Gulf of Mexico region. This case
+study describes the sampling methodology, the policy framework, and initial
+quantitative data from the citizen science project on nurdle distribution along
+the Gulf coast. A total of 2042 Nurdle Patrol surveys have been conducted by
+744 citizen scientists covering shorelines from Mahahual, Mexico to Fort
+Jefferson, Florida. All 20 of the highest standardized nurdle counts were
+recorded at sites in Texas. Results can inform decision-maker response across
+regulatory scales and further research on nurdle pollution.
+
+--------------------------------------------------------------------------------
+2. PROTOCOLO DE COLETA E PADRONIZAÇÃO DE UNIDADE (CPUE: pieces/10 mins)
+--------------------------------------------------------------------------------
+- O protocolo do Nurdle Patrol é padronizado por ESFORÇO TEMPORAL (Catch Per
+  Unit Effort - CPUE), e não por quadrat de área fixa:
+  1. O voluntário caminha até a linha d'água (waterline) e a linha de deixa da
+     maré alta recente (wrack line / high tide line).
+  2. Ao encontrar o primeiro pellet plástico (nurdle), inicia um cronômetro de
+     10 minutos.
+  3. Durante 10 minutos, coleta manualmente todos os nurdles visíveis na
+     superfície da areia e registra a contagem total, o número de voluntários
+     (`Volunteers_Number`) e o tempo de coleta (`Collecting_Time__min_`).
+  4. A contagem padronizada (`Standardized_Nurdle__Amount` na base NOAA NCEI)
+     é expressa em `pieces/10 mins` (nurdles coletados por 10 minutos por
+     pessoa):
+       Standardized_Nurdle_Amount = (Contagem / Volunteers_Number) * (10 / Collecting_Time_min)
+- Classes oficiais de concentração adotadas pela NOAA NCEI para Nurdle Patrol:
+  * Very Low  : 0 pieces/10 mins
+  * Low       : 1 - 2 pieces/10 mins
+  * Medium    : 2 - 40 pieces/10 mins
+  * High      : 40 - 200 pieces/10 mins
+  * Very High : > 200 pieces/10 mins
+
+--------------------------------------------------------------------------------
+3. CITAÇÃO BIBTEX PARA A DISSERTAÇÃO
+--------------------------------------------------------------------------------
+@article{tunnell2020measuring,
+  title   = {Measuring plastic pellet (nurdle) abundance on shorelines throughout the Gulf of Mexico using citizen scientists: Establishing a platform for policy-relevant research},
+  author  = {Tunnell, Jace W. and Dunning, Kelly H. and Scheef, Lindsay P. and Swanson, Kathleen M.},
+  journal = {Marine Pollution Bulletin},
+  volume  = {151},
+  pages   = {110794},
+  year    = {2020},
+  doi     = {10.1016/j.marpolbul.2019.110794}
+}
