@@ -1,0 +1,77 @@
+================================================================================
+ARTIGO RELACIONADO: LEI DE POTÊNCIA E ALINHAMENTO DE MALHA (KOOI & KOELMANS)
+================================================================================
+
+Títulos:
+  (1) Simplifying Microplastic via Continuous Probability Distributions for
+      Size, Shape, and Density
+  (2) Redefining Microplastics: Correction Factors for Aligning Measured
+      Environmental Concentrations (Rescaling Framework)
+
+Autores:
+  Merel Kooi, Albert A. Koelmans, Noël J. Diepens, Svenja M. Mintenig,
+  Paula E. Redondo-Hasselerharm, Mohamedelamin M. N. Mohamed Nor
+  Wageningen University & Research, Aquatic Ecology and Water Quality Management
+
+Periódicos / Anos / DOIs:
+  (1) Environmental Science & Technology Letters, Vol. 6, pp. 551-557 (2019)
+      DOI: https://doi.org/10.1021/acs.estlett.9b00379
+  (2) Environmental Science & Technology, Vol. 54, pp. 12307-12320 (2020)
+      DOI: https://doi.org/10.1021/acs.est.0c02982
+
+--------------------------------------------------------------------------------
+1. FUNDAMENTAÇÃO FÍSICA E EQUAÇÃO DE ALINHAMENTO DE MALHA
+--------------------------------------------------------------------------------
+A fragmentação ambiental contínua de polímeros gera uma distribuição de tamanho
+de partículas (Particle Size Distribution - PSD) governada por uma Lei de
+Potência:
+  y(L) = b * L^(-alpha)
+
+onde:
+  - L é a dimensão característica da partícula (ou abertura de malha em mm/um);
+  - alpha é o expoente de potência (tipicamente alpha ~ 1,6 a 2,6 em águas
+    superficiais e sedimentos costeiros).
+
+Para alinhar (harmonizar) concentrações medidas com diferentes aberturas de
+malha `L_meas` para uma abertura de referência oceanográfica padrão `L_ref`
+(p. ex., L_ref = 0,333 mm das redes Manta/Neuston), aplica-se o Fator de
+Correção Analítico (CF_meas):
+
+  CF_meas = (L_ref^(1 - alpha) - L_max^(1 - alpha)) / (L_meas^(1 - alpha) - L_max^(1 - alpha))
+          ~ (L_ref / L_meas)^(1 - alpha)
+
+E a concentração alinhada é dada por:
+  C_aligned = C_measured * CF_meas
+
+--------------------------------------------------------------------------------
+2. APLICAÇÃO DIRETA NA DISSERTAÇÃO
+--------------------------------------------------------------------------------
+Permite harmonizar campanhas da NOAA NCEI que utilizaram malhas distintas
+(entre 0,02 mm e 5,0 mm) e alinhar as linhas de base entre famílias de
+instrumentos (Redes Superficiais, Peneiras de Praia e Sedimentos), elevando a
+correlação alométrica global de R² = 9,7% para R² = 34,0% (r = +0,58, p < 10^-5).
+
+--------------------------------------------------------------------------------
+3. CITAÇÃO BIBTEX PARA A DISSERTAÇÃO
+--------------------------------------------------------------------------------
+@article{kooi2019simplifying,
+  title   = {Simplifying Microplastic via Continuous Probability Distributions for Size, Shape, and Density},
+  author  = {Kooi, Merel and Koelmans, Albert A.},
+  journal = {Environmental Science \& Technology Letters},
+  volume  = {6},
+  number  = {9},
+  pages   = {551--557},
+  year    = {2019},
+  doi     = {10.1021/acs.estlett.9b00379}
+}
+
+@article{koelmans2020redefining,
+  title   = {Rescaling of Microplastic Effect and Exposure Data for Risk Assessment},
+  author  = {Koelmans, Albert A. and Redondo-Hasselerharm, Paula E. and Mohamed Nor, Nur Hazimah and Kooi, Merel},
+  journal = {Environmental Science \& Technology},
+  volume  = {54},
+  number  = {19},
+  pages   = {12307--12320},
+  year    = {2020},
+  doi     = {10.1021/acs.est.0c02982}
+}

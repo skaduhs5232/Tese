@@ -1,0 +1,56 @@
+================================================================================
+ARTIGO RELACIONADO: EMISSÃO E FLUXO HIDROLÓGICO DE PLÁSTICOS POR BACIAS (LEBRETON)
+================================================================================
+
+Título:
+  River plastic emissions to the world's oceans
+
+Autores:
+  Laurent C. M. Lebreton, Joost van der Zwet, Jan-Willem Damsteeg,
+  Boyan Slat, Anthony Andrady, Julia Reisser
+
+Periódico / Ano / DOI:
+  Nature Communications, Volume 8, Artigo 15611, Junho de 2017
+  DOI: https://doi.org/10.1038/ncomms15611
+  URL: https://www.nature.com/articles/ncomms15611
+
+--------------------------------------------------------------------------------
+1. FUNDAMENTAÇÃO FÍSICA: CONCENTRAÇÃO (C) VS. FLUXO EXPORTADO (F = C * Q)
+--------------------------------------------------------------------------------
+Lebreton et al. (2017) demonstram que a emissão de microplásticos e plásticos
+de uma bacia hidrográfica para o oceano é um FLUXO DE MASSA/PARTÍCULAS (F_MP),
+governado conjuntamente pela população residente na bacia (P) e pelo escoamento
+hidrológico superficial (vazão Q, proporcional à área de drenagem A_bacia):
+
+  C (pieces/m³) = F_MP (pieces/s) / Q (m³/s)
+
+Portanto, a concentração volumétrica instantânea C medida na foz sofre diluição
+pelo volume de água drenado pela bacia (Q ~ A_bacia). Para recuperar a carga
+total emitida pela população P sem o ruído da diluição hidrológica, a grandeza
+física que escala diretamente com a população da bacia é o Fluxo Hidrológico:
+
+  F_proxy = C * A_bacia  ~  P^beta
+
+--------------------------------------------------------------------------------
+2. APLICAÇÃO DIRETA NA DISSERTAÇÃO
+--------------------------------------------------------------------------------
+Ao multiplicar a concentração costeira de microplásticos verificados (C, em
+pieces/m³) pela área esférica exata da bacia hidrográfica (A_bacia, calculada
+via Triângulos Esféricos de L'Huilier), o efeito de diluição desaparece:
+  - Nas Bacias Urbanas CCA das Américas (R <= 15 km): R² sobe para 39,5%
+    (r = +0,63, p = 0,0068).
+  - Nas Redes Superficiais Globais (N = 35 bacias): R² sobe para 42,9%
+    (r = +0,65, Spearman rho = +0,64, p = 0,00002, beta = 1,09 +/- 0,22 ~ 1,0).
+
+--------------------------------------------------------------------------------
+3. CITAÇÃO BIBTEX PARA A DISSERTAÇÃO
+--------------------------------------------------------------------------------
+@article{lebreton2017river,
+  title   = {River plastic emissions to the world's oceans},
+  author  = {Lebreton, Laurent C. M. and van der Zwet, Joost and Damsteeg, Jan-Willem and Slat, Boyan and Andrady, Anthony and Reisser, Julia},
+  journal = {Nature Communications},
+  volume  = {8},
+  pages   = {15611},
+  year    = {2017},
+  doi     = {10.1038/ncomms15611}
+}

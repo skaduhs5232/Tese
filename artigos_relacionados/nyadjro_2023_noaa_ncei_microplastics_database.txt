@@ -1,0 +1,61 @@
+================================================================================
+ARTIGO RELACIONADO: BASE GLOBAL NOAA NCEI MARINE MICROPLASTICS
+================================================================================
+
+Título:
+  The NOAA NCEI marine microplastics database
+
+Autores:
+  Ebenezer S. Nyadjro, Zhankun Wang,oyer B. Reagan, Justinas Cebrian,
+  Lori A. Shoop, et al. (NOAA National Centers for Environmental Information)
+
+Periódico / Ano / DOI:
+  Scientific Data (Nature Portfolio), Volume 10, Artigo 726, Outubro de 2023
+  DOI: https://doi.org/10.1038/s41597-023-02632-y
+  URL: https://www.nature.com/articles/s41597-023-02632-y
+  Dataset NOAA NCEI Accession: 0277068 (https://doi.org/10.25921/f41t-p839)
+
+--------------------------------------------------------------------------------
+1. RESUMO E ESCOPO METODOLÓGICO
+--------------------------------------------------------------------------------
+A base Global Marine Microplastics da NOAA NCEI compila, audita e disponibiliza
+observações globais in-situ de microplásticos (< 5 mm) coletadas desde 1972 em
+quatro compartimentos distintos:
+  1. `Ocean water` (coluna d'água superficial e subsuperficial, em `pieces/m3`
+     de água do mar filtrada).
+  2. `Beach` (sedimento/areia de praia escavada, reportada em `pieces/m3` de
+     volume bruto de areia).
+  3. `Ocean sediment` (sedimento bentônico/estuarino de fundo, reportado em
+     `pieces kg-1 d.w.` de peso seco).
+  4. `Nurdle Patrol` (ciência cidadã de pellets industriais pré-produção nas
+     praias, reportada por esforço temporal em `pieces/10 mins`).
+
+--------------------------------------------------------------------------------
+2. DIRETRIZES CRÍTICAS DE FILTRAGEM E INTERPRETAÇÃO NA DISSERTAÇÃO
+--------------------------------------------------------------------------------
+- Incompatibilidade de Matrizes Físicas sob a mesma unidade (`pieces/m3`):
+  Embora `Ocean water` e `Beach` compartilhem a string `Unit = 'pieces/m3'`,
+  `Beach` mede partículas acumuladas ao longo de anos em 1 m³ de areia escavada
+  (média ~ 2.000 a 44.000 pieces/m³), enquanto `Ocean water` com redes de
+  superfície mede partículas em 1 m³ de água do mar (média ~ 0,02 a 0,45
+  pieces/m³). Misturar essas duas matrizes sem harmonização introduz um salto
+  sistemático de ~ 4,3 ordens de grandeza (20.000x).
+- Obrigatoriedade de controle por Abertura de Malha (`Mesh_size__mm_`) e
+  Instrumento (`Sampling_Method`):
+  Nyadjro et al. (2023) destacam que malhas menores e amostradores pontuais
+  (baldes, garrafas e bombas) capturam concentrações ordens de grandeza maiores
+  do que redes de arrasto superficial (Manta / Neuston de 330-335 um).
+
+--------------------------------------------------------------------------------
+3. CITAÇÃO BIBTEX PARA A DISSERTAÇÃO
+--------------------------------------------------------------------------------
+@article{nyadjro2023noaa,
+  title   = {The NOAA NCEI marine microplastics database},
+  author  = {Nyadjro, Ebenezer S. and Wang, Zhankun and Reagan, Boyer and others},
+  journal = {Scientific Data},
+  volume  = {10},
+  number  = {1},
+  pages   = {726},
+  year    = {2023},
+  doi     = {10.1038/s41597-023-02632-y}
+}

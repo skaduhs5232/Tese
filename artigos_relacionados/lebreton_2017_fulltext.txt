@@ -1,0 +1,241 @@
+# River plastic emissions to the world's oceans
+
+## Abstract
+
+AbstractPlastics in the marine environment have become a major concern because of their persistence at sea, and adverse consequences to marine life and potentially human health. Implementing mitigation strategies requires an understanding and quantification of marine plastic sources, taking spatial and temporal variability into account. Here we present a global model of plastic inputs from rivers into oceans based on waste management, population density and hydrological information. Our model is calibrated against measurements available in the literature. We estimate that between 1.15 and 2.41 million tonnes of plastic waste currently enters the ocean every year from rivers, with over 74% of emissions occurring between May and October. The top 20 polluting rivers, mostly located in Asia, account for 67% of the global total. The findings of this study provide baseline data for ocean plastic mass balance exercises, and assist in prioritizing future plastic debris monitoring and mitigation strategies.
+
+## Abstract
+
+Rivers provide a major pathway for ocean plastic waste, but effective mitigation is dependent on a quantification of active sources. Here, the authors present a global model of riverine plastic inputs, and estimate annual plastic waste of almost 2.5 million tonnes, with 86% sourced from Asia.
+
+Plastics are increasingly used worldwide in a wide variety of applications with global production exceeding 300 million tonnes per year since 2014 (ref. 1). Because of their durability, low-recycling rates, poor waste management and maritime use, a significant portion of the plastics produced worldwide enters and persists in marine ecosystems2. This includes shoreline, seabed, water column and sea surface environments of the world's oceans3. The release of plastics into the marine environment occurs through a variety of pathways, including river and atmospheric transport, beach littering and directly at sea via aquaculture, shipping and fishing activities4. A comprehensive risk assessment of this relatively new type of marine contamination requires defining, understanding and quantifying emissions both geographically and temporally. This knowledge helps in refining our understanding of marine plastic pollution sources and pathways, while working towards an estimated global budget for ocean plastics. It also assists in identifying the critical locations and seasons of plastic releases, supporting the implementation of cost-effective monitoring and source mitigation efforts.
+
+Land-based sources, as opposed to marine-based sources, are considered the dominant input of plastics into oceans4. While a quantification of land-based inputs from coastal populations (<50 km from coastline) worldwide already exists5, no global assessment of contributions from inland populations through riverine systems has been proposed to date. Only a few local studies have reported levels of plastic contamination in freshwater systems worldwide6. Such freshwater studies generally focus on micro-plastics (< 5 mm length) contaminating sediment and waters of lakes and rivers. Sampling design and devices, as well as reported units (for example, pieces per m2, grams per m3) vary substantially between different assessments7. Overall, observed plastic concentrations differ by several orders of magnitude in between sampled rivers7, with studies suggesting that population density8,9, levels of urbanization and industrialization within catchment areas10,11, rainfall rates10,12 and the presence of artificial barriers such as weirs and dams13 play a significant role in resulting rates of river-based plastic inputs into the ocean.
+
+A study in California12 was the first to report levels of micro-plastics in river surface waters, with sampling in Los Angeles River, San Gabriel River and tributary Coyote Creek. The report found substantial temporal variations in plastic contamination levels. For a given location, the study found up to three orders of magnitude differences between plastic concentrations measured at different time periods. These variations were mostly explained by events of dry and wet weather, implying that runoff plays an important role in the transport of plastics into freshwater systems. In recent years, more studies sampled plastic in surface waters of rivers. In Europe, studies estimated that the Danube River releases 530–1,500 tonnes of plastic into the Black Sea annually8,9. Another European study estimated that 20–31 tonnes flows into the North Sea every year from the Rhine River8, with different locations along this river demonstrating the presence of significant sources (for example, wastewater treatment plants, tributaries) and sinks (for example, weirs; ref. 13). In the Italian Po River, sampled concentrations differed by one order of magnitude between winter and spring14, emphasising seasonality of freshwater contamination in rivers.
+
+Surface plastic concentrations showed a statistically significant correlation with human population densities and proportion of urban development in catchments around the Chesapeake Bay (USA)10. The study also reported the highest measured micro-plastic concentrations (up to 1.6 milligrams per cubic metre for 1.73 particles per cubic metre) occurring after major rain events at three of the four monitoring sites. In South America, monitoring from scientists and volunteers at the Elqui, Maipo, Biobio and Maule Rivers, demonstrated a consistent pattern between numerical concentration of micro-plastics (range 0.05–0.74 particles per cubic metre) and the presence of litter deposition on riversides15. In Asia, sampling of micro-plastics on beaches suggested that the nearby Pearl River is a major source of plastic pollution for the region16. Surface samplings at the Chinese Yangtze River mouth showed considerably higher plastic concentrations than any other sampled river worldwide17 with a reported 4,137 particles per cubic metre. The significant differences between sampled estuarine concentrations and nearshore monitoring in the area confirmed that the Yangtze River is a major regional source of plastic input into the marine environment.
+
+Here we provide a global estimate of river plastic inputs into the world's oceans, considering both the seasonality and spatial variability of local sources. Our global model uses geospatial data of population density18,19, rates of mismanaged plastic waste (MPW) production per inhabitant and per country5,20, monthly catchment runoff21,22, as well as the presence of artificial barriers (for example, dams and weirs) that act as particle sinks23,24. The correlation found between model outputs and field observations suggests that the model presented here is able to describe a significant proportion of the spatio-temporal variations on levels of plastic contamination in freshwater systems worldwide. We predict a global annual input of plastic from rivers into the oceans ranging from 1.15 to 2.41 million tonnes with a dominant contribution from rivers of the Asian continent.
+
+
+## Results
+
+
+
+## River plastic mass inputs to oceans
+
+
+We estimated that between 1.15 and 2.41 million tonnes of plastic currently flows from the global riverine system into the oceans every year (Fig. 1). The top 20 polluting rivers were mostly located in Asia (Table 1) and accounted for more than two thirds (67%) of the global annual input while covering 2.2% of the continental surface area and representing 21% of the global population. Furthermore, the top 122 polluting rivers (4% of total landmass surface area and 36% of global population) contributed for >90% of the plastic inputs with 103 rivers located in Asia, eight in Africa, eight in South and Central America, and one in Europe.
+
+
+## Mass of river plastic flowing into oceans in tonnes per year.
+
+
+River contributions are derived from individual watershed characteristics such as population density (in inhab km−2), mismanaged plastic waste (MPW) production per country (in kg inhab−1 d−1) and monthly averaged runoff (in mm d−1). The model is calibrated against river plastic concentration measurements from Europe, Asia, North and South America.
+
+
+## Top 20 polluting rivers as predicted by the global river plastic inputs model.
+
+
+Input rate estimates (in t yr−1) are representative of mismanaged plastic waste (MPW) production and catchment runoff. A lower, midpoint and upper estimate is calculated based on three regression analyses accounting for uncertainties in our field observations data set.
+
+Our model was calibrated against reported micro- and macro-plastic concentrations from river surface waters of Europe, Asia, North and South America (Table 2). The studies used for this assessment report only a fraction of the wide plastic debris size spectrum: from particles larger than their net mesh sizes (typically 0.3 mm) to objects smaller than the aperture size of their sampling devices (typically 0.5 m). Therefore, our global river plastic input estimate is conservative, as we neglect the contribution of debris outside the sampled size range and below the surface sampling devices. Both buoyant and non-buoyant river plastics can be suspended throughout the water column and transported towards the sea due to turbulent river flows and large flood events25.
+
+
+## List of observational studies used in the calibration of the global river plastic inputs model.
+
+
+As shown here, not all studies (n=30 records from 13 rivers) reported both numerical (for example, # m−3) and mass (for example, g m−3) concentrations for both macro- (>5 mm) and micro-plastics (< 5 mm). When numerical and/or mass concentrations are not reported, we extrapolated values from reported micro-plastic concentrations (see main manuscript and Table 3).
+
+River plastic mass concentrations from the literature (Table 3) demonstrated a statistically significant, positive correlation with the product of annual MPW production rates inside a catchment area downstream of artificial barriers and monthly averaged catchment runoff (Pearson product-moment test, r=0.4132, P<0.05, n=29). The correlation test was conducted after removing measurement data from the Yangtze River, considered as an outlier. When including data from the Yangtze River, we logically obtained a much higher, yet biased correlation (r=0.99, P<0.05, n=30).
+
+
+## Plastic concentration in sampled rivers and watershed characteristics.
+
+
+Micro- (< 5 mm) and macro- (>5 mm) plastic numerical (# m−3) and mass (g m−3) concentrations reported by observational studies. Underlined macro-plastic numerical concentrations are derived from micro-plastic concentrations assuming a ratio of 0.04 between macro- and micro-plastic in count. This ratio is the average value from river studies reporting both size classes. As a comparison, Eriksen et al.29 found similar macro- to micro-plastic numerical ratios for ocean particles, with values ranging from 0.01 to 0.12 (global average at 0.07). Underlined plastic mass concentrations are derived from numerical concentrations using average particle mass at sea29: 0.003 and 0.17 g respectively for micro- and macro-plastic. Results from a sensitivity analysis on these parameters is provided in Supplementary Table 1. Model data in the last two columns are the catchment characteristics: mismanaged plastic waste production inside the catchment (Mmpw) in t yr−1 (refs 5, 20) downstream of dams, and monthly averaged runoff (R) in mm d−1 (ref. 21). Model data in the last two columns are corresponding to sampling month.
+
+The product of annual MPW production inside a catchment area downstream of artificial barriers and monthly averaged catchment runoff for the month corresponding to the sampling period was used to formulate an empirical model. Uncertainties related to estimating daily flux inputs from concentration measurements were considered, while assessing a linear regression. We determined three parametric equations corresponding to lower, midpoint and upper model estimates to best predict estimation ranges from observations and account for these uncertainties (Supplementary Table 1). Our midpoint calculations demonstrated a good relationship with mass flux inputs derived from measurements by orders of magnitude with a coefficient of determination r2=0.93 (n=30; Fig. 2).
+
+
+## Comparison between river input model and measurements.
+
+
+Circles indicate midpoint estimates of daily inputs of plastics from river to oceans in kg d−1. Whiskers extend from lower to upper estimates based on a range of average particle mass and ratio between numerical concentrations of macro-plastics and micro-plastics. The regression analysis was carried out with 30 records from 13 rivers reported in seven studies. The locations of the 13 rivers are provided in the map.
+
+Estimated plastic releases from Asian rivers represented 86% of the total global input. A considerably high-population density combined with relatively large MPW production rates and episodes of heavy rainfalls, resulted in this dominant contribution from the Asian continent, with an estimated annual input of 1.21 (range 1.00–2.06) million tonnes per year. Our model predicted that the Chinese Yangtze River is the largest contributing catchment, with an annual input of 0.33 (range 0.31–0.48) million tonnes of plastic discharged into the East China Sea, followed by the Ganges River catchment, between India and Bangladesh, with a computed input of 0.12 (range 0.10–0.17) million tonnes per year. The combined input of the Xi, Dong and Zhujiang Rivers in China all flowing into the South China Sea at the Pearl River delta, was estimated at 0.106 (range 0.091–0.169) million tonnes per year, placing the greater catchment into third position.
+
+Indonesia was also identified as a major contributor on the Asian continent, with four Javanese rivers being of particular concern. The Brantas, Solo, Serayu and Progo Rivers respectively emitting an estimated 38,900 (range 32,300–63,700), 32,500 (range 26,500–54,100), 17,100 (range 13,300–29,900) and 12,800 (range 9,800–22,900) tonnes of plastics per year. Overall, we computed a midpoint annual emission of 200,000 tonnes (14.2% of global total) from Indonesian rivers and streams, mainly coming from the Islands of Java and Sumatra. This result reflects the levels of population density, as well as waste mismanagement in the region considering the surface area of these catchments is two to three orders of magnitude smaller than other large contributing rivers in the list.
+
+The rest of the world shared the remaining 14% of river plastic mass input, with 7.8% coming from Africa with 109,200 (range 85,700–192,000) tonnes per year, 4.8% from South America with 67,400 (range: 52,700–119,000) tonnes per year, 0.95% from Central and North America with 13,400 (range: 8,880–28,200) tonnes per year, 0.28% from Europe with 3,900 (range: 2,310–9,320) tonnes per year, and the remaining 0.02% from the Australia-Pacific region with 300 (range: 193–707) tonnes per year. In West Africa particularly, the Cross River with 40,300 (range 33,800–65,100) tonnes per year, the Imo River with 21,500 (range: 17,500–35,100) tonnes per year and the Kwa Ibo River with 11,900 (range: 9,300–20,800) tonnes per year all appeared in the list of the twenty most polluting river catchments. In South America, we estimated an annual input of 38,900 (range 32,200–63,800) tonnes per year coming from the Amazon River, the largest river on earth by water discharge, with tributaries in Peru, Columbia, Ecuador and Brazil. Also in South America, we predicted a significant contribution from the Magdalena River in Columbia with 16,700 (range 12,900–29,500) tonnes per year entering the Gulf of Mexico.
+
+
+## Seasonality of river plastic inputs to oceans
+
+
+Using monthly averaged daily runoff for the period 2005–2014, we assessed seasonal variations in modelled river plastic inputs into oceans worldwide. We estimated that >74.5% of the total river plastic input occurs between May and October. Our model showed a peak in global inputs for the month of August with an estimated 228,800 (range 193,000–375,000) tonnes, and a low for the month of January with 46,200 (range 34,200–87,500) tonnes. These seasonal findings were mainly driven by the large inputs from China which are regulated by the East Asian monsoon. In the Asian region, opposing seasons between northern and southern hemispheres create distinct monsoon regimes separated by the South China Sea26, with the Indian and East Asian summer monsoons (June to September) in the North and the South East Asia Summer monsoon (November to March) in the south27 (Fig. 3a).
+
+
+## Seasonality of regional inputs of river plastic to oceans.
+
+
+(a) River outflow locations are indicated by trimestral period when respective peak input occurs. Peak seasons for precipitation rates from GLDAS21 are mapped on the continental landmass, showing a clear correlation with our predicted inputs. (b) Relative seasonality of plastic inputs from rivers into the ocean by continents. Continental contributions are expressed in percentage of respective annual mass inputs.
+
+The changes in rainfall rates associated with monsoons was reflected in the predicted monthly river plastic inputs into oceans. The Yangtze River contributed a midpoint estimate of 76,000 tonnes per month in July but <2,500 tonnes per month in January. Similarly, our model showed midpoint input estimates from the Ganges River peaking in August with 44,500 tonnes per month while the river discharges <150 tonnes per month between December and March. In Southeast Asia however, maximum river plastic inputs occurred early in the year, during the regional rainy season. In Indonesia for example, modelled inputs of the archipelago reached a midpoint estimate peak in February with 35,000 tonnes per month, as opposed to 1,800 tonnes per month in August during the dry season.
+
+Looking at seasonal inputs worldwide, it appears that the relative variations in monthly inputs from the Asian subcontinent are not as pronounced as for other continents (Fig. 3b). This is caused by a balance between inputs from East Asia and the Indian Subcontinent during the northern hemisphere summer and contributions from Southeast Asia during the southern hemisphere summer. For other parts of the world, our model showed two distinct river plastic input peaks: one occurring between June and October for African, North and Central American rivers, and one occurring from November to May for European, South American and Australia-Pacific rivers.
+
+
+## Discussion
+
+
+Here we provide a global estimate of plastic emissions from rivers into the world's oceans: between 1.15 and 2.41 million tonnes per year. Most of this river plastic input is coming from Asia, which emphasise the need to focus monitoring and mitigation efforts in Asian countries with rapid economic development and poor waste management. Research on freshwater plastic pollution is a relatively new field and most efforts have been carried out in industrialized countries of Europe and North America. While many indicators suggest a dominant contribution of plastics from Asian countries20, there is very little data to document these assumptions and thoroughly verify the validity of our model. Yet, the relatively high concentrations of ocean plastic found at the surface of the North Pacific Ocean28,29 where buoyant plastics originating from Asia can accumulate30, suggest that our assumptions are plausible.
+
+It has been estimated that between 4.8 and 12.7 million tonnes of plastic enters the ocean every year from coastal populations worldwide5. Plastics within coastal areas however do not only enter the oceans through rivers. It can also reach oceans by other processes such as direct littering near beaches, followed by tidal or wind transport4. It is also important to note that our model is calibrated against buoyant plastics found on river surface waters, whereas this previous coastal contribution assessment considers all types of plastics found in municipal waste. Finally, we only consider a section of the full plastic debris size spectrum as particles smaller than the mesh size of the sampling nets were not accounted for and debris larger than the aperture size of the trawl devices are under-represented. For these reasons our estimate should be considered conservative. Nonetheless, for comparison purposes, we applied our model to calculate the contribution of coastal populations (that is, living within 50 km from the coastline) and obtained a global contribution from coastal population of 356,000–893,000 tonnes per year. This suggests that at least 2.8–18.6% of the coastal plastic emissions occur via river transport. Furthermore, our findings indicate that an additional plastic input of at least 0.79–1.52 million tonnes per year reaches oceans from inland areas via rivers.
+
+It should be stressed that there is a great level of uncertainty related to both measurements and models of plastic transport in riverine systems. Plastic sources, deposition and degradation processes are poorly understood, and may play an important role in the size and spatial distributions of plastic in freshwater ecosystems31. For instance, when taking into account the uncertainties related to the extrapolations we made in the field observation dataset, our global input prediction doubled from lower to upper estimates (Supplementary Table 1). Furthermore, a major assumption of our model is that artificial barriers such as dams act as sinks for all plastic particles. This is a conservative assumption since sediment trap efficiency of reservoirs may vary upon several factors32.
+
+There is a need for more extensive monitoring of freshwater contamination by plastic pollution with systematic samplings in sediment and surface waters of rivers throughout the year to better understand seasonality of inputs. Methodologies and reported units should be better standardized, as these vary widely across assessments. Furthermore, plastics should not be regarded as a generic material but must be classified into classes (for example, polymer types, debris sizes). Defining better standards for monitoring plastic pollution in freshwater ecosystems would allow more robust comparisons across catchments and higher levels of sophistication of numerical models at global scale. Long-term monitoring would improve the definition of the sampled debris size spectrum. Studies should aim at providing mass estimates and not only focus on reporting numbers of particles per units of volume (or surface area). Reporting weight is critical to assess conservative budget assessment and compare estimates against global plastic production statistics. Finally, depending on precipitation patterns, soil characteristics25 and river hydrodynamics31, micro- and macro-plastic retention, as well as vertical distribution may vary significantly along rivers. Similarly, to open ocean waters where empirical models using sea surface wind velocities, sea state and particles properties have been proposed33,34,35, an approach predicting plastic loads in the water column of rivers as a function of its physical and geological characteristics would be beneficial to account for suspended particles and refine our estimates.
+
+Here we provide a geographical and seasonal distribution of plastic inputs from rivers into the ocean at global scale. Both our methodology and model predictions can be refined once more, data are made available. While population density and waste management data demonstrate a good correlation with results from observational river studies, freshwater plastic contamination can occur from different sources. For example, micro-plastics retained in waste water treatment plants can be reintroduced in the environment with application of sewage sludge on agricultural lands36. As such, our model could include multiple source scenarios such as land use characteristics and economic activities to account for the inputs from the industrial and agricultural sectors, land transportation, construction, tourism, fisheries and aquaculture industries. The modelling of local sinks for plastics on rivers could also be refined with the integration of river morphologies and local hydrodynamics (for example, sedimentation, remobilization), as well as the presence of natural (for example, mangrove) and artificial (for example, river groynes or waste water treatment plants) features. Our results are made available in Figshare37 in an attempt to assist researchers and policy makers with selecting locations for future monitoring and mitigation efforts.
+
+
+## Methods
+
+
+
+## Model approach
+
+
+Our global model computes plastic load inputs from 40,760 watersheds worldwide21 into the ocean using geospatial data on population density18,19 and MPW production per inhabitant and per day in 182 individual countries5,20. Waste is considered mismanaged when it is littered or inadequately disposed. MPW corresponds to the fraction of plastic found in mismanaged waste material on land. This definition was applied in a previous estimate of global plastic waste inputs into the ocean from coastal population worldwide5. MPW production rates are integrated inside catchments. The resulting mass is accumulated following natural drainage patterns derived from local topography, and taking into account the presence of artificial barriers (for example, dams and weirs) acting as sinks. The seasonality of inputs at the outfall location is derived from monthly average catchment runoff. An empirical relation using integrated MPW mass production upstream of river mouths and seasonal runoff is formulated and calibrated using a set of field observations (Fig. 4).
+
+
+## Model framework.
+
+
+Plastic mass production per river catchment (Mmpw; n=40,760 rivers) is computed from data on MPW production rates per country, population density, topographic elevation and location of artificial barriers. Seasonality of inputs is derived from monthly averaged runoff (R). A parametric equation with parameters k and a is used to fit model predictions (Mout) against results from observational studies. For our mid-point estimate, best fit was found for k=1.85 10−3 and a=1.52 (r2=0.93, n=30).
+
+
+## Model formulation
+
+
+To estimate daily plastic mass input from individual watersheds, we used the following parametric equation:
+
+where Mout is the plastic mass release at the outflow in kilogram per day, Mmpw, the mass of MPW produced inside the catchment downstream of artificial barriers and R, monthly averaged catchment runoff. k and a are the regression parameters. We find a strong coefficient of determination (r2=0.93) for k=1.85 10–3 and a=1.52 (midpoint estimate, Fig. 2) using n=30 records from 13 different rivers, where data on plastic contamination in surface waters were reported in the literature.
+
+We considered only peer-reviewed studies that provided reliable estimates of plastic concentrations (number and/or mass of plastic particles per volume and/or area of river water) using surface net devices. For plastic concentrations reported in number of particles per unit area of river surface, we used the depth of the trawling devices to convert reported surface areas (km2) into volume of water sampled (m3). The bibliographic review and selection criteria described above led to the consideration of seven studies in our model calibration exercise. These studies reported river plastic concentrations in 13 rivers, at 30 sampling events that occurred in different time periods (Table 2). Our approach is conservative because we neglected the contribution of buoyant plastic that may occur below the sampled depth due to water turbulence13. Furthermore, this approach does not account for the contribution of non-buoyant plastics that, once introduced in rivers, may slowly make its way to the oceans due to turbulent transport, accumulating in deep sea river canyons38. Around 48% of the plastic produced yearly is made of polymers lighter than seawater (Polyethylene and Polypropylene;1), this number is likely higher due to existence of objects made of polymers heavier than seawater that can float due to air entrapment (for example, PET bottles and foamed Polystyrene).
+
+Not all studies considered here reported micro- and macro-plastic concentrations at surface waters of rivers. As such, for our midpoint estimate, we homogenized our data set using the mean ratio micro- to macro-plastic numerical concentration from studies reporting both types (mean ratio equals to 0.04). For comparison, a study compiling thousands of samples at sea found a relatively similar mean ratio of 0.07 (ref. 29). When only numerical concentrations were reported, we estimated the mass concentrations using the average mass of micro- and macro-plastic particles sampled at sea: 0.003 and 0.17 g, respectively29. The results of the standardization exercise are presented in Table 3.
+
+We acknowledge however, that the extrapolations described above are a limitation of the calibration exercise presented here, as the average mass of river plastic particles, as well as the ratio between micro- and macro-plastic concentrations may vary across catchments due to local differences in in-situ fragmentation rates, plastic transport processes and levels of primary micro-plastic emissions (for example, pre-production pellets, microbeads from cosmetics and hygienic products, laundry powders, paint and coating flakes). A sensitivity analysis was conducted by varying the mean ratio micro- to macro-plastic numerical concentration (range: 0.01–0.12) and the average mass of particles (range: 0.002–0.004 g and 0.04–0.33 g for micro- and macro-plastic, respectively) using range values found at sea29. We determined an upper and lower input estimate using equation (1) with respectively k=1.07 10–3, a=1.61 (r2=0.93, n=30) and k=4.46 10−3, a=1.42 (r2=0.91, n=30). Further details on the sensitivity analysis are provided in Supplementary Table 1.
+
+
+## Correction for surface waters
+
+
+Some studies8,9 directly provide an estimate of daily or yearly plastic mass input rate. For the other studies, we computed the daily releases of plastic from rivers into the ocean by multiplying the estimated mass concentrations from observations by the volume of water flowing at the surface layer per day. For each river, the surface layer thickness was taken at the sampling depth reported by the study, therefore the contribution of any particles suspended below the sampled depth was neglected. We derived the surface layer flow from the river depth and the total monthly averaged discharge predicted by our hydrological model using the month corresponding to the surveyed time period. When the river depth was not reported by the study, we used the following relationship in equation (2) between channel form and discharge39:
+
+where Q is the river discharge, D is the river depth, c and f are parameters. A good coefficient of determination (r2=0.75) was found for c=0.349 and f=0.341, when comparing discharge and bed form of 674 rivers in Canada and USA40. When studies reported surveys directly from estuaries, the depth was estimated using nautical charts.
+
+
+## Estimating MPW mass in catchments worldwide
+
+
+We combined data on waste generation in kilograms per inhabitant and per day for 182 individual countries5,20 with gridded population densities in inhabitants per km2 (refs 18, 19) to estimate inland MPW production rates per year. An exception was made for Sri Lanka, where we replaced the World Bank statistics with values reported in more detailed regional assessments41,42. We computed a global ¼ degree resolution grid of estimated mass of MPW generation on land in tonnes per year. In this model, we assumed that inland plastic is accumulated by following natural drainage patterns, derived from the space borne elevation data22. The global landmass surface area was divided in river catchments from the U.S. Geological Survey Agency that are used by the Global Land Data Assimilation System (GLDAS, ref. 21). We used the flow accumulation toolset from ESRI's ArcGIS software to compute the total mass of inland MPW upstream of the outflow location. The outflow is the most downstream position in a river catchment and determines the input source point into the ocean. Input from catchments with an outflow not connected to the ocean (for example, specifically arid inland areas) were discarded. The model takes into account the presence of artificial barriers and treats them as accumulation sinks, where plastic at the surface is intercepted. As a result, the predicted plastic concentration at the river mouth is representative of the accumulation of inland MPW (in tonnes per year) in the catchment area downstream of artificial dams.
+
+The consideration of dams in our numerical model was motivated by a better correlation found with measurements (Table 4) than when including MPW production rates upstream of dams. Artificial barriers in rivers may retain 65% of the global input into freshwater, as we calculated an annual 2.13–4.46 million tonnes of plastic introduced upstream of dams that are not accounted as input into the oceans by our model. These results were calculated using the parametric equation determined when considering MPW downstream of dams as model proxy. Including MPW production upstream of dams, when assessing the linear regression would result in different model parameters k and a in equation (1). While determining regression coefficients based on MPW quantities upstream of dams, our model predicted a global input of 0.76–1.55 million tonnes per year (midpoint at 0.91 million tonnes per year) which remains in the same order of magnitude than the initial scenario. The decrease in predicted global input from the current model may be explained by the number of dams present in the large rivers covered by the observational studies. In the Yangtze River and Danube River catchments particularly, respectively 68% and 78% of MPW production occurs upstream of a dam. Therefore, relative MPW mass have less weight on the overall prediction result which ultimately leads in a decrease of our global estimate.
+
+
+## Pearson's product moment correlations of total mass concentration measurements with watershed characteristics.
+
+
+Mismanaged plastic waste production inside a catchment (Mmpw) is expressed in t yr−1 (with and without the consideration of dams), monthly averaged and yearly averaged catchment runoff (Rmonth
+and Ryear) in mm d−1. Correlation coefficients (r) are positive for all characteristics. Pairs with P values below 0.05 are statistically significant (shown in bold). Weight concentrations (n=30) demonstrated an excellent correlation with Mmpw with r coefficient near 1 and P values near 0, however this result may be biased by the inclusion of measurements from the Yangtze River which may be seen as an outlier with at least three orders of magnitudes difference with the rest of reported concentrations. When removing outliers, the best correlation is found with the product of monthly averaged catchment runoff Rmonth and Mmpw downstream of dams (statistically significant positive correlation, n=29, r=0.4132 and P=0.026 <0.05).
+
+Dam locations were derived from the United Nation Food and Agriculture Organization's AquaStat dam database23, consisting of 8,800 dams worldwide with a minimum height of 15 m or a reservoir capacity of >3 million m3. The Global Rivers and Dam Database (GRanD database; ref. 24) was used for South America as the AquaStat database was incomplete for this continent. The catchments containing the largest number of dams were the basins of the Mississippi River (718 dams), Yangtze River (342 dams) and Danube River (184 dams). As the analysis is based on natural drainage patterns, the model limitations are that man-made channels are not taken into account and that plastic load accumulates in the main arms of rivers at deltas, introducing uncertainties at local scales. These limitations however do not affect the global inputs estimate. An example for the island of Java in Indonesia illustrating the different datasets involved in this framework is provided in Fig. 5.
+
+
+## Modelled data flow illustration for Western Java, Indonesia.
+
+
+(a) Estimated MPW production rates in t yr−1. (b) Accumulated MPW production in rivers and location of artificial barriers. (c) Predicted plastic mass input into the ocean at river mouths in t d−1.
+
+
+## Estimating monthly averaged catchment runoff
+
+
+In our model, surface runoff is included as a model parameter to account for (1) the introduction of MPW in riverine system during episodes of heavy rainfall10 and (2) the remobilization of deposited plastic particles during flood events31. Monthly averaged catchment runoff in millimetres per day was calculated using GLDAS driving the NOAH Land Surface Model21. This land surface modelling system integrates data from advanced ground and space-based observation systems. The model contains land surface parameters for vegetation, soil, elevation and slope. The forcing data in the model are near-real-time satellite-derived precipitation and evaporation data (wind, radiation, temperature, humidity and surface pressure). The model computes the daily surface and subsurface runoff globally on ¼ degree resolution, by solving terrestrial water and energy budgets21. Subsurface runoff consists of water that infiltrates into the soil and flows to a water body by groundwater flow. Surface runoff occurs either when the rainfall exceeds the infiltration capacity of the soil or when the soil is saturated with groundwater. Monthly and yearly averages are calculated over the period 2005–2015. The surface and subsurface runoff are summed and subsequently averaged per catchment area22. A better correlation was found with estimated flux inputs from observational studies when considering monthly averaged runoff instead of the yearly average (Table 4). Therefore, monthly averaged catchment runoff corresponding to sampling event month was considered while calibrating our model to account for temporal variations and seasonality of inputs.
+
+The main motivation behind using runoff data from GLDAS is the provision of land surface processes including runoff estimates at a global level. Nonetheless, it is important to notice that comparisons between river discharge predictions from GLDAS and observations in 66 basins worldwide43 demonstrated that predictions are somewhat dryer than observations. The authors of this validation study attributed the differences to uncertainties in precipitation rates. As our framework relies on intra-annual variability, the NOAH land surface model predictions, forced with GLDAS, were still in good agreement with seasonal variations measurements with a predicted date of maximum discharge within 20 days of observed annual discharge peak date for most rivers covered in the GLDAS validation study.
+
+
+## Data availability
+
+
+The authors declare that the main data supporting the findings of this study are available within the article and its Supplementary Information. Global model inputs and outputs for lower, midpoint and upper estimates and for the 40,760 catchments considered in this study have been deposited in geospatial vector data format for geographic information system (GIS) software on figshare with the identifier doi:10.6084/m9.figshare.4725541.
+
+
+## Additional information
+
+
+How to cite this article: Lebreton, L. C. M. et al. River plastic emissions to the world's oceans. Nat. Commun.
+8, 15611 doi: 10.1038/ncomms15611 (2017).
+
+Publisher's note: Springer Nature remains neutral with regard to jurisdictional claims in published maps and institutional affiliations.
+
+
+## Supplementary Material
+
+
+
+## Supplementary Information
+
+
+Supplementary Table and Supplementary References
+
+
+## Peer Review File
+
+
+
+## Acknowledgments
+
+
+We would like to thank The Ocean Cleanup Foundation supporters who made the realization of this study possible. We would also like to thank three anonymous reviewers for their valuable inputs and comments on this manuscript.
+
+
+## Footnotes
+
+
+The authors declare no competing financial interests.
+
+Author contributions L.C.M.L, J.v.d.Z., J.R. and B.S. designed the study, L.C.M.L. and A.A. conducted the bibliographic review, L.C.M.L., J.v.d.Z. and J.W.D. developed the model, L.C.M.L, J.v.d.Z. and J.R. wrote the manuscript, L.C.M.L and J.v.d.Z prepared the figures. All authors reviewed the manuscript.
+
+
+## References
+
+
+
+## Associated Data
+
+
+
+## Supplementary Materials
+
+
+
+## Supplementary Information
+
+
+Supplementary Table and Supplementary References
+
+
+## Peer Review File
+
+
+
+## Data Availability Statement
+
+
+The authors declare that the main data supporting the findings of this study are available within the article and its Supplementary Information. Global model inputs and outputs for lower, midpoint and upper estimates and for the 40,760 catchments considered in this study have been deposited in geospatial vector data format for geographic information system (GIS) software on figshare with the identifier doi:10.6084/m9.figshare.4725541.

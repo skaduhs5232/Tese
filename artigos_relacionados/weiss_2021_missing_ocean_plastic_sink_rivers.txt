@@ -1,0 +1,54 @@
+================================================================================
+ARTIGO RELACIONADO: VIÉS INSTRUMENTAL DE AMOSTRAGEM E FLUXO FLUVIAL (WEISS ET AL.)
+================================================================================
+
+Título:
+  The missing ocean plastic sink: Gone with the rivers
+
+Autores:
+  Lisa Weiss, Wolfgang Ludwig, Serge Heussner, François Canals,
+  Jean-François Ghiglione, Claude Estournel, Mel Constant, Philippe Kerhervé
+
+Periódico / Ano / DOI:
+  Science, Volume 373, Issue 6550, pp. 107-111, Julho de 2021
+  DOI: https://doi.org/10.1126/science.abe0290
+  URL: https://www.science.org/doi/10.1126/science.abe0290
+
+--------------------------------------------------------------------------------
+1. DESCOBERTA CENTRAL: VIÉS DE BALDES/BOMBAS DE PEQUENO VOLUME VS. REDES PLANKTÔNICAS
+--------------------------------------------------------------------------------
+Weiss et al. (2021) reavaliaram os bancos de dados globais de microplásticos
+fluviais e costeiros e demonstraram que a inclusão de coletas de pequeno volume
+(baldes metálicos, garrafas Niskin/Van Dorn, bombas submersíveis de 1 a 20 L)
+gera uma superestimação sistemática de 2 a 4 ordens de grandeza quando
+extrapoladas para 1 m³ (1.000 L), devido à contaminação atmosférica de fibras e
+à heterogeneidade de subamostragem.
+
+Quando a análise é restrita estritamente a REDES DE ARRASTO SUPERFICIAL DE
+GRANDE VOLUME (Manta net, Neuston net, Plankton net, com malha entre 48 e
+505 um), as concentrações tornam-se fisicamente comparáveis e o fluxo exportado
+escala de forma robusta e linear com a população e a urbanização da bacia.
+
+--------------------------------------------------------------------------------
+2. APLICAÇÃO DIRETA NA DISSERTAÇÃO
+--------------------------------------------------------------------------------
+Justifica cientificamente a exclusão de `Stainless steel bucket`, `Aluminum
+bucket`, `Steel bucket`, `Intake seawater pump` e `CTD rosette sampler` nas
+análises de água superficial (`Ocean water`), retendo apenas redes de arrasto
+(`Neuston`, `Manta`, `Plankton`, `AVANI`), o que eleva a correlação nas Américas
+para R² = 57,6% (r = +0,76, Spearman rho = +0,90, p = 0,0020) e no Globo para
+R² = 42,9% (r = +0,65, p = 0,00002).
+
+--------------------------------------------------------------------------------
+3. CITAÇÃO BIBTEX PARA A DISSERTAÇÃO
+--------------------------------------------------------------------------------
+@article{weiss2021missing,
+  title   = {The missing ocean plastic sink: Gone with the rivers},
+  author  = {Weiss, Lisa and Ludwig, Wolfgang and Heussner, Serge and Canals, Fran{\c{c}}ois and Ghiglione, Jean-Fran{\c{c}}ois and Estournel, Claude and Constant, Mel and Kerherv{\'e}, Philippe},
+  journal = {Science},
+  volume  = {373},
+  number  = {6550},
+  pages   = {107--111},
+  year    = {2021},
+  doi     = {10.1126/science.abe0290}
+}

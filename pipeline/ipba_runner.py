@@ -282,6 +282,48 @@ def run_ipba(
     return basin_grid
 
 
+def spherical_triangle_row_areas(
+    lats_center_deg: np.ndarray,
+    dlat_deg: float,
+    dlon_deg: float,
+    R: float = EARTH_RADIUS_KM,
+) -> np.ndarray:
+    """
+    Calcula a área exata de cada sítio (pixel) em km² pela composição de dois
+    triângulos esféricos (Oliveira et al., 2019, Sci. Rep. 9:9845, Equações 3 e 4).
+
+    Para cada linha centrada em `lats_center_deg` com passo latitudinal `dlat_deg`
+    e passo longitudinal `dlon_deg`:
+      - As arestas geodésicas (grande círculo) a, b, c são obtidas via fórmula de Haversine (Eq. 4).
+      - A área de cada um dos dois triângulos esféricos que compõem o sítio é obtida
+        pelo Teorema de L'Huilier (Todhunter, 1863; Eq. 3):
+        A = 4 * R² * arctan(sqrt(tan(s/2) * tan(s_a/2) * tan(s_b/2) * tan(s_c/2))).
+    """
+    lat1 = np.radians(lats_center_deg - 0.5 * abs(dlat_deg))
+    lat2 = np.radians(lats_center_deg + 0.5 * abs(dlat_deg))
+    dlon = float(np.radians(abs(dlon_deg)))
+
+    def _haversine_unit(phi_i: np.ndarray, phi_j: np.ndarray, dlambda: float) -> np.ndarray:
+        dphi = phi_j - phi_i
+        h = np.sin(0.5 * dphi) ** 2 + np.cos(phi_i) * np.cos(phi_j) * (np.sin(0.5 * dlambda) ** 2)
+        return 2.0 * np.arcsin(np.sqrt(np.clip(h, 0.0, 1.0)))
+
+    def _lhuilier_area(a_u: np.ndarray, b_u: np.ndarray, c_u: np.ndarray) -> np.ndarray:
+        s = 0.5 * (a_u + b_u + c_u)
+        sa = np.maximum(0.0, s - a_u)
+        sb = np.maximum(0.0, s - b_u)
+        sc = np.maximum(0.0, s - c_u)
+        prod = np.tan(0.5 * s) * np.tan(0.5 * sa) * np.tan(0.5 * sb) * np.tan(0.5 * sc)
+        return 4.0 * (R ** 2) * np.arctan(np.sqrt(np.maximum(0.0, prod)))
+
+    edge_south = _haversine_unit(lat1, lat1, dlon)
+    edge_north = _haversine_unit(lat2, lat2, dlon)
+    edge_merid = _haversine_unit(lat1, lat2, 0.0)
+    edge_diag = _haversine_unit(lat1, lat2, dlon)
+
+    return _lhuilier_area(edge_south, edge_merid, edge_diag) + _lhuilier_area(edge_north, edge_merid, edge_diag)
+
+
 def filter_basins_by_area(
     basin_grid: np.ndarray,
     sinks_df: pd.DataFrame,
@@ -289,7 +331,8 @@ def filter_basins_by_area(
     cumulative_area_threshold: float = 0.95,
 ) -> tuple[np.ndarray, pd.DataFrame, pd.DataFrame]:
     """
-    Calcula as áreas das bacias hidrográficas considerando a distorção esférica da latitude,
+    Calcula as áreas das bacias hidrográficas pela composição de dois triângulos
+    esféricos (Teorema de L'Huilier + Haversine, Oliveira et al., 2019),
     ordena por tamanho e retém apenas as maiores bacias que somam `cumulative_area_threshold`
     (ex.: 90% ou 95%) da área terrestre acumulada.
 
@@ -299,13 +342,11 @@ def filter_basins_by_area(
       - retained_sinks_df: tabela de sinks correspondentes às bacias retidas
     """
     nrows, ncols = basin_grid.shape
-    dlon_rad = np.radians(gt[1])
-    dlat_rad = np.radians(abs(gt[5]))
     row_indices = np.arange(nrows)
     lats = gt[3] + (row_indices + 0.5) * gt[5]
 
-    # Área exata do pixel esférico em km²: R² * cos(lat) * dlon * dlat
-    pixel_area_1d = (EARTH_RADIUS_KM**2) * np.cos(np.radians(lats)) * dlon_rad * dlat_rad
+    # Área exata do sítio em km² via composição de dois triângulos esféricos (L'Huilier + Haversine)
+    pixel_area_1d = spherical_triangle_row_areas(lats, abs(gt[5]), gt[1], R=EARTH_RADIUS_KM)
     pixel_area_grid = np.broadcast_to(pixel_area_1d[:, None], (nrows, ncols))
 
     land_mask = basin_grid > 0

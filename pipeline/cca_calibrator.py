@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,6 +26,8 @@ import pandas as pd
 from matplotlib.colors import Normalize
 from osgeo import gdal
 from scipy import stats
+
+from .ipba_runner import EARTH_RADIUS_KM, spherical_triangle_row_areas
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXTERNAL_CCA_DIR = REPO_ROOT / "externos" / "CCA" / "cca"
@@ -46,8 +48,6 @@ from geracao_graficos.estilo_erneson import (
     scatter_vazado,
 )
 
-EARTH_RADIUS_KM = 6378.137
-
 
 def crop_gpw(
     bbox: tuple[float, float, float, float],
@@ -55,7 +55,8 @@ def crop_gpw(
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, tuple[float, float, float, float, float, float], dict[str, Any]]:
     """
     Recorta o raster GPW v4 para a bounding box especificada e calcula
-    a área geodésica exata de cada pixel em km².
+    a área esférica exata de cada pixel em km² pela composição de dois
+    triângulos esféricos (Teorema de L'Huilier + Haversine, Oliveira et al., 2019).
 
     bbox: (lon_min, lat_min, lon_max, lat_max)
     Retorna: (pop, pixel_area, lats_1d, lons_1d, geotransform, metadata)
@@ -89,10 +90,8 @@ def crop_gpw(
     lons_1d = new_gt[0] + (np.arange(x_size) + 0.5) * new_gt[1]
     lats_1d = new_gt[3] + (np.arange(y_size) + 0.5) * new_gt[5]
 
-    # Área exata do pixel em km² considerando distorção esférica: R² * cos(lat) * dlon * dlat
-    dlon_rad = np.radians(new_gt[1])
-    dlat_rad = np.radians(abs(new_gt[5]))
-    area_1d = (EARTH_RADIUS_KM**2) * np.cos(np.radians(lats_1d)) * dlon_rad * dlat_rad
+    # Área exata do sítio em km² via composição de dois triângulos esféricos (L'Huilier + Haversine)
+    area_1d = spherical_triangle_row_areas(lats_1d, abs(new_gt[5]), new_gt[1], R=EARTH_RADIUS_KM)
     pixel_area = np.broadcast_to(area_1d[:, None], (y_size, x_size))
 
     meta = {
@@ -325,7 +324,7 @@ def plot_zipf_calibration(
     ax_a.contour(matrix_alpha, levels=[1.0], colors="black", linewidths=1.2, origin="lower")
     colorbar_direita(fig, ax_a, im_a, r"Zipf exponent $\alpha$")
     ax_a.set_xticks(np.arange(len(l_values)))
-    ax_a.set_xticklabels([f"{int(x)}" for x in l_values])
+    ax_a.set_xticklabels([f"{x:g}" for x in l_values])
     ax_a.set_yticks(np.arange(len(d_values)))
     ax_a.set_yticklabels([f"{int(y)}" for y in d_values])
     ax_a.set_xlabel(r"Cluster distance cutoff $\ell$ (km)")
@@ -343,7 +342,7 @@ def plot_zipf_calibration(
     )
     colorbar_direita(fig, ax_b, im_b, r"Coefficient of determination $R^2$")
     ax_b.set_xticks(np.arange(len(l_values)))
-    ax_b.set_xticklabels([f"{int(x)}" for x in l_values])
+    ax_b.set_xticklabels([f"{x:g}" for x in l_values])
     ax_b.set_yticks(np.arange(len(d_values)))
     ax_b.set_yticklabels([f"{int(y)}" for y in d_values])
     ax_b.set_xlabel(r"Cluster distance cutoff $\ell$ (km)")
@@ -369,7 +368,7 @@ def plot_zipf_calibration(
     rotulo_canto(ax_c, region_name, canto="upper right", bbox=False)
     anotar_expoente(
         ax_c,
-        f"$\\alpha = {abs(ols_res['slope']):.2f} \\pm {ols_res['stderr']:.2f}$\n$R^2 = {ols_res['r2']:.2f}$\n$D^* = {int(opt_d)}$ hab/km$^2$\n$\\ell = {int(opt_l)}$ km",
+        f"$\\alpha = {abs(ols_res['slope']):.2f} \\pm {ols_res['stderr']:.2f}$\n$R^2 = {ols_res['r2']:.2f}$\n$D^* = {int(opt_d)}$ inhab./km$^2$\n$\\ell = {opt_l:g}$ km",
         canto="lower left",
     )
 

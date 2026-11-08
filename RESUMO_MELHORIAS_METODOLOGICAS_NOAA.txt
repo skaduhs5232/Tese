@@ -1,0 +1,64 @@
+================================================================================
+RESUMO EXECUTIVO: MELHORIAS METODOLÓGICAS E FÍSICAS NA BASE NOAA (MICROPLÁSTICOS)
+================================================================================
+
+1. ESCLARECIMENTO ESTATÍSTICO (p-valor e R²)
+   - p-valor baixo (p < 0,05): Indica que a correlação NÃO veio ao acaso (> 95%
+     a 99,999% de certeza estatística). Apenas p-valor alto (ex.: p = 0,64 nos
+     Nurdles) indica acaso.
+   - R² vs. r de Pearson: O R² é o quadrado da correlação (R² = r²). Em ciências
+     ambientais de campo aberto, r entre 0,50 e 0,90 (R² entre 25% e 80%) é
+     considerado correlação forte a muito forte.
+
+2. DIAGNÓSTICO DO DADO NOAA NCEI (CAUSAS DO RUÍDO ANTERIOR)
+   - Mistura de Matrizes Físicas sob a mesma unidade ('pieces/m3'):
+     * 'Beach' mede partículas por m³ de AREIA escavada (~2.300 a 44.000 pieces/m³).
+     * 'Ocean water' mede partículas por m³ de ÁGUA filtrada (~0,02 a 0,45 pieces/m³).
+     * Misturar areia e água criava um salto artificial de 20.000x (4,3 ordens
+       de grandeza) no eixo vertical (Nyadjro et al., 2023).
+   - Viés de Pequeno Volume em Água (Baldes e Bombas vs. Redes):
+     * Amostras de balde/bomba (5 a 20 L) extrapoladas para 1 m³ superestimam a
+       concentração em 100x a 1.000x frente às redes oceanográficas Manta/Neuston
+       (Weiss et al., 2021, Science).
+   - Diferença de Abertura de Malha (0,02 mm a 5,0 mm):
+     * A abundância de microplásticos segue lei de potência n(L) ~ L^(-alpha);
+       malhas finas retêm exponencialmente mais partículas (Kooi & Koelmans, 2019).
+   - Diluição Hidrológica da Concentração (C) pela Vazão da Bacia (Q ~ A_bacia):
+     * A população (P) governa o FLUXO TOTAL exportado (F = C * A_bacia), enquanto
+       a concentração bruta (C = F / Q) sofre diluição pelo volume de água da
+       bacia (Lebreton et al., 2017, Nature Communications).
+
+3. MELHORIAS IMPLEMENTADAS NO PIPELINE E NOS 3 NOTEBOOKS
+   - Separação estrita de compartimentos ('Ocean water' com redes superficiais
+     Manta/Neuston/Plankton, 'Beach' e 'Ocean sediment') e exclusão de baldes/bombas.
+   - Alinhamento de malha e matriz por Lei de Potência (Kooi & Koelmans, 2019)
+     para a referência oceanográfica de 0,333 mm.
+   - Modelagem do Fluxo Hidrológico Costeiro de Microplásticos (F_MP = C * A_bacia),
+     utilizando a área esférica exata da bacia via Triângulos Esféricos (L'Huilier).
+
+4. GANHOS OBTIDOS NAS MÉTRICAS DE CORRELAÇÃO
+   - Recorte Regional EUA-Panamá (Notebook 01 - Figura F10):
+     * Concentração em Bacias Urbanas (N = 14, sem baldes): beta = +1,06 +/- 0,55,
+       R² = 23,4%, r = +0,48 (chegando a R² = 26,6%, p = 0,049 na carga acumulada).
+     * Fluxo Hidrológico (F = C * A_bacia): beta = +1,55 +/- 0,60, R² = 36,2% a 38,3%,
+       r = +0,60 a +0,62 (p = 0,0131 a 0,0227), Spearman rho = +0,56 a +0,57 (p < 0,04).
+   - Recorte Pan-Americano / Américas (Notebook 03 - Figuras F12 e F13):
+     * Bacias Urbanas CCA (Concentração, R <= 15 km, N = 19): beta = +1,01 +/- 0,43,
+       R² = 24,7%, r = +0,50 (p = 0,0303).
+     * Bacias Urbanas CCA (Fluxo F = C * A_bacia, R <= 15 km, N = 17):
+       beta = +1,54 +/- 0,49, R² = 39,5%, r = +0,63 (p = 0,0068), rho = +0,59 (p = 0,0134).
+     * Redes Superficiais nas Américas (0,048 a 0,505 mm, N = 8):
+       beta = +1,11 +/- 0,39, R² = 57,6%, r = +0,76 (p = 0,0290), rho = +0,90 (p = 0,0020).
+   - Escala Global nos 5 Continentes (Notebook 02 - Figuras F11 e F14):
+     * Fluxo Global Alinhado (Kooi & Koelmans, N = 58 bacias):
+       beta = +0,79 +/- 0,15, R² = 34,0%, r = +0,58 (p < 0,00001), rho = +0,55.
+     * Fluxo Global em Redes Superficiais (Manta/Neuston, R <= 15 km, N = 35 bacias):
+       beta = +1,09 +/- 0,22 (~ 1,0), R² = 42,9%, r = +0,65 (p = 0,00002), rho = +0,64.
+     * Sedimento Marinho Estuarino (Integrador Temporal Bentônico, N = 9 bacias):
+       beta = +1,21 +/- 0,24, R² = 78,5%, r = +0,89 (p = 0,0015), rho = +0,85 (p = 0,0037).
+
+5. ARTIGOS ADICIONADOS EM `artigos_relacionados/`
+   - nyadjro_2023_noaa_ncei_microplastics_database.txt (e nyadjro_2023_fulltext.txt)
+   - kooi_koelmans_2019_power_law_mesh_alignment.txt (e koelmans_2020_fulltext.txt)
+   - lebreton_2017_river_plastic_emissions.txt (e lebreton_2017_fulltext.txt)
+   - weiss_2021_missing_ocean_plastic_sink_rivers.txt

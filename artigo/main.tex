@@ -1,0 +1,156 @@
+% =====================================================================
+%  A lei de Zipf nas manchas urbanas do Nordeste brasileiro (GPW v4 + CCA)
+%  Trabalho final — artigo científico (máximo de 3 páginas)
+%
+%  Compilação: pdflatex main -> bibtex main -> pdflatex main (2x)
+%  Figura: python gerar_graficos_artigo.py
+% =====================================================================
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage[top=1.75cm,bottom=1.75cm,left=1.70cm,right=1.70cm,columnsep=0.60cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{flushend}
+\usepackage{titlesec}
+\usepackage{icomma}
+\usepackage[colorlinks=true,allcolors=blue!70!black]{hyperref}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+% Espaçamentos compactos e elegantes para seções e parágrafos
+\titleformat{\section}{\large\bfseries}{\thesection}{0.6em}{}
+\titlespacing*{\section}{0pt}{0.85ex plus .15ex minus .1ex}{0.40ex plus .1ex}
+\newcommand{\rotuloparagrafo}[1]{#1.}
+\titleformat{\paragraph}[runin]{\normalfont\bfseries}{\theparagraph}{0em}{\rotuloparagrafo}
+\titlespacing*{\paragraph}{0pt}{0.40ex plus .1ex minus .1ex}{0.40em}
+
+\pagestyle{empty}
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\floatpagefraction}{0.75}
+
+\begin{document}
+
+% ---------------------------------------------------------------- cabeçalho e título
+\twocolumn[
+\begin{@twocolumnfalse}
+\begin{center}
+\IfFileExists{figs/unifor_logo.png}
+  {\includegraphics[height=1.15cm]{figs/unifor_logo.png}\par\vspace{0.10cm}}
+  {\fbox{\parbox{5.5cm}{\centering\footnotesize\color{red}[inserir \texttt{figs/unifor\_logo.png}]}}\par\vspace{0.10cm}}
+
+{\footnotesize\bfseries Universidade de Fortaleza (UNIFOR) \quad$\cdot$\quad Centro de Ciências Tecnológicas\\
+Programa de Pós-Graduação em Informática Aplicada (PPGIA)\par}
+
+\vspace{0.16cm}
+{\LARGE\bfseries A lei de Zipf nas manchas urbanas do Nordeste brasileiro\par}
+\vspace{0.10cm}
+{\large Cidades definidas pelo \emph{City Clustering Algorithm} sobre o GPW v4, comparadas aos municípios\par}
+\vspace{0.12cm}
+{\normalsize\textbf{Thiago de Oliveira Sampaio}\par}
+{\footnotesize Mestrado em Informática Aplicada, pesquisa de dissertação\par}
+\vspace{0.16cm}
+\end{center}
+
+\begin{quote}\small
+\noindent\textbf{Resumo.}
+A lei de Zipf estabelece que a população $S(r)$ da cidade de posto $r$ decai como $S(r)\propto r^{-\alpha}$, com $\alpha=1$. Testá-la com rigor exige definir os limites urbanos de forma contínua, sem depender de divisas político-administrativas arbitrárias. Neste trabalho, foi aplicado o \emph{City Clustering Algorithm} (CCA) à grade de contagem populacional do \emph{Gridded Population of the World} (GPW v4, rev.~11, ano-base 2020) em todo o Brasil. A densidade demográfica de cada célula é obtida dividindo sua população pela área geodésica exata na esfera terrestre, calculada pela composição de dois triângulos esféricos via Teorema de L'Huilier e fórmula de Haversine. Foi executada uma varredura de $15\,000$ pares $(D^{*},\ell)$, limiar de densidade $D^{*}$ e distância de conectividade $\ell$, calibrando o modelo pela aderência a Zipf ($\alpha \approx 1$) no topo da hierarquia urbana (estimador de Hill e regressão linear com $R^{2}_{\mathrm{OLS}}\geq 0{,}80$). No par ótimo nacional ($D^{*}=1\,450$\,hab/km$^{2}$, $\ell=1{,}8$\,km), as $4\,702$ manchas do país seguem Zipf com notável exatidão: $\hat{\alpha}_{100}=1{,}00$ ($R^{2}_{\mathrm{OLS}}=0{,}99$) no topo e $\alpha_{\mathrm{CSN}}=1{,}00\pm0{,}04$ na cauda ajustada por máxima verossimilhança ($p=0{,}47$). Em contrapartida, os $5\,570$ municípios do Censo 2022 rejeitam a hipótese de lei de potência ($p=0{,}045$). No Nordeste, sob a calibração nacional ($1\,729$ manchas), a cauda obedece a Zipf ($\alpha=0{,}92\pm0{,}05$, $p=0{,}45$), mas o topo rompe a hierarquia ($\hat{\alpha}_{50}=1{,}18$): as nove capitais estaduais concentram populações equiparáveis em um patamar policêntrico achatado. Evidencia-se que a lei de Zipf emerge na rede urbana nacional integrada, mas não se auto-organiza de forma isolada dentro dos subsistemas federativos.
+
+\vspace{0.06cm}
+\noindent\textbf{Palavras-chave:} lei de Zipf, \emph{City Clustering Algorithm} (CCA), GPW v4, triângulos esféricos (L'Huilier), Nordeste, redes urbanas.
+\end{quote}
+\vspace{0.14cm}
+\end{@twocolumnfalse}
+]
+
+% ---------------------------------------------------------------- problema
+\section{Qual é o problema?}
+
+Cidades reais não terminam nas placas de limite municipal. No Brasil, porém, os dados demográficos oficiais adotam o município como recorte básico, gerando duas distorções opostas. Por um lado, grandes metrópoles conurbadas, como a Região Metropolitana de Fortaleza e Recife, fragmentam-se em vários municípios muito próximos. De outro, municípios do interior somam uma pequena sede urbana a vastos territórios rurais. Assim, inferências estatísticas sobre o tamanho das cidades tornam-se reféns da divisão política adotada.
+
+A \textbf{lei de Zipf}~\cite{zipf1949} ilustra bem essa sensibilidade. Ordenando as cidades da maior ($r=1$) para a menor, a população $S(r)$ da cidade de posto (\emph{rank}) $r$ decai segundo:
+%
+\begin{equation}
+S(r) \;\propto\; r^{-\alpha}, \qquad \alpha = 1,
+\label{eq:zipf}
+\end{equation}
+%
+equivalendo a uma densidade de probabilidade $p(x)\propto x^{-\gamma}$ e a uma cauda complementar de Pareto $P(X\geq x)\propto x^{-\zeta}$, com $\zeta=\gamma-1=1/\alpha$. O expoente $\alpha=1$ ($\gamma=2$) caracteriza invariância de escala em redes complexas~\cite{newman2005}. Em municípios brasileiros, Moura Jr. e Ribeiro~\cite{moura2006} reportaram distorções atribuídas justamente às divisas legais.
+
+Para superar limites administrativos, Rozenfeld \emph{et al.}~\cite{rozenfeld2008,rozenfeld2011} propuseram o \emph{City Clustering Algorithm} (CCA), que delimita aglomerações diretamente sobre grades contínuas de densidade populacional. O método embasa análises alométricas de emissões de CO$_2$~\cite{oliveira2014}, mobilidade e criminalidade~\cite{caminha2017} e fronteiras globais de cidades~\cite{oliveira2018}. O CCA possui dois parâmetros livres: o limiar de densidade $D^{*}$ (que define células urbanas) e o comprimento de enlace $\ell$ (que agrupa células urbanas próximas). Fixá-los arbitrariamente compromete a generalidade das conclusões.
+
+Este artigo responde a três perguntas: \textbf{(i)} É possível calibrar $(D^{*},\ell)$ a partir dos próprios dados demográficos para que as manchas do Brasil sigam Zipf, e quão estável é esse ajuste? \textbf{(ii)} Sob a calibração nacional ou regional, o Nordeste reproduz a lei de Zipf? \textbf{(iii)} Que distorções surgem ao confrontar manchas morfológicas do CCA e municípios do Censo 2022?
+
+% ---- figura
+\begin{figure*}[t]
+\centering
+\IfFileExists{figs/zipf.pdf}
+  {\includegraphics[width=0.97\textwidth]{figs/zipf.pdf}}
+  {\includegraphics[width=0.97\textwidth]{figs/zipf.png}}
+\caption{\textbf{Manchas urbanas delimitadas pelo CCA e leis de escala no Brasil e no Nordeste.} \textbf{(a)} Centroides ponderados por população das $4\,702$ manchas urbanas do Brasil no par calibrado ($D^{*}=1\,450$\,hab/km$^{2}$, $\ell=1{,}8$\,km), em escala logarítmica \emph{plasma} e área proporcional à população; o quadro tracejado indica o recorte nordestino. \textbf{(b)} Recorte com as $1\,729$ manchas do Nordeste na mesma escala cromática, destacando as nove capitais estaduais ($1^{\circ}$ ao $9^{\circ}$ posto) e a maior cidade do interior ($10^{\circ}$ Feira de Santana). \textbf{(c)} Curva de posto e tamanho para o Brasil: manchas do CCA (círculos azuis), municípios do Censo 2022 (quadrados cinzas), lei de Zipf ($S_1/r$, tracejado preto) e ajuste de cauda de Clauset--Shalizi--Newman (CSN, linha contínua azul, $x\geq 28\,777$\,hab, $n=596$). \textbf{(d)} Curva de posto e tamanho para o Nordeste: cauda em lei de potência ($\alpha_{\mathrm{cauda}}=0{,}92\pm0{,}05$, $p=0{,}45$) e patamar policêntrico das nove capitais no topo (círculos âmbar, $\hat{\alpha}_{50}=1{,}18$).}
+\label{fig:zipf}
+\end{figure*}
+
+% ---------------------------------------------------------------- método
+\section{O que foi feito (Metodologia)}
+
+\paragraph{Dados em grade e malhas oficiais} Utilizamos o raster de contagem populacional do \emph{Gridded Population of the World} v4 (rev.~11, ano-base 2020)~\cite{gpw4}, disponibilizado pelo CIESIN/NASA em grade regular de $30''$ de arco ($\approx 0{,}93$\,km no equador). Os recortes do Brasil e das nove unidades federativas do Nordeste foram extraídos da API de malhas do IBGE~\cite{ibgemalhas}, somando $215{,}8$ milhões de habitantes no país e $59{,}5$ milhões no Nordeste no GPW v4. Para a comparação administrativa, utilizamos a população residente dos $5\,570$ municípios ($1\,794$ no Nordeste) do Censo Demográfico 2022~\cite{ibge2022}.
+
+\paragraph{Área por triângulos esféricos (L'Huilier)} Para eliminar distorções latitudinais ao longo do território nacional, a área exata $A_i$ de cada célula (sítio $i$) na esfera terrestre ($R = 6\,378{,}137$\,km) é calculada subdividindo o quadrilátero esférico do pixel em dois triângulos esféricos~\cite{oliveira2019}. Os lados geodésicos ($a, b, c$) são obtidos pela fórmula de Haversine e a área de cada triângulo esférico é dada pelo \textbf{Teorema de L'Huilier}~\cite{oliveira2019}:
+%
+\begin{equation}
+A_{\triangle} = 4R^{2}\arctan\sqrt{\tan\frac{s}{2}\,\tan\frac{s_a}{2}\,\tan\frac{s_b}{2}\,\tan\frac{s_c}{2}},
+\label{eq:lhuilier}
+\end{equation}
+%
+com $s=(a+b+c)/2$ e $s_k = s - k$. A densidade demográfica de cada célula é definida exatamente por $D_i = P_i / A_i$, onde $P_i$ é a população do pixel.
+
+\paragraph{Delimitação morfológica de cidades (CCA)} Pelo \emph{City Clustering Algorithm}~\cite{rozenfeld2008,oliveira2014,oliveira2018}, uma célula é ativada como urbana se $D_i > D^{*}$. Duas células urbanas pertencem à mesma mancha (\emph{cluster}) quando a distância ortodrômica de Haversine entre seus centroides é estritamente menor que $\ell$ ($d_{ij} < \ell$), propagando-se a conectividade de forma transitiva (percolação por queima ou \emph{burning}). A população de cada mancha é a soma conservativa de suas células ($S_k = \sum_{i\in k} P_i$) e sua posição é dada pelo centroide ponderado pela população. O CCA é executado sobre a malha contínua de todo o Brasil; uma mancha pertence ao Nordeste quando mais de $50\%$ de sua população situa-se na região, evitando que divisas estaduais cortem conurbações.
+
+\paragraph{Varredura paramétrica e calibração por Zipf} Seguindo o protocolo de calibração via lei de Zipf~\cite{oliveira2018}, varremos uma grade bidimensional de $15\,000$ pares: $D^{*} \in [10, 3\,000]$\,hab/km$^{2}$ (passo de $10$\,hab/km$^{2}$) e $\ell \in [0{,}1, 5{,}0]$\,km (passo de $0{,}1$\,km). Como as células ativas num limiar maior estão contidas nas de um limiar menor para $\ell$ fixo, ordenamos os pixels decrescentemente por densidade e atualizamos os aglomerados via estrutura \emph{union-find} com compressão de caminho~\cite{tarjan1975}, processando os 300 limiares de $D^{*}$ em uma única passagem por $\ell$.
+
+Para cada par $(D^{*},\ell)$, avaliamos a aderência do topo à lei de Zipf combinando: \textbf{(a)} regressão linear ordinária (OLS) na relação $\log_{10} S(r) = \log_{10} S_1 - \alpha_{\mathrm{OLS}}\log_{10} r$ para as $100$ maiores manchas ($R^{2}_{\mathrm{OLS}} \geq 0{,}80$); e \textbf{(b)} o estimador de máxima verossimilhança de Hill~\cite{hill1975}, $\hat{\alpha}_N = [\frac{1}{N-1}\sum_{i=1}^{N-1}\ln(S_i/S_N)]^{-1}$, nos recortes $N\in\{50, 100, 200\}$. Seleciona-se o par que minimiza o pior desvio $\Delta = \max_{N} |\hat{\alpha}_N - 1|$ sob a restrição geométrica $\ell \geq \ell_{\min} = 1{,}4$\,km (acima da diagonal de $\approx 1{,}31$\,km entre células vizinhas no equador, garantindo vizinhança-8). Avaliamos tanto o par nacional aplicado ao Nordeste quanto a calibração independente exclusiva da região.
+
+%\paragraph{Ajuste de cauda pesada} No par ótimo, ajustamos a cauda completa ($x \geq x_{\min}$) pelo método de Clauset, Shalizi e Newman (CSN)~\cite{clauset2009}, estimando $\gamma$ por máxima verossimilhança no limiar $x_{\min}$ que minimiza a estatística de Kolmogorov--Smirnov (KS). A significância é aferida via \emph{bootstrap} semi-paramétrico com $200$ réplicas sintéticas ($p > 0{,}10$ indica que a lei de potência \textbf{não é rejeitada}) e confrontada com modelos alternativos (lognormal, exponencial e truncada) pelo teste de razão de verossimilhança de Vuong~\cite{vuong1989,alstott2014}.
+
+% ---------------------------------------------------------------- resultados
+\section{Resultados e discussões}
+
+\paragraph{Brasil: Zipf nas manchas, rejeição nos municípios}
+A varredura revela uma ampla região compatível com Zipf: dos $11\,100$ pares com $\ell \geq 1{,}4$\,km, $5\,566$ apresentam $\Delta < 0{,}10$ ($D^{*}$ entre $90$ e $3\,000$\,hab/km$^{2}$). Pelas análises, par ótimo nacional é $D^{*} = 1\,450$\,hab/km$^{2}$ e $\ell = 1{,}8$\,km. As $4\,702$ manchas delimitadas no país (Fig.~\ref{fig:zipf}a) reúnem $151{,}0$ milhões de habitantes ($70{,}0\%$ da população nacional).
+
+Na curva nacional de posto e tamanho (Fig.~\ref{fig:zipf}c), o teste CSN confirma a distribuição livre de escala: para $x_{\min} = 28\,777$\,hab ($n=596$), obtém-se $\alpha_{\mathrm{CSN}} = 1{,}00 \pm 0{,}04$, com $\mathrm{KS} = 0{,}021 < 0{,}056$ e $p = 0{,}47$. A lei de potência supera amplamente a exponencial ($R = 4{,}54$, $p < 10^{-5}$) e é indistinguível da lognormal ($p = 0{,}99$) e da truncada ($p = 0{,}48$). As manchas de São Paulo ($20{,}0$\,M) e Rio de Janeiro ($8{,}9$\,M) exibem razão $0{,}45$, próxima do valor teórico $0{,}50$. Já os $5\,570$ municípios do Censo 2022 resultam em $\alpha = 0{,}91 \pm 0{,}02$ na cauda ($x_{\min}=22\,393$\,hab) com $p = 0{,}045 < 0{,}10$, o que \textbf{rejeita formalmente a lei de potência}, além de forte truncamento no topo ($\hat{\alpha}_{50} = 0{,}70$).
+
+\paragraph{Nordeste: cauda livre de escala e topo policêntrico}
+No par calibrado nacionalmente, o Nordeste contém $1\,729$ manchas urbanas ($35{,}5$ milhões de pessoas, $59{,}8\%$ da região, Fig.~\ref{fig:zipf}b). A cauda segue Zipf: o ajuste CSN identifica $x_{\min} = 10\,439$\,hab ($n=414$), resultando em $\alpha_{\mathrm{cauda}} = 0{,}92 \pm 0{,}05$ ($\mathrm{KS} = 0{,}026 < 0{,}067$, $p = 0{,}45$).
+
+O topo da hierarquia nordestina, contudo, rompe a lei de Zipf (Fig.~\ref{fig:zipf}d, círculos âmbar). As nove maiores manchas são exatamente as nove capitais estaduais: Recife ($3{,}47$\,M), Fortaleza ($3{,}35$\,M) e Salvador ($3{,}10$\,M) formam uma tríade metropolitana de populações quase iguais, seguidas por São Luís ($1{,}30$\,M), Natal ($1{,}23$\,M), Maceió ($1{,}07$\,M), João Pessoa ($1{,}05$\,M), Teresina ($0{,}98$\,M) e Aracaju ($0{,}83$\,M). Sob Zipf estrito ($S_1/r$), a segunda cidade deveria ter $1{,}74$\,M e a nona apenas $0{,}39$\,M (menos da metade de Aracaju). A maior cidade do interior, Feira de Santana ($0{,}53$\,M), surge apenas em $10^{\circ}$ lugar. Essa macrocefalia compartilhada pelas capitais gera um degrau no estimador de Hill ($\hat{\alpha}_{50} = 1{,}18$), que converge para a cauda quando inclui o interior ($\hat{\alpha}_{100} = 0{,}93$, $R^{2}_{\mathrm{OLS}} = 0{,}98$; $\hat{\alpha}_{200} = 0{,}95$). Calibrar $(D^{*},\ell)$ isoladamente para o Nordeste ($D^{*} = 110$\,hab/km$^{2}$, $\ell = 3{,}4$\,km) ainda mantém desvio $\Delta = 0{,}07$ e agrega $81\%$ da população regional ao absorver zonas rurais densas.
+
+\paragraph{Manchas morfológicas versus municípios}
+A diferença entre definições é decisiva nas metrópoles conurbadas. O município do Recife tem $1{,}49$ milhão de habitantes ($3^{\circ}$ do Nordeste, atrás de Fortaleza e Salvador), mas sua mancha contínua --- unindo Recife, Olinda, Jaboatão, Paulista e Camaragibe --- soma $3{,}47$ milhões, ocupando a $1^{\text{a}}$ posição regional. Na cauda, os $1\,794$ municípios nordestinos fornecem $\alpha = 0{,}74 \pm 0{,}03$, distorção causada pela soma de sedes pequenas com extensas zonas rurais.
+
+\paragraph{Limitações e conclusão}
+Registram-se duas limitações: \textbf{(i)} o GPW v4 (2020) projeta contagens baseadas no Censo 2010, gerando diferença absoluta frente ao Censo 2022, mas preservando a hierarquia espacial relativa; e \textbf{(ii)} a resolução de $30''$ impõe o corte físico $\ell_{\min} = 1{,}4$\,km. Em conclusão, delimitadas morfologicamente pelo CCA com área esférica exata (L'Huilier), as manchas urbanas do Brasil obedecem à lei de Zipf ($\alpha = 1{,}00 \pm 0{,}04$), enquanto os municípios a rejeitam. No Nordeste, a cauda urbana segue Zipf, mas o topo é regido por nove capitais de porte equivalente --- provando que a lei de Zipf é uma propriedade emergente do sistema nacional integrado, e não de suas sub-redes federativas isoladas.
+
+% ---------------------------------------------------------------- refs
+{
+\small
+\let\oldbibliography\thebibliography
+\renewcommand{\thebibliography}[1]{%
+  \oldbibliography{#1}%
+  \setlength{\itemsep}{0.4pt}%
+  \setlength{\parskip}{0pt}%
+  \footnotesize
+}
+\bibliographystyle{unsrt}
+\bibliography{referencias}
+}
+
+\end{document}
