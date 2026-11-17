@@ -14,6 +14,8 @@ via IPBA (Invasion Percolation-Based Algorithm) em conformidade com:
 
 from __future__ import annotations
 
+import random
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -23,69 +25,16 @@ import pandas as pd
 from osgeo import gdal
 from scipy.ndimage import binary_dilation
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+EXTERNAL_IPBA_DIR = REPO_ROOT / "externos" / "IPBA"
+if str(EXTERNAL_IPBA_DIR) not in sys.path:
+    sys.path.insert(0, str(EXTERNAL_IPBA_DIR))
+
+from drainage_basins import SetDrainageBasins  # Algoritmo oficial em externos/IPBA
+from heap import Heap  # Heap oficial em externos/IPBA
+from lattice import Lattice  # Lattice oficial em externos/IPBA
+
 EARTH_RADIUS_KM = 6378.137
-
-
-class IPBASite:
-    __slots__ = ("height", "sigma", "label", "parent", "status", "status1")
-
-    def __init__(self, height: float, rng_perturbation: float):
-        self.height = np.float32(height + rng_perturbation)
-        self.sigma = np.uint32(1)
-        self.label = np.uint32(0)
-        self.parent = np.uint32(0)
-        self.status = np.uint32(0)
-        self.status1 = np.uint8(0)
-
-
-class IPBAHeap:
-    def __init__(self, n: int):
-        self.n = n
-        self.m = 0
-        self.key = np.empty(self.n, dtype=np.float32)
-        self.item = np.empty(self.n, dtype=np.uint32)
-
-    def insert(self, key: float, item: int) -> None:
-        self.m += 1
-        i = self.m - 1
-        self.key[i] = key
-        self.item[i] = item
-
-        p = (i - 1) // 2
-        while i > 0 and self.key[p] > self.key[i]:
-            self.key[i], self.key[p] = self.key[p], self.key[i]
-            self.item[i], self.item[p] = self.item[p], self.item[i]
-            i = p
-            p = (i - 1) // 2
-
-    def extract_min(self) -> tuple[float, int]:
-        min_key = self.key[0]
-        min_item = int(self.item[0])
-
-        self.key[0] = self.key[self.m - 1]
-        self.item[0] = self.item[self.m - 1]
-        self.m -= 1
-
-        # Heapify down
-        i = 0
-        while True:
-            left = 2 * i + 1
-            right = 2 * i + 2
-            smallest = i
-
-            if left < self.m and self.key[left] < self.key[smallest]:
-                smallest = left
-            if right < self.m and self.key[right] < self.key[smallest]:
-                smallest = right
-
-            if smallest != i:
-                self.key[i], self.key[smallest] = self.key[smallest], self.key[i]
-                self.item[i], self.item[smallest] = self.item[smallest], self.item[i]
-                i = smallest
-            else:
-                break
-
-        return min_key, min_item
 
 
 def crop_gebco(
@@ -159,8 +108,8 @@ def extract_coastal_sinks(
     sink_ids = np.arange(1, n_sinks + 1, dtype=np.uint32)
     sink_grid[sink_rows, sink_cols] = sink_ids
 
-    # Coordenadas geográficas dos centros dos pixels de sink
-    sink_lons = gt[0] + (sink_cols + 0.5) * gt[1]
+    # Coordenadas geográficas dos centros dos pixels de sink (normalizadas em [-180, 180))
+    sink_lons = ((gt[0] + (sink_cols + 0.5) * gt[1] + 180.0) % 360.0) - 180.0
     sink_lats = gt[3] + (sink_rows + 0.5) * gt[5]
     sink_elevations = dem[sink_rows, sink_cols]
 
@@ -183,101 +132,35 @@ def run_ipba(
     sink_grid: np.ndarray,
     h_star: float = 0.0,
     seed: int = 42,
+    ispbc: bool = False,
 ) -> np.ndarray:
     """
-    Executa a rodada única do Invasion Percolation-Based Algorithm (IPBA) sobre o DEM.
-    Cada pixel de terra drena pelo caminho topográfico de menor resistência até atingir um sink litorâneo.
+    Executa a rodada única do Invasion Percolation-Based Algorithm (IPBA) utilizando
+    diretamente `Lattice`, `Heap` e `SetDrainageBasins` de `externos/IPBA`.
     Retorna a matriz 2D basin_grid, onde cada pixel de terra contém o ID do sink receptor (0 = mar).
     """
     nrows, ncols = dem.shape
-    n = nrows * ncols
     land = dem > h_star
+    nodata = np.float32(-32768.0)
 
-    rng = np.random.default_rng(seed)
-    perturbations = rng.uniform(0.0, 1.0, size=n).astype(np.float32)
+    random.seed(seed)
+    arr0 = np.where(land, dem, nodata).astype(np.float32).ravel()
+    arr1 = sink_grid.ravel()
 
-    # Inicialização dos sítios na rede regular
-    flat_dem = dem.ravel()
-    sites = [IPBASite(float(flat_dem[k]), float(perturbations[k])) for k in range(n)]
-
-    # Atribuir nodata / oceano
-    for k in range(n):
+    lattice = Lattice(nrows, ncols, arr0)
+    for k in range(lattice.n):
         if not land.flat[k]:
-            sites[k].height = np.float32(-99999.0)
-            sites[k].sigma = np.uint32(0)
+            lattice.sites[k].height = nodata
+            lattice.sites[k].sigma = np.uint32(0)
+        if arr1[k] > 0:
+            lattice.sites[k].label = np.uint32(arr1[k])
 
-    # Atribuir rótulos dos sinks
-    flat_sinks = sink_grid.ravel()
-    for k in range(n):
-        if flat_sinks[k] > 0:
-            sites[k].label = np.uint32(flat_sinks[k])
-
-    heap = IPBAHeap(n)
-    burner: list[int] = []
-
-    # Vizinhança 4-conectada plana (sem PBC horizontal para recortes regionais)
-    def _get_neighbors(k: int) -> list[int]:
-        r = k // ncols
-        c = k % ncols
-        nbrs = []
-        if r > 0:
-            nbrs.append(k - ncols)
-        if r < nrows - 1:
-            nbrs.append(k + ncols)
-        if c > 0:
-            nbrs.append(k - 1)
-        if c < ncols - 1:
-            nbrs.append(k + 1)
-        return nbrs
-
-    # Invasão por percolação a partir de cada pixel de terra
-    for k in range(n):
-        if sites[k].sigma == 1:
-            for b in burner:
-                sites[b].status1 = np.uint8(0)
-            burner.clear()
-            heap.m = 0
-
-            burner.append(k)
-            sites[k].status1 = np.uint8(1)
-            t_old = k
-            heap.insert(sites[k].height, k)
-
-            stop = False
-            w = 0
-            while heap.m > 0 and not stop:
-                _, t = heap.extract_min()
-                sites[t].status1 = np.uint8(2)
-                sites[t].parent = np.uint32(t_old)
-                t_old = t
-
-                if sites[t].sigma >= 2:
-                    w = int(sites[t].sigma) - 2
-                    stop = True
-                elif sites[t].label > 0:
-                    w = t
-                    stop = True
-
-                if not stop:
-                    for s in _get_neighbors(t):
-                        if sites[s].status1 == 0:
-                            burner.append(s)
-                            sites[s].status1 = np.uint8(1)
-                            heap.insert(sites[s].height, s)
-
-            if stop:
-                i = t
-                target_status = sites[w].label if sites[w].label > 0 else sites[w].status
-                while sites[i].parent != i:
-                    sites[i].sigma = np.uint32(w + 2)
-                    sites[i].status = target_status
-                    i = int(sites[i].parent)
-                sites[i].sigma = np.uint32(w + 2)
-                sites[i].status = target_status
+    heap = Heap(lattice.n)
+    SetDrainageBasins(lattice, heap, ispbc)
 
     basin_grid = np.zeros((nrows, ncols), dtype=np.uint32)
-    for k in range(n):
-        basin_grid.flat[k] = sites[k].status
+    for k in range(lattice.n):
+        basin_grid.flat[k] = lattice.sites[k].status
 
     return basin_grid
 

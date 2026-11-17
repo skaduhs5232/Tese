@@ -63,8 +63,13 @@ def carregar_ocean_water_com_distancias() -> tuple[pd.DataFrame, int]:
 
     ow = df[(df["Medium"] == "Ocean water") & (df["mesh"] >= 0.02) & (df["mesh"] <= 5.0)].copy()
 
-    sinks_files = sorted(glob.glob(str(REPO_ROOT / "relatorios" / "ilhas" / "sinks_raios_*.csv")))
-    sinks = pd.concat([pd.read_csv(p) for p in sinks_files], ignore_index=True)
+    global_csv = REPO_ROOT / "relatorios" / "bacias_globais_gebco_cutter_ipba_cca.csv"
+    if global_csv.is_file():
+        df_b = pd.read_csv(global_csv)
+        sinks = df_b[df_b["in_top_95pct_global"]].copy()
+    else:
+        sinks_files = sorted(glob.glob(str(REPO_ROOT / "relatorios" / "ilhas" / "sinks_raios_*.csv")))
+        sinks = pd.concat([pd.read_csv(p) for p in sinks_files], ignore_index=True)
 
     tree = cKDTree(to_xyz(sinks["latitude"].to_numpy(), sinks["longitude"].to_numpy()))
     dists_chord, _ = tree.query(to_xyz(ow["lat"].to_numpy(), ow["lon"].to_numpy()), k=1)

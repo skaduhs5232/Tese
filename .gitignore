@@ -323,3 +323,6 @@ dados/ibge/
 
 # Caches binarios grandes
 *.pkl
+
+*.npz
+relatorios/porcoes_terra/

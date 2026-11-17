@@ -37,7 +37,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from geracao_graficos.estilo_erneson import aplicar_estilo, rotulo_painel, salvar
-from pipeline.ipba_runner import EARTH_RADIUS_KM, crop_gebco, extract_coastal_sinks
+from pipeline.gebco_cutter import executar_percolacao_gebco_cutter
+from pipeline.ipba_runner import EARTH_RADIUS_KM, extract_coastal_sinks
 
 RAIOS_KM: list[int] = [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -89,13 +90,21 @@ def carregar_ocean_water_malha_padrao() -> pd.DataFrame:
 
 def extrair_todos_sinks_gebco_h0() -> pd.DataFrame:
     """
-    Aplica o corte h = 0 no GEBCO global (-60 a 80 graus de latitude)
+    Usa `externos/GebcoCutter` (`Percolation.site_percolation()` com corte h = 0)
+    para segmentar as porcoes de terra do globo, descarta a Antartida (desabitada, lat < -60)
     e identifica todo pixel de terra vizinho de mar (4-conectividade) como sink,
     sem rodar o IPBA e sem aplicar corte de 95%.
     """
     gebco_path = REPO_ROOT / "dados" / "gebco" / "gebco_2026_sub_ice_geotiff.tif"
-    dem, gt, _ = crop_gebco((-180.0, -60.0, 180.0, 80.0), gebco_path)
+    cache_perc = REPO_ROOT / "relatorios" / "cache_percolacao_gebco_h0.npz"
+    info, dem, label, vals, _ = executar_percolacao_gebco_cutter(
+        gebco_path, h_star=0.0, cache_npz=cache_perc
+    )
+    gt = info["GeoTransform"]
     _, sinks_df = extract_coastal_sinks(dem, gt, h_star=0.0)
+    sinks_df["land_cluster_id"] = label[sinks_df["row"].to_numpy(), sinks_df["col"].to_numpy()]
+    # Filtrar fora a Antartida / regioes polares austrais (lat < -60)
+    sinks_df = sinks_df[sinks_df["latitude"] >= -60.0].copy().reset_index(drop=True)
     return sinks_df
 
 

@@ -1,25 +1,28 @@
 """
 scripts/analise_r22km_mar_territorial.py
 ----------------------------------------
-Implementa o procedimento definido pelo Prof. Dr. Erneson Oliveira nos 2 novos audios (17/11/2026):
-  1. Raio fixo R = 22 km (mar territorial = 12 milhas nauticas) em volta de cada sink.
-  2. Filtro estrito de MAR nos pontos de microplastico:
-     - Usa apenas Agua Oceanica com microplastico padrao (0,02-5,0 mm, pieces/m3).
-     - Verifica no raster GEBCO 2026 a elevacao do pixel de cada ponto de coleta e mantem
-       APENAS os pontos que estao de fato no mar (`elevacao GEBCO <= 0`, n = 14.363),
-       descartando os 410 pontos que caem em terra / rio acima (`elevacao GEBCO > 0`).
-  3. Media simples por sink (sem descartar sobreposicao de circulos vizinhos):
-     - Se cair 10 pontos em 22 km, tira a media dos 10; se cair 1 ponto, a media e ele mesmo.
-  4. Junta todas as porcoes de terra do mundo (incluindo America do Norte/Central, America do Sul,
-     Europa, Africa, Asia e Australia) e testa a Lei de Potencia com as ~500 bacias do IPBA
-     (e com todas as bacias com mancha urbana CCA).
+Implementa integralmente o protocolo definido pelo Prof. Dr. Erneson Oliveira nos
+novos audios (17/11/2026) utilizando os algoritmos oficiais da pasta `externos/`:
+  1. Divisao do globo em porcoes de terra conectadas via `externos/GebcoCutter`
+     (`Percolation.site_percolation()` + recorte com periodicidade longitudinal).
+  2. Extracao das bacias hidrográficas em cada porcao de terra via `externos/IPBA`
+     (`Lattice`, `Heap`, `SetDrainageBasins`, corte h = 0) e area esferica exata
+     (Triangulos Esfericos de L'Huilier + Haversine).
+  3. Delimitacao das manchas urbanas em cada porcao de terra via `externos/CCA`
+     (`burn` calibrado por Lei de Zipf no GPW v4 alinhado 4x4).
+  4. Filtro estrito de MAR nos pontos de Agua Oceanica (malha padrao 0,02-5,0 mm):
+     mantem apenas pontos em pixels com elevacao `GEBCO <= 0` (n = 14.363),
+     descartando pontos rio acima / dentro do continente (`GEBCO > 0`, n = 410).
+  5. Raio fixo R = 22 km (mar territorial = 12 milhas nauticas) em cada sink:
+     calcula a MEDIA aritmetica simples (pieces/m3) sem descartar sobreposicao
+     entre circulos vizinhos, junta todas as porcoes de terra do mundo e testa a
+     Lei de Potencia.
 """
 
 from __future__ import annotations
 
 import json
 import sys
-import time
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +32,7 @@ import pandas as pd
 from matplotlib.patches import Polygon
 from osgeo import gdal
 from scipy import stats
+from scipy.ndimage import binary_dilation
 from scipy.spatial import cKDTree
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -37,32 +41,17 @@ sys.path.insert(0, str(REPO_ROOT))
 from geracao_graficos.estilo_erneson import (
     WORLD_GEOJSON,
     aplicar_estilo,
-    curva_nw,
     eixo_mapa,
     rotulo_painel,
     salvar,
 )
-from pipeline.cca_calibrator import crop_gpw, run_calibrated_cca
-from pipeline.gebco_cutter import GRANDES_ILHAS
-from pipeline.ipba_runner import (
-    EARTH_RADIUS_KM,
-    crop_gebco,
-    extract_coastal_sinks,
-    run_ipba,
-    spherical_triangle_row_areas,
+from pipeline.gebco_cutter import (
+    executar_percolacao_gebco_cutter,
+    gerar_bacias_globais_gebco_cutter,
 )
-from pipeline.spatial_matcher import split_urban_clusters_by_basins
+from pipeline.ipba_runner import EARTH_RADIUS_KM
 
 RAIO_MAR_TERRITORIAL_KM = 22.0
-
-REGIOES_MUNDO: dict[str, dict[str, Any]] = {
-    **GRANDES_ILHAS,
-    "Asia": {
-        "bbox": (45.0, -10.0, 150.0, 60.0),
-        "marker": "P",
-        "color": "C5",
-    },
-}
 
 
 def to_xyz(lat_deg: np.ndarray, lon_deg: np.ndarray) -> np.ndarray:
@@ -85,8 +74,7 @@ def carregar_ocean_water_filtrado_mar() -> tuple[pd.DataFrame, pd.DataFrame]:
     Carrega Agua Oceanica (malha padrao 0,02-5,0 mm, pieces/m3) e classifica cada ponto
     pelo raster GEBCO 2026:
       - `is_sea == True`: pixel com `elevacao GEBCO <= 0` (com certeza no mar)
-      - `is_sea == False`: pixel com `elevacao GEBCO > 0` (dentro do continente / rio acima)
-    Retorna (ow_all, ow_sea).
+      - `is_sea == False`: pixel com `elevacao GEBCO > 0` (rio acima / continente)
     """
     noaa_path = REPO_ROOT / "dados" / "noaa_microplastic" / "Hub_Microplastics_Replace_2485283804436522212.geojson"
     with open(noaa_path, "r", encoding="utf-8") as f:
@@ -124,83 +112,61 @@ def carregar_ocean_water_filtrado_mar() -> tuple[pd.DataFrame, pd.DataFrame]:
     return ow, ow_sea
 
 
-def extrair_ou_carregar_todas_regioes_mundo() -> pd.DataFrame:
+def identificar_porcoes_terra_ativas(
+    ow_sea: pd.DataFrame,
+    max_radius_km: float = 50.0,
+) -> set[int]:
     """
-    Carrega do cache (ou extrai via IPBA + CCA) todas as bacias costeiras (h = 0)
-    para as 6 grandes porcoes de terra do mundo (incluindo Asia).
+    Usa `externos/GebcoCutter` para identificar todas as porcoes de terra conectadas
+    que possuem pelo menos um sink costeiro (h = 0) a ate `max_radius_km` de uma
+    coleta marinha (`ow_sea`).
     """
     gebco_path = REPO_ROOT / "dados" / "gebco" / "gebco_2026_sub_ice_geotiff.tif"
+    cache_perc = REPO_ROOT / "relatorios" / "cache_percolacao_gebco_h0.npz"
+    info, arr, label, _, _ = executar_percolacao_gebco_cutter(gebco_path, h_star=0.0, cache_npz=cache_perc)
+
+    gt = info["GeoTransform"]
+    p = arr > 0
+    struct4 = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=bool)
+    coast = p & binary_dilation(~p, structure=struct4)
+    sr, sc = np.nonzero(coast)
+    slats = gt[3] + (sr + 0.5) * gt[5]
+    slons = ((gt[0] + (sc + 0.5) * gt[1] + 180.0) % 360.0) - 180.0
+    svals = label[sr, sc]
+
+    tree_p = cKDTree(to_xyz(ow_sea["lat"].to_numpy(), ow_sea["lon"].to_numpy()))
+    chord = float(2.0 * np.sin((max_radius_km / EARTH_RADIUS_KM) / 2.0))
+    p_lists = tree_p.query_ball_point(to_xyz(slats, slons), r=chord)
+    has_pts = np.array([len(x) > 0 for x in p_lists])
+    return {int(v) for v in np.unique(svals[has_pts])}
+
+
+def carregar_ou_gerar_bacias_globais_externos(ow_sea: pd.DataFrame) -> pd.DataFrame:
+    """
+    Carrega (ou gera com `externos/GebcoCutter` + `externos/IPBA` + `externos/CCA`)
+    o catalogo completo de bacias hidrográficas das porcoes de terra ativas do mundo.
+    """
+    global_csv = REPO_ROOT / "relatorios" / "bacias_globais_gebco_cutter_ipba_cca.csv"
+    if global_csv.is_file() and global_csv.stat().st_size > 1000:
+        return pd.read_csv(global_csv)
+
+    gebco_path = REPO_ROOT / "dados" / "gebco" / "gebco_2026_sub_ice_geotiff.tif"
     gpw_path = REPO_ROOT / "dados" / "gpw_data" / "gpw_v4_population_count_rev11_2020_30_sec.tif"
-    ilhas_dir = REPO_ROOT / "relatorios" / "ilhas"
-    ilhas_dir.mkdir(parents=True, exist_ok=True)
+    cache_perc = REPO_ROOT / "relatorios" / "cache_percolacao_gebco_h0.npz"
 
-    dfs = []
-    for region_name, info in REGIOES_MUNDO.items():
-        slug = region_name.lower().replace(" & ", "_").replace(" ", "_")
-        cache_csv = ilhas_dir / f"bacias_100pct_{slug}.csv"
+    active_vals = identificar_porcoes_terra_ativas(ow_sea, max_radius_km=50.0)
+    print(f"   Porcoes de terra GebcoCutter ativas (ate R=50 km): {len(active_vals)}", flush=True)
 
-        if cache_csv.is_file() and cache_csv.stat().st_size > 1000:
-            dfs.append(pd.read_csv(cache_csv))
-            continue
-
-        print(f"   [{region_name}] Extraindo sinks e bacias (h = 0)...", flush=True)
-        t0 = time.time()
-        bbox = info["bbox"]
-
-        zipf_csv = ilhas_dir / f"matriz_zipf_{slug}.csv"
-        if zipf_csv.is_file():
-            df_zipf = pd.read_csv(zipf_csv)
-            best = df_zipf.iloc[(df_zipf["alpha"] - 1.0).abs().argsort()[:1]].iloc[0]
-            d_star, l_km = float(best["d_star"]), float(best["l_cutoff"])
-        else:
-            d_star, l_km = 2000.0, 5.0
-
-        dem, gt_gebco, _ = crop_gebco(bbox, gebco_path)
-        sink_grid, sinks_df = extract_coastal_sinks(dem, gt_gebco, h_star=0.0)
-        basin_grid = run_ipba(dem, sink_grid, h_star=0.0)
-
-        nrows, ncols = basin_grid.shape
-        lats_gebco = gt_gebco[3] + (np.arange(nrows) + 0.5) * gt_gebco[5]
-        px_area_1d = spherical_triangle_row_areas(lats_gebco, abs(gt_gebco[5]), gt_gebco[1], R=EARTH_RADIUS_KM)
-        px_area_grid = np.broadcast_to(px_area_1d[:, None], (nrows, ncols))
-
-        land_mask = basin_grid > 0
-        total_land_area = float(px_area_grid[land_mask].sum())
-        labels, counts = np.unique(basin_grid[land_mask], return_counts=True)
-        areas = np.bincount(basin_grid[land_mask], weights=px_area_grid[land_mask])[labels]
-
-        df_areas = (
-            pd.DataFrame({"basin_id": labels, "pixel_count": counts, "area_km2": areas})
-            .sort_values("area_km2", ascending=False)
-            .reset_index(drop=True)
-        )
-        df_areas["area_fraction"] = df_areas["area_km2"] / total_land_area
-        df_areas["cumulative_fraction"] = df_areas["area_fraction"].cumsum()
-        cut_idx = int(np.searchsorted(df_areas["cumulative_fraction"], 0.95))
-        df_areas["in_top_95pct"] = False
-        df_areas.loc[:cut_idx, "in_top_95pct"] = True
-
-        pop, px_area_gpw, lats_1d, lons_1d, gt_gpw, _ = crop_gpw(bbox, gpw_path)
-        grid_clusters, _ = run_calibrated_cca(pop, lons_1d, lats_1d, px_area_gpw, d_star, l_km)
-        basin_pop_df, _ = split_urban_clusters_by_basins(grid_clusters, pop, basin_grid, gt_gpw, gt_gebco)
-
-        df_full = (
-            sinks_df[["sink_id", "latitude", "longitude", "elevation"]]
-            .merge(df_areas, left_on="sink_id", right_on="basin_id", how="inner")
-            .merge(basin_pop_df, on="basin_id", how="left")
-        )
-        for col in ["urban_population", "total_population", "urban_pixels", "total_pixels", "urban_fraction"]:
-            df_full[col] = df_full[col].fillna(0.0)
-
-        df_full["island_name"] = region_name
-        df_full["d_star_opt"] = d_star
-        df_full["l_opt_km"] = l_km
-        df_full.to_csv(cache_csv, index=False)
-        n_top = int(df_full["in_top_95pct"].sum())
-        print(f"   [{region_name}] Concluido em {time.time() - t0:.1f}s: {len(df_full)} bacias ({n_top} no Top 95%).", flush=True)
-        dfs.append(df_full)
-
-    return pd.concat(dfs, ignore_index=True)
+    df_all = gerar_bacias_globais_gebco_cutter(
+        gebco_path=gebco_path,
+        gpw_path=gpw_path,
+        target_cluster_vals=active_vals,
+        cache_percolation_npz=cache_perc,
+        out_dir=REPO_ROOT / "relatorios" / "porcoes_terra",
+    )
+    df_all.to_csv(global_csv, index=False)
+    print(f"   Catalogo global salvo em: {global_csv} ({len(df_all)} bacias totais)", flush=True)
+    return df_all
 
 
 def associar_media_r22km_mar(
@@ -211,8 +177,7 @@ def associar_media_r22km_mar(
     """
     Para cada sink em `bacias_df`, toma todos os pontos de `ow_sea` (apenas no mar)
     a ate `r_km` (22 km) e calcula a MEDIA aritmetica simples (pieces/m3),
-    independentemente de sobreposicao com sinks vizinhos.
-    Se cair 1 ponto, a media e o proprio valor dele.
+    permitindo sobreposicao entre circulos vizinhos.
     """
     out = bacias_df.copy().reset_index(drop=True)
     s_xyz = to_xyz(out["latitude"].to_numpy(), out["longitude"].to_numpy())
@@ -271,20 +236,20 @@ def _plotar_painel_lei_potencia(
     cor_reta: str = "#047857",
 ) -> dict[str, Any]:
     estilos_regiao = {
-        "North & Central America": ("o", "C0", "Am. Norte/Central"),
-        "South America": ("s", "C2", "Am. do Sul"),
-        "Europe & Eurasia": ("^", "C3", "Europa"),
-        "Africa": ("D", "C4", "África"),
-        "Asia": ("P", "C5", "Ásia"),
-        "Australia": ("v", "C1", "Austrália"),
+        "Am. Norte/Central": ("o", "C0"),
+        "Am. do Sul": ("s", "C2"),
+        "Europa": ("^", "C3"),
+        "África": ("D", "C4"),
+        "Ásia": ("P", "C5"),
+        "Austrália/Oceania": ("v", "C1"),
     }
 
     sub = df_valid[(df_valid[pop_col] > 0) & (df_valid[y_col] > 0) & np.isfinite(df_valid[y_col])].copy()
     x = np.log10(sub[pop_col].to_numpy())
     y = np.log10(sub[y_col].to_numpy())
 
-    for reg_key, (mk, cor, lbl_pt) in estilos_regiao.items():
-        grp = sub[sub["island_name"] == reg_key]
+    for reg_key, (mk, cor) in estilos_regiao.items():
+        grp = sub[sub["macroregiao"] == reg_key]
         if len(grp) > 0:
             ax.scatter(
                 np.log10(grp[pop_col].to_numpy()),
@@ -295,11 +260,10 @@ def _plotar_painel_lei_potencia(
                 s=28,
                 linewidths=0.9,
                 alpha=0.58,
-                label=f"{lbl_pt} (n={len(grp)})",
+                label=f"{reg_key} (n={len(grp)})",
                 zorder=3,
             )
 
-    # Ajuste OLS em todos os N pontos
     sl, ic, rv, pv, se = stats.linregress(x, y)
     rho, prho = stats.spearmanr(x, y)
 
@@ -307,14 +271,12 @@ def _plotar_painel_lei_potencia(
     yl = ic + sl * xl
     ax.plot(xl, yl, color=cor_reta, linewidth=2.0, zorder=7, label="Ajuste OLS (Lei de Potência)")
 
-    # Banda IC 95% do ajuste OLS
     n = len(x)
     t_val = float(stats.t.ppf(0.975, df=n - 2))
     s_err = float(np.sqrt(np.sum((y - (ic + sl * x)) ** 2) / (n - 2)))
     ci = t_val * s_err * np.sqrt(1.0 / n + (xl - np.mean(x)) ** 2 / np.sum((x - np.mean(x)) ** 2))
     ax.fill_between(xl, yl - ci, yl + ci, color=cor_reta, alpha=0.18, zorder=2)
 
-    # Medias por bins logaritmicos (8 faixas) para evidenciar a tendencia macroscopica
     bins = np.linspace(x.min(), x.max(), 9)
     sub["bin"] = pd.cut(x, bins=bins, include_lowest=True)
     b_df = (
@@ -363,14 +325,14 @@ def _plotar_painel_lei_potencia(
         transform=ax.transAxes,
         ha="left",
         va="top",
-        fontsize=8.1,
+        fontsize=8.0,
         bbox=dict(boxstyle="round,pad=0.28", facecolor="white", edgecolor="#cccccc", alpha=0.94),
         zorder=10,
     )
 
     y_span = max(y.max() - y.min(), 3.5)
     ax.set_ylim(y.min() - 0.36 * y_span, y.max() + 0.44 * y_span)
-    ax.set_title(titulo, fontsize=10.3, pad=9)
+    ax.set_title(titulo, fontsize=10.1, pad=9)
     ax.set_xlabel(xlabel, fontsize=9.8)
     ax.set_ylabel(ylabel, fontsize=9.8)
     ax.legend(
@@ -398,34 +360,30 @@ def _plotar_painel_lei_potencia(
 def gerar_figura_r22km_mar_territorial(
     ow_all: pd.DataFrame,
     ow_sea: pd.DataFrame,
-    df_95_paired: pd.DataFrame,
-    df_100_paired: pd.DataFrame,
-    n_pts_95: int,
+    df_main_paired: pd.DataFrame,
+    n_pts_main: int,
 ) -> Path:
     """
-    Gera a figura cientifica 2x2 do protocolo R = 22 km (mar territorial, apenas pontos no mar):
-      - Painel (a): Mapa-mundi mostrando os 14.363 pontos no mar (`h <= 0`), os 410 pontos
-                    descartados no continente/rio acima (`h > 0`) e os ~500 sinks ativos do IPBA a 22 km.
-      - Painel (b): Lei de Potencia nas Bacias do IPBA (Top 95% de area, N ~ 500 bacias):
-                    log10(P_bacia) vs. log10(Media MP em 22 km no mar, pieces/m3).
-      - Painel (c): Lei de Potencia nas Bacias com Mancha Urbana CCA (100% dos sinks h = 0, N ~ 875):
-                    log10(P_mancha) vs. log10(Media MP em 22 km no mar, pieces/m3).
-      - Painel (d): Lei de Potencia para o Fluxo Hidrologico Costeiro em R = 22 km (N ~ 500 bacias):
-                    log10(P_bacia) vs. log10(Media MP_22km * Area_bacia).
+    Gera a figura 2x2 do protocolo R = 22 km (mar territorial, apenas pontos no mar,
+    com divisao do globo via `externos/GebcoCutter`, bacias via `externos/IPBA`
+    e manchas urbanas via `externos/CCA`):
+      - Painel (a): Mapa-mundi do filtro de mar (`h <= 0`) e fozes IPBA ativas a 22 km.
+      - Painel (b): Bacias IPBA (Area >= 100 km²): Pop. da bacia vs. Media em 22 km.
+      - Painel (c): Bacias c/ Mancha Urbana CCA (Area >= 100 km²): Pop. mancha vs. Media em 22 km.
+      - Painel (d): Bacias IPBA (Area >= 100 km²): Pop. da bacia vs. Fluxo (Media_22km * Area).
     """
     aplicar_estilo()
 
-    fig, axes = plt.subplots(2, 2, figsize=(14.4, 9.8), gridspec_kw={"wspace": 0.23, "hspace": 0.29})
+    fig, axes = plt.subplots(2, 2, figsize=(14.6, 9.9), gridspec_kw={"wspace": 0.23, "hspace": 0.29})
     ax_a, ax_b, ax_c, ax_d = axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]
 
-    # =========================================================================
-    # Painel (a): Mapa-mundi do filtro de mar (h <= 0) e Sinks Pareados em R = 22 km
-    # =========================================================================
     eixo_mapa(ax_a, (-180, 180, -60, 82))
     _desenhar_continentes(ax_a)
 
     ow_land = ow_all[~ow_all["is_sea"]]
-    sinks_ativos_95 = df_95_paired[df_95_paired["mp_mean_r22km"] > 0]
+    sinks_ativos = df_main_paired[
+        (df_main_paired["mp_mean_r22km"] > 0) & (df_main_paired["total_population"] > 0)
+    ]
 
     ax_a.scatter(
         ow_sea["lon"],
@@ -449,24 +407,24 @@ def gerar_figura_r22km_mar_territorial(
         label=f"Descartados rio acima / terra h > 0 (n = {fmt_int_pt(len(ow_land))})",
     )
     ax_a.scatter(
-        sinks_ativos_95["longitude"],
-        sinks_ativos_95["latitude"],
-        s=16.0,
+        sinks_ativos["longitude"],
+        sinks_ativos["latitude"],
+        s=14.0,
         edgecolors="#b91c1c",
         facecolors="none",
         marker="o",
-        linewidths=0.9,
-        alpha=0.92,
+        linewidths=0.85,
+        alpha=0.88,
         zorder=8,
-        label=f"Fozes IPBA c/ média em R ≤ 22 km (N = {fmt_int_pt(len(sinks_ativos_95))} fozes, {fmt_int_pt(n_pts_95)} pts)",
+        label=f"Fozes GebcoCutter+IPBA (A ≥ 100 km², R ≤ 22 km: N = {fmt_int_pt(len(sinks_ativos))}, {fmt_int_pt(n_pts_main)} pts)",
     )
 
-    ax_a.set_title("Filtro de mar (h ≤ 0) e fozes com coleta em R = 22 km (mar territorial)", fontsize=10.3, pad=9)
+    ax_a.set_title("Filtro de mar (h ≤ 0) e fozes GebcoCutter+IPBA em R = 22 km", fontsize=10.1, pad=9)
     leg_a = ax_a.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.02),
         ncol=1,
-        fontsize=7.6,
+        fontsize=7.3,
         frameon=True,
         facecolor="white",
         edgecolor="#cccccc",
@@ -477,45 +435,36 @@ def gerar_figura_r22km_mar_territorial(
         h.set_alpha(1.0)
     rotulo_painel(ax_a, "(a)", dentro=True, x=0.02, y=0.96)
 
-    # =========================================================================
-    # Painel (b): Concentracao Media em R = 22 km vs Populacao da Bacia (IPBA Top 95%)
-    # =========================================================================
     _plotar_painel_lei_potencia(
         ax_b,
-        df_95_paired,
+        df_main_paired,
         pop_col="total_population",
         y_col="mp_mean_r22km",
-        titulo="Bacias IPBA (Top 95%): População da bacia vs. Média em R = 22 km",
+        titulo="Bacias IPBA (A ≥ 100 km²): População da bacia vs. Média em R = 22 km",
         xlabel=r"$\log_{10} P_{\mathrm{bacia}}$ (Habitantes na bacia hidrográfica)",
         ylabel=r"$\log_{10} \bar{C}_{22\mathrm{km}}$ (Média no mar em $\mathrm{pieces/m^3}$)",
         cor_reta="#1d4ed8",
     )
     rotulo_painel(ax_b, "(b)", dentro=False, x=-0.13, y=1.03)
 
-    # =========================================================================
-    # Painel (c): Concentracao Media em R = 22 km vs Populacao Urbana CCA (Todas as bacias h=0)
-    # =========================================================================
     _plotar_painel_lei_potencia(
         ax_c,
-        df_100_paired,
+        df_main_paired,
         pop_col="urban_population",
         y_col="mp_mean_r22km",
-        titulo="Bacias c/ Mancha Urbana CCA: Pop. da mancha vs. Média em R = 22 km",
+        titulo="Bacias c/ Mancha Urbana CCA (A ≥ 100 km²): Pop. mancha vs. Média 22 km",
         xlabel=r"$\log_{10} P_{\mathrm{mancha}}$ (População urbana CCA na bacia)",
         ylabel=r"$\log_{10} \bar{C}_{22\mathrm{km}}$ (Média no mar em $\mathrm{pieces/m^3}$)",
         cor_reta="#047857",
     )
     rotulo_painel(ax_c, "(c)", dentro=False, x=-0.13, y=1.03)
 
-    # =========================================================================
-    # Painel (d): Fluxo Hidrologico Exportado (Media_22km * Area_bacia) nas ~500 bacias IPBA
-    # =========================================================================
     _plotar_painel_lei_potencia(
         ax_d,
-        df_95_paired,
+        df_main_paired,
         pop_col="total_population",
         y_col="flux_r22km",
-        titulo=r"Bacias IPBA (Top 95%): População vs. Fluxo ($\bar{C}_{22\mathrm{km}} \times A_{\mathrm{bacia}}$)",
+        titulo=r"Bacias IPBA (A ≥ 100 km²): População vs. Fluxo ($\bar{C}_{22\mathrm{km}} \times A_{\mathrm{bacia}}$)",
         xlabel=r"$\log_{10} P_{\mathrm{bacia}}$ (Habitantes na bacia hidrográfica)",
         ylabel=r"$\log_{10} (\bar{C}_{22\mathrm{km}} \cdot A_{\mathrm{bacia}})$ (Índice de fluxo exportado)",
         cor_reta="#b91c1c",
@@ -534,29 +483,38 @@ if __name__ == "__main__":
     n_land = len(ow_all) - len(ow_sea)
     print(f"   Total: {len(ow_all)} | No mar (h <= 0): {len(ow_sea)} | Descartados rio acima/continente (h > 0): {n_land}")
 
-    print("2. Carregando/extraindo bacias de todas as 6 grandes porcoes de terra do mundo (incluindo Asia)...")
-    df_mundo_100 = extrair_ou_carregar_todas_regioes_mundo()
-    df_mundo_95 = df_mundo_100[df_mundo_100["in_top_95pct"]].copy().reset_index(drop=True)
-    print(f"   Total sinks/bacias (100%): {len(df_mundo_100)} | Bacias principais IPBA (Top 95% area): {len(df_mundo_95)}")
+    print("2. Segmentando o globo com externos/GebcoCutter e rodando externos/IPBA + externos/CCA...")
+    df_mundo_100 = carregar_ou_gerar_bacias_globais_externos(ow_sea)
+    df_mundo_a100 = df_mundo_100[df_mundo_100["area_km2"] >= 100.0].copy().reset_index(drop=True)
+    df_mundo_95g = df_mundo_100[df_mundo_100["in_top_95pct_global"]].copy().reset_index(drop=True)
+    print(
+        f"   Total bacias (porcoes ativas): {len(df_mundo_100)} | "
+        f"Area >= 100 km2: {len(df_mundo_a100)} | Top 95% global: {len(df_mundo_95g)}"
+    )
 
-    print("3. Calculando a media simples nos sinks para R = 22 km (mar territorial, apenas pontos no mar)...")
-    df_95_paired, n_pts_95 = associar_media_r22km_mar(df_mundo_95, ow_sea, r_km=22.0)
+    print("3. Calculando media simples nos sinks em R = 22 km (mar territorial, apenas pontos no mar)...")
+    df_a100_paired, n_pts_a100 = associar_media_r22km_mar(df_mundo_a100, ow_sea, r_km=22.0)
+    df_95g_paired, n_pts_95g = associar_media_r22km_mar(df_mundo_95g, ow_sea, r_km=22.0)
     df_100_paired, n_pts_100 = associar_media_r22km_mar(df_mundo_100, ow_sea, r_km=22.0)
 
-    ativos_95 = df_95_paired[df_95_paired["mp_mean_r22km"].notna()].copy()
-    positivos_95 = df_95_paired[(df_95_paired["mp_mean_r22km"] > 0) & (df_95_paired["total_population"] > 0)].copy()
+    positivos_a100 = df_a100_paired[(df_a100_paired["mp_mean_r22km"] > 0) & (df_a100_paired["total_population"] > 0)].copy()
+    positivos_a100_urb = df_a100_paired[(df_a100_paired["mp_mean_r22km"] > 0) & (df_a100_paired["urban_population"] > 0)].copy()
+    positivos_95g = df_95g_paired[(df_95g_paired["mp_mean_r22km"] > 0) & (df_95g_paired["total_population"] > 0)].copy()
     positivos_100_urb = df_100_paired[(df_100_paired["mp_mean_r22km"] > 0) & (df_100_paired["urban_population"] > 0)].copy()
 
+    out_csv_a100 = REPO_ROOT / "relatorios" / "bacias_pareadas_r22km_mar_ipba_area100km2.csv"
     out_csv_95 = REPO_ROOT / "relatorios" / "bacias_pareadas_r22km_mar_ipba_top95.csv"
     out_csv_100 = REPO_ROOT / "relatorios" / "bacias_pareadas_r22km_mar_urbanas_100pct.csv"
-    positivos_95.to_csv(out_csv_95, index=False)
+    positivos_a100.to_csv(out_csv_a100, index=False)
+    positivos_95g.to_csv(out_csv_95, index=False)
     positivos_100_urb.to_csv(out_csv_100, index=False)
 
-    print(f"   [IPBA Top 95%] Fozes c/ pontos em 22 km: {len(ativos_95)} | Fozes c/ media > 0 e pop > 0: {len(positivos_95)} (pontos unicos no mar usados: {n_pts_95})")
-    print(f"   [100% Sinks Urbanos CCA] Bacias urbanas c/ media > 0 em 22 km: {len(positivos_100_urb)} (pontos unicos no mar usados: {n_pts_100})")
-    print("   Distribuicao por continente (IPBA Top 95%, N = " + str(len(positivos_95)) + "):")
-    print(positivos_95["island_name"].value_counts().to_string())
+    print(f"   [Area >= 100 km2] Fozes c/ media > 0 e pop_total > 0: {len(positivos_a100)} | c/ pop_urbana > 0: {len(positivos_a100_urb)} (pts unicos mar: {n_pts_a100})")
+    print(f"   [Top 95% Global] Fozes c/ media > 0 e pop_total > 0: {len(positivos_95g)} (pts unicos mar: {n_pts_95g})")
+    print(f"   [100% Sinks Urbanos CCA] Bacias c/ media > 0: {len(positivos_100_urb)} (pts unicos mar: {n_pts_100})")
+    print("   Distribuicao por porcao de terra (Area >= 100 km2, N = " + str(len(positivos_a100)) + "):")
+    print(positivos_a100["landmass_name"].value_counts().head(15).to_string())
 
-    print("\n4. Gerando figura cientifica R = 22 km (mar territorial)...")
-    fig_path = gerar_figura_r22km_mar_territorial(ow_all, ow_sea, df_95_paired, df_100_paired, n_pts_95)
+    print("\n4. Gerando figura cientifica R = 22 km (externos/GebcoCutter + IPBA + CCA)...")
+    fig_path = gerar_figura_r22km_mar_territorial(ow_all, ow_sea, df_a100_paired, n_pts_a100)
     print(f"   Figura salva em: {fig_path}")

@@ -105,6 +105,75 @@ def crop_gpw(
     return pop, pixel_area, lats_1d, lons_1d, new_gt, meta
 
 
+def crop_gpw_for_gebco_cluster(
+    j_min: int,
+    j_max: int,
+    cols_gebco: np.ndarray,
+    cluster_mask_gebco: np.ndarray,
+    gpw_path: str | Path,
+    gebco_total_cols: int = 10800,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, tuple[float, float, float, float, float, float], dict[str, Any]]:
+    """
+    Recorta o raster GPW v4 (30 arc-sec) em alinhamento exato 4x4 com uma porção de terra
+    segmentada por `externos/GebcoCutter` (2 arc-min), suportando inclusive cruzamento
+    do meridiano +-180 graus (ex.: Afro-Eurásia) e mascarando os pixels populacionais
+    para pertencerem estritamente à massa de terra conectada (`cluster_mask_gebco`).
+    """
+    gdal.UseExceptions()
+    ds = gdal.Open(str(gpw_path), gdal.GA_ReadOnly)
+    gt = ds.GetGeoTransform()
+    band = ds.GetRasterBand(1)
+    nodata = band.GetNoDataValue()
+
+    scale = 4
+    gpw_r0 = scale * int(j_min)
+    gpw_r1 = scale * (int(j_max) + 1)
+    y_size = gpw_r1 - gpw_r0
+
+    c_start = int(cols_gebco[0])
+    c_end = int(cols_gebco[-1])
+    if c_end >= c_start and len(cols_gebco) == (c_end - c_start + 1):
+        gpw_c0 = scale * c_start
+        x_size = scale * len(cols_gebco)
+        raw_pop = band.ReadAsArray(gpw_c0, gpw_r0, x_size, y_size).astype(np.float32)
+        gpw_cols_idx = np.arange(gpw_c0, gpw_c0 + x_size)
+    else:
+        # Wrap-around atraves do meridiano +-180 graus
+        n1_gebco = gebco_total_cols - c_start
+        n2_gebco = c_end + 1
+        p1 = band.ReadAsArray(scale * c_start, gpw_r0, scale * n1_gebco, y_size).astype(np.float32)
+        p2 = band.ReadAsArray(0, gpw_r0, scale * n2_gebco, y_size).astype(np.float32)
+        raw_pop = np.concatenate([p1, p2], axis=1)
+        x_size = raw_pop.shape[1]
+        gpw_cols_idx = np.concatenate(
+            [np.arange(scale * c_start, scale * gebco_total_cols), np.arange(0, scale * n2_gebco)]
+        )
+
+    pop = np.where((raw_pop == nodata) | (raw_pop < 0), 0.0, raw_pop).astype(np.float32)
+    del raw_pop
+    # Isolamento topologico estrito a porcao de terra do GebcoCutter (in-place para poupar RAM)
+    mask_gpw = np.repeat(np.repeat(cluster_mask_gebco.astype(bool), scale, axis=0), scale, axis=1)
+    pop[~mask_gpw] = 0.0
+    del mask_gpw
+
+    lons_1d = gt[0] + (gpw_cols_idx + 0.5) * gt[1]
+    lats_1d = gt[3] + (np.arange(gpw_r0, gpw_r1) + 0.5) * gt[5]
+
+    area_1d = spherical_triangle_row_areas(lats_1d, abs(gt[5]), gt[1], R=EARTH_RADIUS_KM).astype(np.float32)
+    pixel_area = np.broadcast_to(area_1d[:, None], (y_size, x_size))
+
+    new_gt = (gt[0] + scale * c_start * gt[1], gt[1], gt[2], gt[3] + gpw_r0 * gt[5], gt[4], gt[5])
+    meta = {
+        "gpw_r0": gpw_r0,
+        "gpw_c0": scale * c_start,
+        "x_size": x_size,
+        "y_size": y_size,
+        "total_population": float(pop.sum()),
+    }
+    del ds
+    return pop, pixel_area, lats_1d, lons_1d, new_gt, meta
+
+
 def calibrate_zipf_grid(
     pop: np.ndarray,
     lons_1d: np.ndarray,
@@ -115,6 +184,7 @@ def calibrate_zipf_grid(
     top_n: int = 100,
     min_clusters: int = 20,
     d_max: float = 5000.0,
+    fallback_pair: tuple[float, float] = (1010.0, 2.0),
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, pd.DataFrame, tuple[float, float]]:
     """
     Executa a calibração do CCA na grade de parâmetros (D* x L),
@@ -146,7 +216,7 @@ def calibrate_zipf_grid(
     records = []
 
     best_score = float("inf")
-    best_pair = (float(d_values[0]), float(l_values[0]))
+    best_pair = (float(fallback_pair[0]), float(fallback_pair[1]))
 
     for i, d_star in enumerate(d_values):
         rows, cols = np.nonzero(density > d_star)
