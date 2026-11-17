@@ -30,6 +30,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Patch
 from scipy import stats
 from scipy.spatial import cKDTree
 
@@ -663,6 +664,162 @@ def gerar_figura_comparacao_raios_fixos(
     return out_base.with_suffix(".png")
 
 
+def gerar_figura_barras_melhor_raio_1_a_22km(
+    df_sens: pd.DataFrame,
+    df_best: pd.DataFrame | None = None,
+) -> Path:
+    """
+    Gera um grafico de barras direto e simples (R = 1..22 km) destacando qual foi o R escolhido:
+      - Painel superior (a): Barras de R² (%) por raio fixo R = 1..22 km (pico absoluto em R* = 5 km).
+      - Painel inferior (b): Barras do numero de bacias estimadas (N) para cada raio R = 1..22 km.
+    """
+    aplicar_estilo()
+
+    sub = df_sens[
+        (df_sens["regime"] == "2_Bacias_Area_ge_100km2_Todas")
+        & (df_sens["pop_col"] == "urban_population")
+        & (df_sens["metrica"] == "concentracao")
+        & (df_sens["r_km"].between(1, 22))
+    ].sort_values("r_km").copy()
+
+    sub_flux = df_sens[
+        (df_sens["regime"] == "2_Bacias_Area_ge_100km2_Todas")
+        & (df_sens["pop_col"] == "urban_population")
+        & (df_sens["metrica"] == "fluxo")
+        & (df_sens["r_km"].between(1, 22))
+    ].sort_values("r_km").copy()
+
+    r_best = 5
+    r_trans = 13
+    if df_best is not None and not df_best.empty:
+        rc = df_best[df_best["criterio"].str.startswith("Max R² — Urb. CCA Concentracao")]
+        if not rc.empty:
+            r_best = int(rc.iloc[0]["r_otimo_km"])
+        rt = df_best[df_best["criterio"].str.startswith("Compromisso Intermediario")]
+        if not rt.empty:
+            r_trans = int(rt.iloc[0]["r_otimo_km"])
+
+    raios = sub["r_km"].to_numpy(dtype=int)
+    n_vals = sub["n_bacias_estimadas"].to_numpy(dtype=int)
+    r2_vals = np.where(np.isfinite(sub["r2_pct"].to_numpy()), sub["r2_pct"].to_numpy(), 0.0)
+    p_vals = sub["p_value"].to_numpy()
+
+    cores = []
+    bordas = []
+    lws = []
+    hatches = []
+    for r_k, n_k, p_k in zip(raios, n_vals, p_vals):
+        if r_k == r_best:
+            cores.append("#059669")
+            bordas.append("#064e3b")
+            lws.append(1.4)
+            hatches.append("")
+        elif r_k == r_trans:
+            cores.append("#2563eb")
+            bordas.append("#1e3a8a")
+            lws.append(1.0)
+            hatches.append("")
+        elif r_k == 22:
+            cores.append("#dc2626")
+            bordas.append("#7f1d1d")
+            lws.append(1.0)
+            hatches.append("")
+        elif n_k < 30 or not np.isfinite(p_k) or p_k >= 0.05:
+            cores.append("#e5e7eb")
+            bordas.append("#9ca3af")
+            lws.append(0.7)
+            hatches.append("///")
+        else:
+            cores.append("#cbd5e1")
+            bordas.append("#475569")
+            lws.append(0.65)
+            hatches.append("")
+
+    fig, (ax1, ax2) = plt.subplots(
+        2,
+        1,
+        figsize=(12.8, 6.9),
+        sharex=True,
+        gridspec_kw={"height_ratios": [1.35, 1.0], "hspace": 0.16},
+    )
+
+    bars1 = ax1.bar(raios, r2_vals, width=0.70, zorder=3)
+    for b, c, ec, lw, ht in zip(bars1, cores, bordas, lws, hatches):
+        b.set_facecolor(c)
+        b.set_edgecolor(ec)
+        b.set_linewidth(lw)
+        if ht:
+            b.set_hatch(ht)
+
+    for r_k, n_k, r2_v, p_k in zip(raios, n_vals, r2_vals, p_vals):
+        if n_k < 4:
+            ax1.text(r_k, 0.7, "sem\najuste", ha="center", va="bottom", fontsize=6.4, color="#6b7280")
+        else:
+            txt = f"{r2_v:.1f}%".replace(".", ",")
+            cor_txt = "#064e3b" if r_k == r_best else ("#1e3a8a" if r_k == r_trans else ("#7f1d1d" if r_k == 22 else "#334155"))
+            peso = "bold" if r_k in (r_best, r_trans, 22) else "normal"
+            if n_k < 30:
+                txt += "\n(n.s.)"
+            ax1.text(r_k, r2_v + 0.65, txt, ha="center", va="bottom", fontsize=7.0, fontweight=peso, color=cor_txt)
+
+    row_best = sub[sub["r_km"] == r_best].iloc[0]
+    row_best_f = sub_flux[sub_flux["r_km"] == r_best].iloc[0]
+    ax1.annotate(
+        f"ESCOLHIDO: R* = {r_best} km (melhor resultado)\n"
+        f"• Concentração: R² = {row_best['r2_pct']:.1f}% (β = {row_best['beta']:+.2f}, N = {int(row_best['n_bacias_estimadas'])})\n"
+        f"• Com Fluxo (C̄ × A): R² = {row_best_f['r2_pct']:.1f}% (β = {row_best_f['beta']:+.2f})".replace(".", ","),
+        xy=(r_best + 0.36, float(row_best["r2_pct"]) - 2.8),
+        xytext=(6.6, 36.8),
+        fontsize=7.6,
+        fontweight="bold",
+        color="#064e3b",
+        ha="left",
+        va="center",
+        bbox=dict(boxstyle="round,pad=0.32", facecolor="#ecfdf5", edgecolor="#059669", linewidth=1.25),
+        arrowprops=dict(arrowstyle="->", color="#059669", lw=1.5, connectionstyle="arc3,rad=-0.10"),
+        zorder=9,
+    )
+
+    ax1.set_ylabel(r"Força da Lei de Potência $R^2$ (%)", fontsize=10.0)
+    ax1.set_ylim(0, 45.5)
+    ax1.set_title("Escolha do melhor raio fixo (R = 1 a 22 km) — Mancha Urbana CCA vs. Média no Mar", fontsize=11.0, pad=10)
+    leg_elems = [
+        Patch(facecolor="#059669", edgecolor="#064e3b", lw=1.2, label=f"R* = {r_best} km — Escolhido (melhor R²)"),
+        Patch(facecolor="#2563eb", edgecolor="#1e3a8a", lw=0.9, label=f"R = {r_trans} km — Pico interm. (N = 157)"),
+        Patch(facecolor="#dc2626", edgecolor="#7f1d1d", lw=0.9, label="R = 22 km — Mar territ. (N = 314)"),
+        Patch(facecolor="#cbd5e1", edgecolor="#475569", lw=0.6, label="Válidos (N ≥ 30, p < 0,05)"),
+        Patch(facecolor="#e5e7eb", edgecolor="#9ca3af", lw=0.6, hatch="///", label="Amostra pequena / n.s. (R ≤ 3 km)"),
+    ]
+    ax1.legend(handles=leg_elems, loc="upper right", fontsize=7.2, frameon=True, facecolor="white", edgecolor="#cccccc", framealpha=0.95)
+    rotulo_painel(ax1, "(a)", dentro=False, x=-0.06, y=1.03)
+
+    bars2 = ax2.bar(raios, n_vals, width=0.70, zorder=3)
+    for b, c, ec, lw, ht in zip(bars2, cores, bordas, lws, hatches):
+        b.set_facecolor(c)
+        b.set_edgecolor(ec)
+        b.set_linewidth(lw)
+        if ht:
+            b.set_hatch(ht)
+
+    for r_k, n_k in zip(raios, n_vals):
+        peso = "bold" if r_k in (r_best, r_trans, 22) else "normal"
+        cor_txt = "#064e3b" if r_k == r_best else ("#1e3a8a" if r_k == r_trans else ("#7f1d1d" if r_k == 22 else "#334155"))
+        ax2.text(r_k, n_k + 6.0, str(n_k), ha="center", va="bottom", fontsize=7.3, fontweight=peso, color=cor_txt)
+
+    ax2.set_xticks(raios)
+    ax2.set_xticklabels([f"{r}" for r in raios], fontsize=9.0)
+    ax2.set_xlim(0.2, 22.8)
+    ax2.set_ylim(0, 365)
+    ax2.set_xlabel("Raio fixo R aplicado em todas as fozes (km)", fontsize=10.2)
+    ax2.set_ylabel("Bacias urbanas estimadas (N)", fontsize=10.0)
+    rotulo_painel(ax2, "(b)", dentro=False, x=-0.06, y=1.03)
+
+    out_base = REPO_ROOT / "relatorios" / "figuras" / "noaa_barras_melhor_raio_1_a_22km"
+    salvar(fig, out_base)
+    plt.close(fig)
+    return out_base.with_suffix(".png")
+
+
 def gerar_figura_scatter_por_tipo_lixo(
     df_bacias_100: pd.DataFrame,
     df_noaa_all: pd.DataFrame,
@@ -781,8 +938,9 @@ if __name__ == "__main__":
     row_urb_conc = df_best[df_best["criterio"].str.startswith("Max R² — Urb. CCA Concentracao")]
     r_otimo = float(row_urb_conc.iloc[0]["r_otimo_km"]) if not row_urb_conc.empty else 5.0
 
-    print("\n4. Gerando as 3 figuras cientificas...")
+    print("\n4. Gerando as 4 figuras cientificas...")
     f1 = gerar_figura_todas_vs_maiores_vs_exclusivas(df_bacias_100, ow_sea, r_km=r_otimo)
     f2 = gerar_figura_comparacao_raios_fixos(df_sens, df_bacias_100, ow_sea, df_best=df_best)
     f3 = gerar_figura_scatter_por_tipo_lixo(df_bacias_100, df_noaa, ow_sea, r_km=22.0)
-    print(f"   Figuras salvas em:\n     - {f1}\n     - {f2}\n     - {f3}")
+    f4 = gerar_figura_barras_melhor_raio_1_a_22km(df_sens, df_best=df_best)
+    print(f"   Figuras salvas em:\n     - {f1}\n     - {f2}\n     - {f3}\n     - {f4}")
