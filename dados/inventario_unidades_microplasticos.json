@@ -1,0 +1,22 @@
+{
+  "unidade_harmonizada": "items/m3",
+  "justificativa_fisica": "1 item/m³ (LITTERBASE camada itemsm3, Beach, micro) equivale exatamente a 1 piece/m³ (NOAA NCEI, Beach). Ambas medem concentração volumétrica de microplásticos em sedimento de praia sem qualquer fator de conversão geométrica. Registros por área (items/km²) e por esforço temporal (pieces/10 mins, Nurdle Patrol) são mantidos fora da regressão para evitar distorção dimensional.",
+  "global": {
+    "noaa_beach_pieces_m3_total": 893,
+    "noaa_beach_pieces_m3_positivos": 683,
+    "litterbase_beach_items_m3_positivos": 323,
+    "unificado_items_m3_positivos": 1006
+  },
+  "americas": {
+    "noaa_beach_pieces_m3_positivos": 374,
+    "litterbase_beach_items_m3_positivos": 64,
+    "unificado_items_m3_positivos": 438,
+    "litterbase_beach_items_km2_descartados_por_dimensao": 159,
+    "noaa_por_meio_e_unidade_bruto": {
+      "Beach | pieces/m3": 521,
+      "Nurdle Patrol | pieces/10 mins": 10468,
+      "Ocean sediment | pieces kg-1 d.w.": 106,
+      "Ocean water | pieces/m3": 11940
+    }
+  }
+}
