@@ -40,11 +40,7 @@ from geracao_graficos.estilo_erneson import aplicar_estilo, rotulo_painel, salva
 from pipeline.gebco_cutter import executar_percolacao_gebco_cutter
 from pipeline.ipba_runner import EARTH_RADIUS_KM, extract_coastal_sinks
 
-RAIOS_KM: list[int] = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-    22, 25, 30, 40, 50,
-]
+RAIOS_KM: list[int] = list(range(1, 23)) + [25, 30, 40, 50]
 
 
 def to_xyz(lat_deg: np.ndarray, lon_deg: np.ndarray) -> np.ndarray:
