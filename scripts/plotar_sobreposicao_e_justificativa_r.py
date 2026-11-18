@@ -463,6 +463,189 @@ def gerar_grafico_r_e_justificativa(
     return out_base.with_suffix(".png")
 
 
+def gerar_grafico_r_vs_bacias_contempladas(df_sens: pd.DataFrame) -> Path:
+    """
+    Gera um grafico focado em explicar o porque da escolha de R* relacionando
+    o valor de R (1 a 22 km) diretamente com a quantidade de bacias contempladas
+    com pontos de coleta no mar (`n_bacias_com_pts_mar`, A >= 100 km²).
+    """
+    aplicar_estilo()
+
+    sub_tot = df_sens[
+        (df_sens["regime"] == "2_Bacias_Area_ge_100km2_Todas")
+        & (df_sens["pop_col"] == "total_population")
+        & (df_sens["metrica"] == "concentracao")
+        & (df_sens["r_km"].between(1, 22))
+    ].sort_values("r_km").copy()
+
+    sub_urb = df_sens[
+        (df_sens["regime"] == "2_Bacias_Area_ge_100km2_Todas")
+        & (df_sens["pop_col"] == "urban_population")
+        & (df_sens["metrica"] == "concentracao")
+        & (df_sens["r_km"].between(1, 22))
+    ].sort_values("r_km").copy()
+
+    raios = sub_tot["r_km"].to_numpy(dtype=int)
+    n_tot_pts = sub_tot["n_bacias_com_pts_mar"].to_numpy(dtype=int)
+    n_urb_pts = sub_urb["n_bacias_com_pts_mar"].to_numpy(dtype=int)
+    n_tot_est = sub_tot["n_bacias_estimadas"].to_numpy(dtype=int)
+    n_urb_est = sub_urb["n_bacias_estimadas"].to_numpy(dtype=int)
+    r2_tot = np.where(np.isfinite(sub_tot["r2_pct"].to_numpy()), sub_tot["r2_pct"].to_numpy(), np.nan)
+    r2_urb = np.where(np.isfinite(sub_urb["r2_pct"].to_numpy()), sub_urb["r2_pct"].to_numpy(), np.nan)
+
+    fig, (ax1, ax2) = plt.subplots(
+        1,
+        2,
+        figsize=(14.8, 5.7),
+        gridspec_kw={"wspace": 0.23},
+    )
+
+    # --- Painel (a): R (1..22 km) x Bacias contempladas com pontos de coleta ---
+    ax1.axvspan(0.4, 3.5, color="#f1f5f9", alpha=0.85, zorder=1)
+    ax1.axvspan(4.5, 5.5, color="#d1fae5", alpha=0.55, zorder=1)
+
+    cols_tot = [
+        "#6ee7b7" if r == 5 else ("#93c5fd" if r == 13 else ("#fca5a5" if r == 22 else ("#e2e8f0" if r <= 3 else "#bfdbfe")))
+        for r in raios
+    ]
+    eds_tot = [
+        "#047857" if r == 5 else ("#1d4ed8" if r == 13 else ("#b91c1c" if r == 22 else ("#94a3b8" if r <= 3 else "#3b82f6")))
+        for r in raios
+    ]
+    cols_urb = [
+        "#059669" if r == 5 else ("#1d4ed8" if r == 13 else ("#dc2626" if r == 22 else ("#94a3b8" if r <= 3 else "#1e40af")))
+        for r in raios
+    ]
+
+    b_tot = ax1.bar(raios, n_tot_pts, width=0.76, zorder=2)
+    for b, c, ec in zip(b_tot, cols_tot, eds_tot):
+        b.set_facecolor(c)
+        b.set_edgecolor(ec)
+        b.set_linewidth(0.8)
+
+    b_urb = ax1.bar(raios, n_urb_pts, width=0.44, zorder=4)
+    for b, c in zip(b_urb, cols_urb):
+        b.set_facecolor(c)
+        b.set_edgecolor("#0f172a")
+        b.set_linewidth(0.55)
+
+    ax1.axhline(30.0, color="#64748b", linestyle=":", linewidth=1.1, zorder=5)
+    ax1.text(
+        0.55,
+        44.0,
+        "Mín. estatístico (N = 30)",
+        ha="left",
+        va="bottom",
+        fontsize=6.9,
+        color="#334155",
+        bbox=dict(boxstyle="round,pad=0.14", facecolor="white", edgecolor="none", alpha=0.92),
+        zorder=6,
+    )
+    ax1.axhline(300.0, color="#0369a1", linestyle="--", linewidth=1.1, alpha=0.85, zorder=5)
+    ax1.text(0.8, 309.0, "Meta de ~300 bacias citada nos áudios", ha="left", va="bottom", fontsize=7.2, color="#0369a1")
+
+    anot_a = [
+        (3, (3.1, 165), f"R=1–3 km (insuf.)\n22 tot / 16 urb.", "#475569"),
+        (5, (6.0, 245), f"R* = 5 km (ESCOLHIDO)\n{n_tot_pts[4]} IPBA / {n_urb_pts[4]} urb.\n(R² = 33,3%)", "#065f46"),
+        (13, (11.2, 470), f"R = 13 km\n{n_tot_pts[12]} IPBA / {n_urb_pts[12]} urb.", "#1e3a8a"),
+        (22, (17.5, 675), f"R = 22 km (Mar territ.)\n{n_tot_pts[21]} IPBA / {n_urb_pts[21]} urb.", "#7f1d1d"),
+    ]
+    for r_pt, (tx, ty), texto_a, cor_a in anot_a:
+        idx = int(np.where(raios == r_pt)[0][0])
+        ax1.annotate(
+            texto_a,
+            xy=(r_pt, n_tot_pts[idx]),
+            xytext=(tx, ty),
+            fontsize=7.3,
+            fontweight="bold" if r_pt in (5, 13, 22) else "normal",
+            color=cor_a,
+            ha="center",
+            va="center",
+            bbox=dict(boxstyle="round,pad=0.22", facecolor="white", edgecolor=cor_a, alpha=0.95),
+            arrowprops=dict(arrowstyle="->", color=cor_a, lw=0.95),
+            zorder=8,
+        )
+
+    ax1.set_xticks(range(2, 23, 2))
+    ax1.set_xlim(0.2, 22.8)
+    ax1.set_ylim(0, 790)
+    ax1.set_xlabel("Raio fixo R em todas as fozes (km)", fontsize=10.0)
+    ax1.set_ylabel("Bacias contempladas com pontos de coleta (N)", fontsize=10.0)
+    ax1.set_title("Cobertura: R (1–22 km) × Bacias contempladas", fontsize=10.6, pad=10)
+    leg_a = [
+        Patch(facecolor="#bfdbfe", edgecolor="#3b82f6", lw=0.8, label="Todas as bacias IPBA com pontos no mar (≥ 100 km²)"),
+        Patch(facecolor="#1e40af", edgecolor="#0f172a", lw=0.6, label="Bacias c/ Mancha Urbana CCA contempladas"),
+        Patch(facecolor="#059669", edgecolor="#047857", lw=0.8, label="R* = 5 km (ESCOLHIDO — melhor lei de potência)"),
+    ]
+    ax1.legend(handles=leg_a, loc="upper left", fontsize=7.2, frameon=True, facecolor="white", edgecolor="#cccccc", framealpha=0.95)
+    rotulo_painel(ax1, "(a)", dentro=False, x=-0.12, y=1.03)
+
+    # --- Painel (b): Por que R*=5 km? Relacao Cobertura (bacias contempladas) x R² ---
+    m3 = raios >= 3
+    ax2.plot(n_urb_pts[m3], r2_urb[m3], color="#059669", marker="o", markersize=4.5, linewidth=1.8, zorder=4,
+             label="Mancha Urbana CCA (R = 3..22 km)")
+    ax2.plot(n_tot_pts[m3], r2_tot[m3], color="#2563eb", marker="s", markersize=4.0, linewidth=1.5, linestyle="--", zorder=3,
+             label="População Total IPBA (R = 3..22 km)")
+
+    ax2.axvline(30.0, color="#64748b", linestyle=":", linewidth=1.1, zorder=2)
+    ax2.scatter([n_urb_pts[4]], [r2_urb[4]], color="#059669", edgecolor="#064e3b", linewidth=1.4, s=110, zorder=7)
+    ax2.scatter([n_tot_pts[3]], [r2_tot[3]], color="#1d4ed8", edgecolor="#1e3a8a", linewidth=1.2, s=85, zorder=7)
+    ax2.scatter([n_urb_pts[12], n_tot_pts[12]], [r2_urb[12], r2_tot[12]], color="#2563eb", edgecolor="black", s=65, zorder=6)
+    ax2.scatter([n_urb_pts[21], n_tot_pts[21]], [r2_urb[21], r2_tot[21]], color="#dc2626", edgecolor="black", s=70, zorder=6)
+
+    anot_b = [
+        (3, n_urb_pts[2], r2_urb[2], (95, 5.2), "R=3 (16 urb., n.s.)", "#475569"),
+        (5, n_urb_pts[4], r2_urb[4], (210, 35.5), f"ESCOLHIDO R* = 5 km\n{n_urb_pts[4]} bacias urb. ({n_urb_est[4]} pos.)\nPico R² = 33,3% (β = +0,70)", "#065f46"),
+        (4, n_tot_pts[3], r2_tot[3], (185, 27.2), f"R=4 km (Total: {n_tot_pts[3]} bacias)\nPico Pop. Total: R² = 26,9%", "#1e3a8a"),
+        (13, n_tot_pts[12], r2_tot[12], (380, 21.8), f"R=13 km ({n_tot_pts[12]} IPBA / {n_tot_est[12]} pos.)\nR² = 15,1% tot. / 13,3% urb.", "#1e3a8a"),
+        (22, n_urb_pts[21], r2_urb[21], (340, 4.3), f"R=22 km Urb. ({n_urb_pts[21]} bacias): R²=7,9%", "#7f1d1d"),
+        (22, n_tot_pts[21], r2_tot[21], (575, 19.5), f"R=22 km Total\n({n_tot_pts[21]} IPBA / {n_tot_est[21]} pos.)\nR² = 14,1%", "#7f1d1d"),
+    ]
+    for _, x_p, y_p, (tx, ty), txt_b, cor_b in anot_b:
+        ax2.annotate(
+            txt_b,
+            xy=(x_p, y_p),
+            xytext=(tx, ty),
+            fontsize=7.0,
+            fontweight="bold" if "ESCOLHIDO" in txt_b else "normal",
+            color=cor_b,
+            ha="center",
+            va="center",
+            bbox=dict(boxstyle="round,pad=0.22", facecolor="white", edgecolor=cor_b, alpha=0.95),
+            arrowprops=dict(arrowstyle="->", color=cor_b, lw=0.9),
+            zorder=8,
+        )
+
+    ax2.text(
+        485,
+        35.5,
+        "Por que R* = 5 km?\n"
+        "• R ≤ 3 km: poucas bacias (< 30).\n"
+        "• R* = 5 km: 1º ponto c/ amostra\n"
+        "  sólida antes da mistura costeira.\n"
+        "• R > 5 km: +bacias, −qualidade.",
+        fontsize=7.3,
+        color="#1e293b",
+        ha="left",
+        va="center",
+        bbox=dict(boxstyle="round,pad=0.30", facecolor="#f8fafc", edgecolor="#94a3b8", alpha=0.96),
+        zorder=9,
+    )
+
+    ax2.set_xlim(0, 745)
+    ax2.set_ylim(0, 43.0)
+    ax2.set_xlabel("Bacias contempladas com pontos de coleta no mar (N)", fontsize=10.0)
+    ax2.set_ylabel(r"Qualidade da Lei de Potência $R^2$ (%)", fontsize=10.0)
+    ax2.set_title("Por que R* = 5 km? Relação Cobertura × Qualidade", fontsize=10.6, pad=10)
+    ax2.legend(loc="upper left", fontsize=7.3, frameon=True, facecolor="white", edgecolor="#cccccc", framealpha=0.95)
+    rotulo_painel(ax2, "(b)", dentro=False, x=-0.12, y=1.03)
+
+    out_base = REPO_ROOT / "relatorios" / "figuras" / "noaa_r_vs_bacias_contempladas_e_escolha"
+    salvar(fig, out_base)
+    plt.close(fig)
+    return out_base.with_suffix(".png")
+
+
 if __name__ == "__main__":
     pre_csv = REPO_ROOT / "relatorios" / "pre_ipba_estatisticas_raios_sinks.csv"
     sens_csv = REPO_ROOT / "relatorios" / "lei_escala_sensibilidade_raio_fixo.csv"
@@ -472,4 +655,5 @@ if __name__ == "__main__":
 
     p1 = gerar_grafico_r_vs_sobreposicoes(df_pre)
     p2 = gerar_grafico_r_e_justificativa(df_sens, df_pre)
-    print(f"Graficos gerados com sucesso:\n  1. {p1}\n  2. {p2}")
+    p3 = gerar_grafico_r_vs_bacias_contempladas(df_sens)
+    print(f"Graficos gerados com sucesso:\n  1. {p1}\n  2. {p2}\n  3. {p3}")
