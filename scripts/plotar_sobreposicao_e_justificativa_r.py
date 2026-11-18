@@ -646,6 +646,95 @@ def gerar_grafico_r_vs_bacias_contempladas(df_sens: pd.DataFrame) -> Path:
     return out_base.with_suffix(".png")
 
 
+def gerar_grafico_barras_simples_r5(df_sens: pd.DataFrame) -> Path:
+    """
+    Gera um unico grafico de barras minimalista (1 painel) destacando de forma
+    direta e intuitiva que R* = 5 km foi o melhor raio escolhido entre 1 e 22 km.
+    """
+    aplicar_estilo()
+
+    sub = df_sens[
+        (df_sens["regime"] == "2_Bacias_Area_ge_100km2_Todas")
+        & (df_sens["pop_col"] == "urban_population")
+        & (df_sens["metrica"] == "concentracao")
+        & (df_sens["r_km"].between(1, 22))
+    ].sort_values("r_km").copy()
+
+    raios = sub["r_km"].to_numpy(dtype=int)
+    n_vals = sub["n_bacias_estimadas"].to_numpy(dtype=int)
+    r2_vals = np.where(np.isfinite(sub["r2_pct"].to_numpy()), sub["r2_pct"].to_numpy(), 0.0)
+    p_vals = sub["p_value"].to_numpy()
+
+    fig, ax = plt.subplots(figsize=(11.8, 4.9))
+
+    bars = ax.bar(raios, r2_vals, width=0.68, zorder=3)
+    for b, r_k, n_k, p_k in zip(bars, raios, n_vals, p_vals):
+        if r_k == 5:
+            b.set_facecolor("#059669")
+            b.set_edgecolor("#064e3b")
+            b.set_linewidth(1.5)
+        elif n_k < 30 or not np.isfinite(p_k) or p_k >= 0.05:
+            b.set_facecolor("#e5e7eb")
+            b.set_edgecolor("#9ca3af")
+            b.set_linewidth(0.7)
+            b.set_hatch("///")
+        else:
+            b.set_facecolor("#cbd5e1")
+            b.set_edgecolor("#64748b")
+            b.set_linewidth(0.65)
+
+    for r_k, n_k, r2_v in zip(raios, n_vals, r2_vals):
+        if n_k < 4:
+            ax.text(r_k, 0.7, "N<4", ha="center", va="bottom", fontsize=7.0, color="#6b7280")
+        elif r_k == 5:
+            ax.text(r_k, r2_v + 0.7, f"{fmt_dec_pt(r2_v, 1)}%", ha="center", va="bottom", fontsize=9.2, fontweight="bold", color="#065f46")
+        else:
+            txt = f"{fmt_dec_pt(r2_v, 1)}%"
+            if n_k < 30:
+                txt += "\n(n.s.)"
+            ax.text(r_k, r2_v + 0.55, txt, ha="center", va="bottom", fontsize=7.1, color="#334155")
+
+    ax.annotate(
+        "R* = 5 km (ESCOLHIDO)\nMelhor ajuste: R² = 33,3% (N = 49, β = +0,70)",
+        xy=(5.35, float(r2_vals[4]) - 1.8),
+        xytext=(6.9, 34.5),
+        fontsize=8.4,
+        fontweight="bold",
+        color="#065f46",
+        ha="left",
+        va="center",
+        bbox=dict(boxstyle="round,pad=0.30", facecolor="#ecfdf5", edgecolor="#059669", linewidth=1.3),
+        arrowprops=dict(arrowstyle="->", color="#059669", lw=1.5, connectionstyle="arc3,rad=-0.10"),
+        zorder=8,
+    )
+
+    ax.set_xticks(raios)
+    ax.set_xticklabels([str(r) for r in raios], fontsize=9.2)
+    for tick, r_k in zip(ax.get_xticklabels(), raios):
+        if r_k == 5:
+            tick.set_fontweight("bold")
+            tick.set_color("#065f46")
+            tick.set_fontsize(10.5)
+
+    ax.set_xlim(0.2, 22.8)
+    ax.set_ylim(0, 42.5)
+    ax.set_xlabel("Raio fixo R (km)", fontsize=10.5)
+    ax.set_ylabel(r"Qualidade da Lei de Potência $R^2$ (%)", fontsize=10.2)
+    ax.set_title("Escolha do melhor raio (R = 1 a 22 km): R* = 5 km", fontsize=11.5, pad=11)
+
+    leg = [
+        Patch(facecolor="#059669", edgecolor="#064e3b", lw=1.3, label="R* = 5 km (Escolhido)"),
+        Patch(facecolor="#cbd5e1", edgecolor="#64748b", lw=0.7, label="Outros raios testados (N ≥ 30, p < 0,05)"),
+        Patch(facecolor="#e5e7eb", edgecolor="#9ca3af", lw=0.7, hatch="///", label="Amostra pequena / não signif. (R ≤ 3 km)"),
+    ]
+    ax.legend(handles=leg, loc="upper right", fontsize=8.0, frameon=True, facecolor="white", edgecolor="#cccccc", framealpha=0.95)
+
+    out_base = REPO_ROOT / "relatorios" / "figuras" / "noaa_barras_simples_r5_escolhido"
+    salvar(fig, out_base)
+    plt.close(fig)
+    return out_base.with_suffix(".png")
+
+
 if __name__ == "__main__":
     pre_csv = REPO_ROOT / "relatorios" / "pre_ipba_estatisticas_raios_sinks.csv"
     sens_csv = REPO_ROOT / "relatorios" / "lei_escala_sensibilidade_raio_fixo.csv"
@@ -656,4 +745,5 @@ if __name__ == "__main__":
     p1 = gerar_grafico_r_vs_sobreposicoes(df_pre)
     p2 = gerar_grafico_r_e_justificativa(df_sens, df_pre)
     p3 = gerar_grafico_r_vs_bacias_contempladas(df_sens)
-    print(f"Graficos gerados com sucesso:\n  1. {p1}\n  2. {p2}\n  3. {p3}")
+    p4 = gerar_grafico_barras_simples_r5(df_sens)
+    print(f"Graficos gerados com sucesso:\n  1. {p1}\n  2. {p2}\n  3. {p3}\n  4. {p4}")
