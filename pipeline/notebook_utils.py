@@ -265,13 +265,17 @@ def plotar_lei_potencia(
     return res
 
 
-def plotar_varredura_r1_a_22km(df_varredura: pd.DataFrame) -> None:
-    """Plota um embaixo do outro (2x1): R² (%) de R = 1 a 22 km e N bacias (100% sem corte)."""
+def plotar_varredura_r1_a_22km(
+    df_varredura: pd.DataFrame,
+    titulo: str = "Todas as bacias (100% sem corte): R de 1 a 22 km (Ocean water no mar)",
+    min_n: int = 20,
+) -> None:
+    """Plota um embaixo do outro (2x1): R² (%) de R = 1 a 22 km e N bacias contempladas."""
     aplicar_estilo()
     raios = df_varredura["R_km"].to_numpy(dtype=int)
-    r2_u = np.where((df_varredura["N_urb"] >= 20) & np.isfinite(df_varredura["R2_urb_pct"]), df_varredura["R2_urb_pct"], 0.0)
-    r2_t = np.where((df_varredura["N_tot"] >= 20) & np.isfinite(df_varredura["R2_tot_pct"]), df_varredura["R2_tot_pct"], 0.0)
-    r2_ft = np.where((df_varredura["N_tot"] >= 20) & np.isfinite(df_varredura["R2_flux_tot_pct"]), df_varredura["R2_flux_tot_pct"], np.nan)
+    r2_u = np.where((df_varredura["N_urb"] >= min_n) & np.isfinite(df_varredura["R2_urb_pct"]), df_varredura["R2_urb_pct"], 0.0)
+    r2_t = np.where((df_varredura["N_tot"] >= min_n) & np.isfinite(df_varredura["R2_tot_pct"]), df_varredura["R2_tot_pct"], 0.0)
+    r2_ft = np.where((df_varredura["N_tot"] >= min_n) & np.isfinite(df_varredura["R2_flux_tot_pct"]), df_varredura["R2_flux_tot_pct"], np.nan)
     n_u = df_varredura["N_urb"].to_numpy(dtype=int)
     n_t = df_varredura["N_tot"].to_numpy(dtype=int)
 
@@ -280,21 +284,23 @@ def plotar_varredura_r1_a_22km(df_varredura: pd.DataFrame) -> None:
     ax1.bar(raios, r2_t, color=cores, edgecolor="#1e3a8a", width=0.68, label="Concentração Média — Pop. Total da Bacia (R² %)")
     ax1.plot(raios, r2_u, "o--", color="#059669", markersize=4.0, linewidth=1.3, label="Concentração Média — Pop. Urbana na Bacia (R² %)")
     ax1.plot(raios, r2_ft, "D-", color="#7c3aed", markersize=4.2, linewidth=1.6, label="Fluxo C̄ × A — Pop. Total da Bacia (R² %)")
+    r2_off = max(0.5, float(np.nanmax(r2_t)) * 0.015) if np.any(r2_t > 0) else 0.5
     for r_k, v_t in zip(raios, r2_t):
         if v_t > 0:
-            ax1.text(r_k, v_t + 0.5, f"{v_t:.1f}%".replace(".", ","), ha="center", va="bottom", fontsize=7.0, fontweight="bold" if r_k in (5, 13, 22) else "normal")
+            ax1.text(r_k, v_t + r2_off, f"{v_t:.1f}%".replace(".", ","), ha="center", va="bottom", fontsize=7.0, fontweight="bold" if r_k in (5, 13, 22) else "normal")
     y_top = max(float(np.nanmax(r2_ft)), float(np.nanmax(r2_t)), 25.0) + 7.0
     ax1.set_ylim(0, y_top)
     ax1.set_ylabel("Qualidade do ajuste R² (%)")
-    ax1.set_title("Todas as bacias (100% sem corte): R de 1 a 22 km (Ocean water no mar)")
+    ax1.set_title(titulo)
     ax1.legend(loc="upper right", fontsize=7.8)
 
-    ax2.bar(raios, n_t, color="#bfdbfe", edgecolor="#3b82f6", width=0.72, label="Todas as bacias c/ valor no sink (N_tot)")
+    ax2.bar(raios, n_t, color="#bfdbfe", edgecolor="#3b82f6", width=0.72, label="Bacias c/ valor no sink (N_tot)")
     ax2.bar(raios, n_u, color=cores, edgecolor="#0f172a", width=0.44, label="Bacias c/ mancha urbana CCA no sink (N_urb)")
+    n_off = max(2.0, float(n_t.max()) * 0.015)
     for r_k, nt_v in zip(raios, n_t):
-        if r_k in (3, 5, 10, 13, 18, 22):
-            ax2.text(r_k, nt_v + 120, f"{nt_v:,}".replace(",", "."), ha="center", va="bottom", fontsize=7.2, fontweight="bold" if r_k in (5, 22) else "normal")
-    ax2.set_ylim(0, max(int(n_t.max()), 100) * 1.15)
+        if r_k in (3, 5, 10, 13, 18, 22) and nt_v > 0:
+            ax2.text(r_k, nt_v + n_off, f"{nt_v:,}".replace(",", "."), ha="center", va="bottom", fontsize=7.2, fontweight="bold" if r_k in (5, 22) else "normal")
+    ax2.set_ylim(0, max(int(n_t.max()), 10) * 1.16)
     ax2.set_xticks(raios)
     ax2.set_xlabel("Raio fixo R no sink (1 a 22 km)")
     ax2.set_ylabel("Bacias c/ valor no sink (N)")
