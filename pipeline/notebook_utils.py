@@ -266,32 +266,39 @@ def plotar_lei_potencia(
 
 
 def plotar_varredura_r1_a_22km(df_varredura: pd.DataFrame) -> None:
-    """Plota um embaixo do outro (2x1): R² (%) de R = 1 a 22 km e N bacias de R = 1 a 22 km."""
+    """Plota um embaixo do outro (2x1): R² (%) de R = 1 a 22 km e N bacias (100% sem corte)."""
     aplicar_estilo()
     raios = df_varredura["R_km"].to_numpy(dtype=int)
-    r2_u = np.where(np.isfinite(df_varredura["R2_urb_pct"]), df_varredura["R2_urb_pct"], 0.0)
-    r2_f = np.where(np.isfinite(df_varredura["R2_flux_urb_pct"]), df_varredura["R2_flux_urb_pct"], 0.0)
+    r2_u = np.where((df_varredura["N_urb"] >= 20) & np.isfinite(df_varredura["R2_urb_pct"]), df_varredura["R2_urb_pct"], 0.0)
+    r2_t = np.where((df_varredura["N_tot"] >= 20) & np.isfinite(df_varredura["R2_tot_pct"]), df_varredura["R2_tot_pct"], 0.0)
+    r2_ft = np.where((df_varredura["N_tot"] >= 20) & np.isfinite(df_varredura["R2_flux_tot_pct"]), df_varredura["R2_flux_tot_pct"], np.nan)
     n_u = df_varredura["N_urb"].to_numpy(dtype=int)
     n_t = df_varredura["N_tot"].to_numpy(dtype=int)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12.2, 6.8), sharex=True, gridspec_kw={"hspace": 0.18})
-    cores = ["#059669" if r == 5 else ("#2563eb" if r == 13 else ("#dc2626" if r == 22 else "#cbd5e1")) for r in raios]
-    ax1.bar(raios, r2_u, color=cores, edgecolor="#334155", width=0.68, label="Concentração Média — Pop. Urbana (R² %)")
-    ax1.plot(raios[raios >= 3], r2_f[raios >= 3], "D-", color="#7c3aed", markersize=4.2, linewidth=1.6, label="Fluxo C̄ × A — Pop. Urbana (R² %)")
-    for r_k, v_u in zip(raios, r2_u):
-        if v_u > 0:
-            ax1.text(r_k, v_u + 0.6, f"{v_u:.1f}%".replace(".", ","), ha="center", va="bottom", fontsize=7.0, fontweight="bold" if r_k in (5, 13, 22) else "normal")
-    ax1.set_ylim(0, 48)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12.4, 6.8), sharex=True, gridspec_kw={"hspace": 0.18})
+    cores = ["#059669" if r == 5 else ("#2563eb" if r == 13 else ("#dc2626" if r == 22 else "#93c5fd")) for r in raios]
+    ax1.bar(raios, r2_t, color=cores, edgecolor="#1e3a8a", width=0.68, label="Concentração Média — Pop. Total da Bacia (R² %)")
+    ax1.plot(raios, r2_u, "o--", color="#059669", markersize=4.0, linewidth=1.3, label="Concentração Média — Pop. Urbana na Bacia (R² %)")
+    ax1.plot(raios, r2_ft, "D-", color="#7c3aed", markersize=4.2, linewidth=1.6, label="Fluxo C̄ × A — Pop. Total da Bacia (R² %)")
+    for r_k, v_t in zip(raios, r2_t):
+        if v_t > 0:
+            ax1.text(r_k, v_t + 0.5, f"{v_t:.1f}%".replace(".", ","), ha="center", va="bottom", fontsize=7.0, fontweight="bold" if r_k in (5, 13, 22) else "normal")
+    y_top = max(float(np.nanmax(r2_ft)), float(np.nanmax(r2_t)), 25.0) + 7.0
+    ax1.set_ylim(0, y_top)
     ax1.set_ylabel("Qualidade do ajuste R² (%)")
-    ax1.set_title("Evolução da Lei de Potência para R de 1 a 22 km (Ocean water no mar)")
-    ax1.legend(loc="upper right", fontsize=8.0)
+    ax1.set_title("Todas as bacias (100% sem corte): R de 1 a 22 km (Ocean water no mar)")
+    ax1.legend(loc="upper right", fontsize=7.8)
 
-    ax2.bar(raios, n_t, color="#bfdbfe", edgecolor="#3b82f6", width=0.72, label="Bacias totais c/ valor no sink (N_tot)")
-    ax2.bar(raios, n_u, color=cores, edgecolor="#0f172a", width=0.44, label="Bacias urbanas CCA c/ valor no sink (N_urb)")
+    ax2.bar(raios, n_t, color="#bfdbfe", edgecolor="#3b82f6", width=0.72, label="Todas as bacias c/ valor no sink (N_tot)")
+    ax2.bar(raios, n_u, color=cores, edgecolor="#0f172a", width=0.44, label="Bacias c/ mancha urbana CCA no sink (N_urb)")
+    for r_k, nt_v in zip(raios, n_t):
+        if r_k in (3, 5, 10, 13, 18, 22):
+            ax2.text(r_k, nt_v + 120, f"{nt_v:,}".replace(",", "."), ha="center", va="bottom", fontsize=7.2, fontweight="bold" if r_k in (5, 22) else "normal")
+    ax2.set_ylim(0, max(int(n_t.max()), 100) * 1.15)
     ax2.set_xticks(raios)
     ax2.set_xlabel("Raio fixo R no sink (1 a 22 km)")
     ax2.set_ylabel("Bacias c/ valor no sink (N)")
-    ax2.legend(loc="upper left", fontsize=8.0)
+    ax2.legend(loc="upper left", fontsize=7.8)
     plt.show()
 
 
@@ -308,14 +315,13 @@ def plotar_varredura_4_tipos_r1_a_22km(df_var_tipos: pd.DataFrame) -> None:
     for row_i, (nome, c_bar, c_ln) in enumerate(estilos):
         sub = df_var_tipos[df_var_tipos["Tipo_NOAA"] == nome].sort_values("R_km")
         raios = sub["R_km"].to_numpy(dtype=int)
-        r2_c = np.where(np.isfinite(sub["R2_Conc_Urb_pct"]), sub["R2_Conc_Urb_pct"], 0.0)
-        r2_f = np.where(np.isfinite(sub["R2_Fluxo_Tot_pct"]), sub["R2_Fluxo_Tot_pct"], 0.0)
-        n_u = sub["N_urb"].to_numpy(dtype=int)
+        r2_c = np.where((sub["N_urb"] >= 20) & np.isfinite(sub["R2_Conc_Urb_pct"]), sub["R2_Conc_Urb_pct"], 0.0)
+        r2_f = np.where((sub["N_tot"] >= 20) & np.isfinite(sub["R2_Fluxo_Tot_pct"]), sub["R2_Fluxo_Tot_pct"], 0.0)
         n_t = sub["N_tot"].to_numpy(dtype=int)
 
         ax_l, ax_r = axes[row_i, 0], axes[row_i, 1]
         ax_l.bar(raios, r2_c, color=c_bar, edgecolor="#1e293b", alpha=0.82, width=0.68)
-        ax_l.set_title(f"{nome} — Concentração Média (R = 1 a 22 km)", fontsize=9.8)
+        ax_l.set_title(f"{nome} — Concentração Média (100% bacias, N ≥ 20)", fontsize=9.8)
         ax_l.set_ylabel("R² (%)")
         ax_l.set_xticks(raios)
 
@@ -323,7 +329,7 @@ def plotar_varredura_4_tipos_r1_a_22km(df_var_tipos: pd.DataFrame) -> None:
         ax_r_n = ax_r.twinx()
         ax_r_n.plot(raios, n_t, "k--o", markersize=3.0, linewidth=1.1, label="N bacias")
         ax_r_n.set_ylabel("N bacias", fontsize=8.5)
-        ax_r.set_title(f"{nome} — Fluxo C̄ × A e Cobertura N (R = 1 a 22 km)", fontsize=9.8)
+        ax_r.set_title(f"{nome} — Fluxo C̄ × A e Cobertura N (100% bacias)", fontsize=9.8)
         ax_r.set_ylabel("R² Fluxo (%)")
         ax_r.set_xticks(raios)
 
