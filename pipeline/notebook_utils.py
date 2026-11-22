@@ -1,18 +1,15 @@
 """
 pipeline/notebook_utils.py
 --------------------------
-Funcoes auxiliares enxutas para os notebooks de analise da Lei de Potencia:
-  - Carregamento e separacao dos 4 tipos de lixo da base NOAA c/ cota GEBCO.
-  - Identificacao das porcoes de terra ativas via `externos/GebcoCutter`.
-  - Associacao da media aritmetica no circulo de raio R em cada sink e filtro
-    apenas das bacias que possuem valor associado ao sink.
-  - Ajuste OLS log-log (Lei de Potencia) e plotagem padronizada.
+Funcoes curtas usadas pelos notebooks:
+  - carrega os tipos de lixo da NOAA (com cota GEBCO) e as bacias (GebcoCutter + IPBA + CCA);
+  - media dos pontos num circulo de raio R em volta de cada sink;
+  - lei de potencia log-log (nuvem + medias por faixa) e mosaicos de graficos.
 """
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -23,7 +20,7 @@ from scipy import stats
 from scipy.ndimage import binary_dilation
 from scipy.spatial import cKDTree
 
-from geracao_graficos.estilo_erneson import aplicar_estilo, rotulo_painel, salvar
+from geracao_graficos.estilo_erneson import aplicar_estilo, rotulo_painel
 from pipeline.gebco_cutter import (
     REPO_ROOT,
     executar_percolacao_gebco_cutter,
@@ -37,22 +34,27 @@ GEBCO_TIF = REPO_ROOT / "dados" / "gebco" / "gebco_2026_sub_ice_geotiff.tif"
 GPW_TIF = REPO_ROOT / "dados" / "gpw_data" / "gpw_v4_population_count_rev11_2020_30_sec.tif"
 CACHE_PERC = REPO_ROOT / "relatorios" / "cache_percolacao_gebco_h0.npz"
 PORCOES_DIR = REPO_ROOT / "relatorios" / "porcoes_terra"
+FIGURAS_DIR = REPO_ROOT / "relatorios" / "figuras"
+
+UNIDADES = {
+    "Água oceânica": "pieces/m³",
+    "Areia de praia": "pieces/m³",
+    "Sedimento oceânico": "pieces/kg",
+    "Nurdle Patrol": "pieces/10 min",
+}
+EIXOS_X = {"total_population": "População da Bacia", "area_km2": "Área da Bacia (km²)"}
+CORES = ["#0284c7", "#d97706", "#7c3aed", "#059669"]
 
 
 def to_xyz(lat_deg: np.ndarray, lon_deg: np.ndarray) -> np.ndarray:
+    """Converte coordenadas geograficas (graus) em vetores unitarios 3D."""
     lat = np.radians(lat_deg)
     lon = np.radians(lon_deg)
     return np.column_stack([np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon), np.sin(lat)])
 
 
 def carregar_noaa_por_tipo() -> dict[str, pd.DataFrame]:
-    """
-    Carrega o GeoJSON da NOAA, anota a elevacao `gebco_h` e separa os 4 tipos de lixo:
-      - `Ocean water`: malha padrao 0,02-5,0 mm (pieces/m3), filtrado no mar (`gebco_h <= 0`)
-      - `Ocean sediment`: sedimento marinho (pieces kg-1 d.w.), filtrado no mar (`gebco_h <= 0`)
-      - `Nurdle Patrol`: pellets industriais na costa/praia (pieces/10 mins)
-      - `Beach`: areia de praia (pieces/m3)
-    """
+    """Le o GeoJSON da NOAA, anota a cota GEBCO e separa os tipos de lixo (nomes em portugues)."""
     with open(NOAA_GEOJSON, "r", encoding="utf-8") as f:
         gj = json.load(f)
 
@@ -74,18 +76,12 @@ def carregar_noaa_por_tipo() -> dict[str, pd.DataFrame]:
     df["gebco_h"] = dem[rows, cols].astype(float)
     del ds
 
+    mar = df["gebco_h"] <= 0.0
     return {
-        "Ocean water": df[
-            (df["Medium"] == "Ocean water")
-            & (df["Unit"] == "pieces/m3")
-            & (df["mesh_mm"].between(0.02, 5.0))
-            & (df["gebco_h"] <= 0.0)
-        ].reset_index(drop=True),
-        "Ocean sediment": df[
-            (df["Medium"] == "Ocean sediment") & (df["gebco_h"] <= 0.0)
-        ].reset_index(drop=True),
+        "Água oceânica": df[(df["Medium"] == "Ocean water") & (df["Unit"] == "pieces/m3") & df["mesh_mm"].between(0.02, 5.0) & mar].reset_index(drop=True),
+        "Areia de praia": df[(df["Medium"] == "Beach") & (df["Unit"] == "pieces/m3")].reset_index(drop=True),
+        "Sedimento oceânico": df[(df["Medium"] == "Ocean sediment") & mar].reset_index(drop=True),
         "Nurdle Patrol": df[df["Medium"] == "Nurdle Patrol"].reset_index(drop=True),
-        "Beach": df[(df["Medium"] == "Beach") & (df["Unit"] == "pieces/m3")].reset_index(drop=True),
     }
 
 
@@ -126,220 +122,174 @@ def processar_ou_carregar_porcao(
     return processar_porcao_terra_gebco_cutter(int(val), arr_c, cl_c, info_c, jmin, jmax, cols, GPW_TIF, out_dir=PORCOES_DIR)
 
 
-def media_por_sink_raio(
-    bacias_df: pd.DataFrame,
-    pontos_df: pd.DataFrame,
-    r_km: float,
-) -> pd.DataFrame:
-    """
-    Calcula a MEDIA aritmetica simples dos pontos dentro do raio `r_km` de cada sink
-    e retorna APENAS as bacias que obtiveram valor positivo (`mp_mean > 0`).
-    """
-    out = bacias_df.copy().reset_index(drop=True)
-    tree_p = cKDTree(to_xyz(pontos_df["lat"].to_numpy(), pontos_df["lon"].to_numpy()))
-    chord = float(2.0 * np.sin((float(r_km) / EARTH_RADIUS_KM) / 2.0))
-    p_lists = tree_p.query_ball_point(to_xyz(out["latitude"].to_numpy(), out["longitude"].to_numpy()), r=chord)
-
-    vals = pontos_df["valor"].to_numpy()
-    means = np.full(len(out), np.nan, dtype=float)
-    n_pts = np.zeros(len(out), dtype=int)
-    for i, idx_list in enumerate(p_lists):
-        if idx_list:
-            v = vals[np.array(idx_list, dtype=int)]
-            means[i] = float(np.mean(v))
-            n_pts[i] = len(v)
-
-    out["mp_mean"] = means
-    out["n_points"] = n_pts
-    out["flux"] = out["mp_mean"] * out["area_km2"]
-    return out[(out["mp_mean"] > 0) & np.isfinite(out["mp_mean"])].copy().reset_index(drop=True)
+def carregar_bacias(pontos: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """100% das bacias (IPBA + CCA) das porcoes de terra a ate 50 km de algum ponto."""
+    info, arr, label, porcoes = identificar_porcoes_ativas(pd.concat(pontos.values(), ignore_index=True))
+    dfs = [processar_ou_carregar_porcao(v, info, arr, label) for v in porcoes]
+    return pd.concat([d for d in dfs if len(d) > 0], ignore_index=True)
 
 
-def ajustar_lei_potencia(
-    df_pareado: pd.DataFrame,
-    pop_col: str = "total_population",
-    y_col: str = "mp_mean",
-) -> dict[str, Any]:
-    """Ajusta regressao linear OLS em log10(pop_col) vs log10(y_col)."""
-    sub = df_pareado[(df_pareado[pop_col] > 0) & (df_pareado[y_col] > 0) & np.isfinite(df_pareado[y_col])].copy()
-    n = len(sub)
-    if n < 4:
-        return {"N": n, "beta": np.nan, "se": np.nan, "r": np.nan, "r2_pct": np.nan, "p_value": np.nan, "rho": np.nan, "r2_bins_pct": np.nan}
+def recorte_top95_global(bacias: pd.DataFrame) -> pd.DataFrame:
+    """Maiores bacias que somam 95% da area total (recorte classico do IPBA)."""
+    b = bacias.sort_values("area_km2", ascending=False).reset_index(drop=True)
+    acum = b["area_km2"].cumsum() / b["area_km2"].sum()
+    return b.iloc[: int((acum <= 0.95).sum()) + 1].reset_index(drop=True)
 
-    x = np.log10(sub[pop_col].to_numpy())
-    y = np.log10(sub[y_col].to_numpy())
-    sl, ic, rv, pv, se = stats.linregress(x, y)
-    rho, _ = stats.spearmanr(x, y)
 
-    r2_bins_pct = np.nan
-    if n >= 20:
-        sub["bin"] = pd.cut(x, bins=np.linspace(x.min(), x.max(), 9), include_lowest=True)
-        b_df = (
-            sub.groupby("bin", observed=True)
-            .agg(n_b=(y_col, "count"), xm=(pop_col, lambda s: float(np.mean(np.log10(s)))), ym=(y_col, lambda s: float(np.mean(np.log10(s)))))
-            .dropna()
-        )
-        b_df = b_df[b_df["n_b"] >= 3]
-        if len(b_df) >= 4:
-            _, _, rv_b, _, _ = stats.linregress(b_df["xm"].to_numpy(), b_df["ym"].to_numpy())
-            r2_bins_pct = float(rv_b**2 * 100.0)
+def filtrar_pop(df: pd.DataFrame, pop_min: float = 0) -> pd.DataFrame:
+    """Filtra bacias com populacao total positiva e >= `pop_min`."""
+    return df[(df["total_population"] > 0) & (df["total_population"] >= pop_min)]
 
-    return {
-        "N": int(n),
-        "beta": float(sl),
-        "intercept": float(ic),
-        "se": float(se),
-        "r": float(rv),
-        "r2_pct": float(rv**2 * 100.0),
-        "p_value": float(pv),
-        "rho": float(rho),
-        "r2_bins_pct": r2_bins_pct,
-    }
+
+def media_por_sink_raio(bacias: pd.DataFrame, pontos: pd.DataFrame, r_km: float) -> pd.DataFrame:
+    """Media dos pontos a ate `r_km` de cada sink; devolve so as bacias com media > 0."""
+    tree = cKDTree(to_xyz(pontos["lat"].to_numpy(), pontos["lon"].to_numpy()))
+    corda = 2.0 * np.sin(r_km / EARTH_RADIUS_KM / 2.0)
+    vizinhos = tree.query_ball_point(to_xyz(bacias["latitude"].to_numpy(), bacias["longitude"].to_numpy()), r=corda)
+    vals = pontos["valor"].to_numpy()
+    out = bacias.copy()
+    out["mp_mean"] = [vals[v].mean() if v else np.nan for v in vizinhos]
+    out["n_points"] = [len(v) for v in vizinhos]
+    return out[out["mp_mean"] > 0].reset_index(drop=True)
+
+
+def pareados_por_raio(
+    bacias: pd.DataFrame,
+    pontos: dict[str, pd.DataFrame],
+    raios: Any,
+) -> dict[int, dict[str, pd.DataFrame]]:
+    """Associa a media por raio para cada conjunto de pontos."""
+    return {r: {nome: media_por_sink_raio(bacias, pts, r) for nome, pts in pontos.items()} for r in raios}
+
+
+def _medias_bins(x: np.ndarray, y: np.ndarray) -> pd.DataFrame:
+    """Media de log x e log y em 8 faixas iguais de log x (so faixas com >= 3 pontos)."""
+    faixa = pd.cut(x, np.linspace(x.min(), x.max(), 9), include_lowest=True)
+    b = pd.DataFrame({"x": x, "y": y, "f": faixa}).groupby("f", observed=True).agg(n=("y", "size"), xm=("x", "mean"), ym=("y", "mean"))
+    return b[b["n"] >= 3]
+
+
+def ajustar_lei_potencia(df: pd.DataFrame, x_col: str, y_col: str = "mp_mean") -> dict[str, Any]:
+    """OLS em log10(x) vs log10(y) na nuvem + R² e beta (ponderado por n) nas medias por faixa."""
+    sub = df[(df[x_col] > 0) & (df[y_col] > 0)]
+    res: dict[str, Any] = dict(
+        N=len(sub), beta=np.nan, intercept=np.nan, se=np.nan,
+        r2_pct=np.nan, p_value=np.nan, rho=np.nan, r2_bins_pct=np.nan, beta_bins_w=np.nan,
+    )
+    if len(sub) < 4:
+        return res
+    x, y = np.log10(sub[x_col].to_numpy()), np.log10(sub[y_col].to_numpy())
+    fit = stats.linregress(x, y)
+    res.update(
+        beta=fit.slope, intercept=fit.intercept, se=fit.stderr,
+        r2_pct=100 * fit.rvalue**2, p_value=fit.pvalue, rho=stats.spearmanr(x, y)[0],
+    )
+    b = _medias_bins(x, y) if len(sub) >= 20 else pd.DataFrame()
+    if len(b) >= 4:
+        res["r2_bins_pct"] = 100 * stats.linregress(b["xm"], b["ym"]).rvalue ** 2
+        res["beta_bins_w"] = np.polyfit(b["xm"], b["ym"], 1, w=np.sqrt(b["n"]))[0]
+    return res
+
+
+def tabela_ajustes(pareados_por_r: dict[int, dict[str, pd.DataFrame]], pop_mins: Any = (0,)) -> pd.DataFrame:
+    """Consolida os ajustes de lei de potencia por conjunto, raio, corte de populacao e eixo X."""
+    linhas = []
+    for r, pareados in pareados_por_r.items():
+        for nome, df in pareados.items():
+            for pop_min in pop_mins:
+                for x_col in EIXOS_X:
+                    res = ajustar_lei_potencia(filtrar_pop(df, pop_min), x_col)
+                    res.pop("intercept")
+                    linhas.append({"Conjunto": nome, "R_km": r, "Pop_min": pop_min, "X": x_col, **res})
+    return pd.DataFrame(linhas)
 
 
 def plotar_lei_potencia(
     ax: plt.Axes,
-    df_pareado: pd.DataFrame,
-    pop_col: str,
-    y_col: str,
+    df: pd.DataFrame,
+    x_col: str,
     titulo: str,
     xlabel: str,
     ylabel: str,
-    cor_pts: str = "#0284c7",
-    cor_reta: str = "#0369a1",
-) -> dict[str, Any]:
-    """Plota o scatter log-log com reta OLS, banda IC 95% e medias por faixa log."""
-    aplicar_estilo()
-    sub = df_pareado[(df_pareado[pop_col] > 0) & (df_pareado[y_col] > 0) & np.isfinite(df_pareado[y_col])].copy()
-    res = ajustar_lei_potencia(sub, pop_col, y_col)
-    if res["N"] < 4:
-        ax.text(0.5, 0.5, f"Amostra insuficiente (N = {res['N']})", ha="center", va="center", transform=ax.transAxes, fontsize=9.0, color="#64748b")
-        ax.set_title(titulo, fontsize=10.0, pad=8)
-        ax.set_xlabel(xlabel, fontsize=9.4)
-        ax.set_ylabel(ylabel, fontsize=9.4)
-        return res
-
-    x = np.log10(sub[pop_col].to_numpy())
-    y = np.log10(sub[y_col].to_numpy())
-    ax.scatter(x, y, edgecolors=cor_pts, facecolors="none", s=30, linewidths=1.0, alpha=0.72, label=f"Bacias (N = {res['N']})")
-
-    xl = np.linspace(x.min() - 0.1, x.max() + 0.1, 100)
-    yl = res["intercept"] + res["beta"] * xl
-    ax.plot(xl, yl, color=cor_reta, linewidth=2.0, label="Ajuste Lei de Potência")
-
-    n = res["N"]
-    t_val = float(stats.t.ppf(0.975, df=n - 2))
-    s_err = float(np.sqrt(np.sum((y - (res["intercept"] + res["beta"] * x)) ** 2) / (n - 2)))
-    ci = t_val * s_err * np.sqrt(1.0 / n + (xl - np.mean(x)) ** 2 / np.sum((x - np.mean(x)) ** 2))
-    ax.fill_between(xl, yl - ci, yl + ci, color=cor_reta, alpha=0.16)
-
-    if n >= 20:
-        sub["bin"] = pd.cut(x, bins=np.linspace(x.min(), x.max(), 9), include_lowest=True)
-        b_df = (
-            sub.groupby("bin", observed=True)
-            .agg(n_b=(y_col, "count"), xm=(pop_col, lambda s: float(np.mean(np.log10(s)))), ym=(y_col, lambda s: float(np.mean(np.log10(s)))))
-            .dropna()
-        )
-        b_df = b_df[b_df["n_b"] >= 3]
-        if len(b_df) >= 4:
-            ax.plot(b_df["xm"], b_df["ym"], "ko", markersize=4.8, zorder=7, label="Média por faixa log")
-
-    p_txt = "p < 0,0001" if res["p_value"] < 1e-4 else f"p = {res['p_value']:.4f}".replace(".", ",")
-    bins_txt = f"\nR²_bins = {res['r2_bins_pct']:.1f}%".replace(".", ",") if np.isfinite(res["r2_bins_pct"]) else ""
-    stat_box = (
-        f"β = {res['beta']:+.2f} ± {res['se']:.2f}\n"
-        f"R² = {res['r2_pct']:.1f}% ({p_txt})\n"
-        f"Spearman ρ = {res['rho']:+.2f}{bins_txt}"
-    ).replace(".", ",")
-
-    ax.text(
-        0.04, 0.95, stat_box, transform=ax.transAxes, ha="left", va="top", fontsize=8.0,
-        bbox=dict(boxstyle="round,pad=0.28", facecolor="white", edgecolor="#cbd5e1", alpha=0.94),
-    )
-    ax.set_title(titulo, fontsize=10.2, pad=8)
-    ax.set_xlabel(xlabel, fontsize=9.6)
-    ax.set_ylabel(ylabel, fontsize=9.6)
-    y_span = max(float(y.max() - y.min()), 2.8)
-    ax.set_ylim(float(y.min()) - 0.25 * y_span, float(y.max()) + 0.42 * y_span)
-    ax.legend(loc="lower right", fontsize=7.2, frameon=True, facecolor="white", edgecolor="#cccccc")
-    return res
-
-
-def plotar_varredura_r1_a_22km(
-    df_varredura: pd.DataFrame,
-    titulo: str = "Todas as bacias (100% sem corte): R de 1 a 22 km (Ocean water no mar)",
-    min_n: int = 20,
+    cor: str = "#0284c7",
 ) -> None:
-    """Plota um embaixo do outro (2x1): R² (%) de R = 1 a 22 km e N bacias contempladas."""
+    """Nuvem log-log, reta OLS, medias por faixa (pontos pretos) e caixa com as estatisticas."""
+    res = ajustar_lei_potencia(df, x_col)
+    ax.set(title=titulo, xlabel=xlabel, ylabel=ylabel)
+    if res["N"] < 4:
+        ax.text(0.5, 0.5, f"N = {res['N']} (insuficiente)", ha="center", va="center", transform=ax.transAxes)
+        return
+    sub = df[(df[x_col] > 0) & (df["mp_mean"] > 0)]
+    x, y = np.log10(sub[x_col].to_numpy()), np.log10(sub["mp_mean"].to_numpy())
+    ax.scatter(x, y, s=22, facecolors="none", edgecolors=cor, alpha=0.7, label=f"Bacias (N = {res['N']})")
+    xl = np.array([x.min(), x.max()])
+    ax.plot(xl, res["intercept"] + res["beta"] * xl, color=cor, lw=2, label="Ajuste na nuvem")
+    if res["N"] >= 20:
+        b = _medias_bins(x, y)
+        ax.plot(b["xm"], b["ym"], "ko", ms=5, label="Média por faixa")
+    bins_txt = (
+        f"\nR²_bins = {res['r2_bins_pct']:.1f}% | β_bins (pond) = {res['beta_bins_w']:+.2f}"
+        if np.isfinite(res["r2_bins_pct"])
+        else ""
+    )
+    texto = (
+        f"β = {res['beta']:+.2f} ± {res['se']:.2f}\n"
+        f"R² = {res['r2_pct']:.1f}% (p = {res['p_value']:.1e})\n"
+        f"ρ Spearman = {res['rho']:+.2f}{bins_txt}"
+    )
+    ax.text(
+        0.03, 0.97, texto.replace(".", ","), transform=ax.transAxes, ha="left", va="top", fontsize=7.5,
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#cbd5e1"),
+    )
+    span = max(y.max() - y.min(), 2.0)
+    ax.set_ylim(y.min() - 0.15 * span, y.max() + 0.55 * span)
+    ax.legend(loc="lower right", fontsize=7)
+
+
+def plotar_mosaico(
+    pareados: dict[str, pd.DataFrame],
+    titulo: str,
+    pop_min: float = 0,
+    arquivo: str | None = None,
+) -> None:
+    """Linhas = conjuntos (ex.: Agua oceanica, Areia de praia); colunas = Populacao e Area da bacia."""
     aplicar_estilo()
-    raios = df_varredura["R_km"].to_numpy(dtype=int)
-    r2_u = np.where((df_varredura["N_urb"] >= min_n) & np.isfinite(df_varredura["R2_urb_pct"]), df_varredura["R2_urb_pct"], 0.0)
-    r2_t = np.where((df_varredura["N_tot"] >= min_n) & np.isfinite(df_varredura["R2_tot_pct"]), df_varredura["R2_tot_pct"], 0.0)
-    r2_ft = np.where((df_varredura["N_tot"] >= min_n) & np.isfinite(df_varredura["R2_flux_tot_pct"]), df_varredura["R2_flux_tot_pct"], np.nan)
-    n_u = df_varredura["N_urb"].to_numpy(dtype=int)
-    n_t = df_varredura["N_tot"].to_numpy(dtype=int)
-
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12.4, 6.8), sharex=True, gridspec_kw={"hspace": 0.18})
-    cores = ["#059669" if r == 5 else ("#2563eb" if r == 13 else ("#dc2626" if r == 22 else "#93c5fd")) for r in raios]
-    ax1.bar(raios, r2_t, color=cores, edgecolor="#1e3a8a", width=0.68, label="Concentração Média — Pop. Total da Bacia (R² %)")
-    ax1.plot(raios, r2_u, "o--", color="#059669", markersize=4.0, linewidth=1.3, label="Concentração Média — Pop. Urbana na Bacia (R² %)")
-    ax1.plot(raios, r2_ft, "D-", color="#7c3aed", markersize=4.2, linewidth=1.6, label="Fluxo C̄ × A — Pop. Total da Bacia (R² %)")
-    r2_off = max(0.5, float(np.nanmax(r2_t)) * 0.015) if np.any(r2_t > 0) else 0.5
-    for r_k, v_t in zip(raios, r2_t):
-        if v_t > 0:
-            ax1.text(r_k, v_t + r2_off, f"{v_t:.1f}%".replace(".", ","), ha="center", va="bottom", fontsize=7.0, fontweight="bold" if r_k in (5, 13, 22) else "normal")
-    y_top = max(float(np.nanmax(r2_ft)), float(np.nanmax(r2_t)), 25.0) + 7.0
-    ax1.set_ylim(0, y_top)
-    ax1.set_ylabel("Qualidade do ajuste R² (%)")
-    ax1.set_title(titulo)
-    ax1.legend(loc="upper right", fontsize=7.8)
-
-    ax2.bar(raios, n_t, color="#bfdbfe", edgecolor="#3b82f6", width=0.72, label="Bacias c/ valor no sink (N_tot)")
-    ax2.bar(raios, n_u, color=cores, edgecolor="#0f172a", width=0.44, label="Bacias c/ mancha urbana CCA no sink (N_urb)")
-    n_off = max(2.0, float(n_t.max()) * 0.015)
-    for r_k, nt_v in zip(raios, n_t):
-        if r_k in (3, 5, 10, 13, 18, 22) and nt_v > 0:
-            ax2.text(r_k, nt_v + n_off, f"{nt_v:,}".replace(",", "."), ha="center", va="bottom", fontsize=7.2, fontweight="bold" if r_k in (5, 22) else "normal")
-    ax2.set_ylim(0, max(int(n_t.max()), 10) * 1.16)
-    ax2.set_xticks(raios)
-    ax2.set_xlabel("Raio fixo R no sink (1 a 22 km)")
-    ax2.set_ylabel("Bacias c/ valor no sink (N)")
-    ax2.legend(loc="upper left", fontsize=7.8)
+    fig, axes = plt.subplots(len(pareados), 2, figsize=(12, 4.3 * len(pareados)), squeeze=False)
+    for i, (nome, df) in enumerate(pareados.items()):
+        for j, (x_col, nome_x) in enumerate(EIXOS_X.items()):
+            ax = axes[i, j]
+            plotar_lei_potencia(
+                ax, filtrar_pop(df, pop_min), x_col, nome,
+                f"log10({nome_x})", f"log10(Média {UNIDADES[nome]})", CORES[i],
+            )
+            rotulo_painel(ax, f"({'abcdefgh'[2 * i + j]})", x=-0.12, y=1.04)
+    filtro = f"População ≥ {pop_min:,} hab.".replace(",", ".") if pop_min else "sem filtro de população"
+    fig.suptitle(f"{titulo} — {filtro}")
+    fig.tight_layout()
+    if arquivo:
+        FIGURAS_DIR.mkdir(parents=True, exist_ok=True)
+        fig.savefig(FIGURAS_DIR / f"{arquivo}.png", dpi=200, bbox_inches="tight")
     plt.show()
 
 
-def plotar_varredura_4_tipos_r1_a_22km(df_var_tipos: pd.DataFrame) -> None:
-    """Plota os 4 tipos de lixo da NOAA um embaixo do outro (4 linhas x 2 colunas) para R de 1 a 22 km."""
+def plotar_varredura(tab: pd.DataFrame, min_n: int = 20) -> None:
+    """Para cada conjunto: R² (%) vs R (Populacao e Area) e N de bacias vs R."""
     aplicar_estilo()
-    estilos = [
-        ("Ocean water", "#0284c7", "#0369a1"),
-        ("Ocean sediment", "#7c3aed", "#4c1d95"),
-        ("Nurdle Patrol", "#059669", "#065f46"),
-        ("Beach", "#d97706", "#92400e"),
-    ]
-    fig, axes = plt.subplots(4, 2, figsize=(13.6, 12.8), sharex=True, gridspec_kw={"hspace": 0.25, "wspace": 0.22})
-    for row_i, (nome, c_bar, c_ln) in enumerate(estilos):
-        sub = df_var_tipos[df_var_tipos["Tipo_NOAA"] == nome].sort_values("R_km")
-        raios = sub["R_km"].to_numpy(dtype=int)
-        r2_c = np.where((sub["N_urb"] >= 20) & np.isfinite(sub["R2_Conc_Urb_pct"]), sub["R2_Conc_Urb_pct"], 0.0)
-        r2_f = np.where((sub["N_tot"] >= 20) & np.isfinite(sub["R2_Fluxo_Tot_pct"]), sub["R2_Fluxo_Tot_pct"], 0.0)
-        n_t = sub["N_tot"].to_numpy(dtype=int)
-
-        ax_l, ax_r = axes[row_i, 0], axes[row_i, 1]
-        ax_l.bar(raios, r2_c, color=c_bar, edgecolor="#1e293b", alpha=0.82, width=0.68)
-        ax_l.set_title(f"{nome} — Concentração Média (100% bacias, N ≥ 20)", fontsize=9.8)
-        ax_l.set_ylabel("R² (%)")
-        ax_l.set_xticks(raios)
-
-        ax_r.bar(raios, r2_f, color=c_ln, edgecolor="#1e293b", alpha=0.85, width=0.68, label="R² Fluxo (%)")
-        ax_r_n = ax_r.twinx()
-        ax_r_n.plot(raios, n_t, "k--o", markersize=3.0, linewidth=1.1, label="N bacias")
-        ax_r_n.set_ylabel("N bacias", fontsize=8.5)
-        ax_r.set_title(f"{nome} — Fluxo C̄ × A e Cobertura N (100% bacias)", fontsize=9.8)
-        ax_r.set_ylabel("R² Fluxo (%)")
-        ax_r.set_xticks(raios)
-
-    axes[-1, 0].set_xlabel("Raio fixo R no sink (1 a 22 km)")
-    axes[-1, 1].set_xlabel("Raio fixo R no sink (1 a 22 km)")
+    nomes = tab["Conjunto"].unique()
+    fig, axes = plt.subplots(len(nomes), 2, figsize=(12, 3.2 * len(nomes)), sharex=True, squeeze=False)
+    for i, nome in enumerate(nomes):
+        for x_col, nome_x in EIXOS_X.items():
+            s = tab[(tab["Conjunto"] == nome) & (tab["X"] == x_col)]
+            axes[i, 0].plot(s["R_km"], s["r2_pct"].where(s["N"] >= min_n), "o-", label=nome_x)
+        axes[i, 1].bar(s["R_km"], s["N"], color=CORES[i])
+        axes[i, 0].set(title=f"{nome} — R² na nuvem (N ≥ {min_n})", ylabel="R² (%)")
+        axes[i, 1].set(title=f"{nome} — bacias com valor no sink", ylabel="N")
+        axes[i, 0].legend(fontsize=8)
+        for ax in axes[i]:
+            for r in (5, 22):
+                ax.axvline(r, color="gray", ls=":", lw=1)
+    for ax in axes[-1]:
+        ax.set_xlabel("Raio R no sink (km)")
+        ax.set_xticks(range(1, 23))
+    fig.tight_layout()
     plt.show()
-
