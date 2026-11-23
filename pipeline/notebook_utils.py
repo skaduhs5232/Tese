@@ -271,7 +271,7 @@ def plotar_mosaico(
     plt.show()
 
 
-def plotar_varredura(tab: pd.DataFrame, min_n: int = 20) -> None:
+def plotar_varredura(tab: pd.DataFrame, min_n: int = 20, arquivo: str | None = None) -> None:
     """Para cada conjunto: R² (%) vs R (Populacao e Area) e N de bacias vs R."""
     aplicar_estilo()
     nomes = tab["Conjunto"].unique()
@@ -280,7 +280,7 @@ def plotar_varredura(tab: pd.DataFrame, min_n: int = 20) -> None:
         for x_col, nome_x in EIXOS_X.items():
             s = tab[(tab["Conjunto"] == nome) & (tab["X"] == x_col)]
             axes[i, 0].plot(s["R_km"], s["r2_pct"].where(s["N"] >= min_n), "o-", label=nome_x)
-        axes[i, 1].bar(s["R_km"], s["N"], color=CORES[i])
+        axes[i, 1].bar(s["R_km"], s["N"], color=CORES[i % len(CORES)])
         axes[i, 0].set(title=f"{nome} — R² na nuvem (N ≥ {min_n})", ylabel="R² (%)")
         axes[i, 1].set(title=f"{nome} — bacias com valor no sink", ylabel="N")
         axes[i, 0].legend(fontsize=8)
@@ -291,4 +291,7 @@ def plotar_varredura(tab: pd.DataFrame, min_n: int = 20) -> None:
         ax.set_xlabel("Raio R no sink (km)")
         ax.set_xticks(range(1, 23))
     fig.tight_layout()
+    if arquivo:
+        FIGURAS_DIR.mkdir(parents=True, exist_ok=True)
+        fig.savefig(FIGURAS_DIR / f"{arquivo}.png", dpi=200, bbox_inches="tight")
     plt.show()
