@@ -42,6 +42,7 @@ UNIDADES = {
     "Sedimento oceânico": "pieces/kg",
     "Nurdle Patrol": "pieces/10 min",
 }
+REDES_SUPERFICIE = ("Neuston net", "Manta net", "AVANI net")
 EIXOS_X = {"total_population": "População da Bacia", "area_km2": "Área da Bacia (km²)"}
 CORES = ["#0284c7", "#d97706", "#7c3aed", "#059669"]
 
@@ -129,11 +130,9 @@ def carregar_bacias(pontos: dict[str, pd.DataFrame]) -> pd.DataFrame:
     return pd.concat([d for d in dfs if len(d) > 0], ignore_index=True)
 
 
-def recorte_top95_global(bacias: pd.DataFrame) -> pd.DataFrame:
-    """Maiores bacias que somam 95% da area total (recorte classico do IPBA)."""
-    b = bacias.sort_values("area_km2", ascending=False).reset_index(drop=True)
-    acum = b["area_km2"].cumsum() / b["area_km2"].sum()
-    return b.iloc[: int((acum <= 0.95).sum()) + 1].reset_index(drop=True)
+def filtrar_redes_superficie(df: pd.DataFrame, metodos: tuple[str, ...] = REDES_SUPERFICIE) -> pd.DataFrame:
+    """Mantem apenas coletas de redes de superficie (ex.: Neuston, Manta, AVANI)."""
+    return df[df["Sampling_Method"].isin(metodos)].reset_index(drop=True)
 
 
 def filtrar_pop(df: pd.DataFrame, pop_min: float = 0) -> pd.DataFrame:
@@ -260,7 +259,7 @@ def plotar_mosaico(
             ax = axes[i, j]
             plotar_lei_potencia(
                 ax, filtrar_pop(df, pop_min), x_col, nome,
-                f"log10({nome_x})", f"log10(Média {UNIDADES[nome]})", CORES[i],
+                f"log10({nome_x})", f"log10(Média {UNIDADES.get(nome, 'pieces/m³')})", CORES[i % len(CORES)],
             )
             rotulo_painel(ax, f"({'abcdefgh'[2 * i + j]})", x=-0.12, y=1.04)
     filtro = f"População ≥ {pop_min:,} hab.".replace(",", ".") if pop_min else "sem filtro de população"
