@@ -42,7 +42,7 @@ from .estilo_erneson import (
 
 
 def plotar_calibracao_zipf_regioes(*args, **kwargs):
-    from pipeline.cca_calibrator import plot_zipf_calibration
+    from pipeline import plot_zipf_calibration
     return plot_zipf_calibration(*args, **kwargs)
 
 

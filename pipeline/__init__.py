@@ -1,40 +1,44 @@
 """
 pipeline
 --------
-Pacote de processamento geoespacial e alometria:
-  - ipba_runner: Extração de bacias e sinks costeiros via IPBA simplificado e área por triângulos esféricos (L'Huilier).
-  - cca_calibrator: Varredura 10x10, calibração via Lei de Zipf e extração de manchas CCA.
-  - spatial_matcher: Particionamento de manchas por bacia, ingestão NOAA e raio exclusivo.
+Arquitetura limpa em camadas para análise de bacias hidrográficas e microplásticos:
+  - config: caminhos e constantes do projeto.
+  - domain: geometria esférica, bacias, calibração Zipf e lei de potência (puro, sem I/O).
+  - infra: adaptadores para `externos/` (GebcoCutter, IPBA, CCA), GDAL, NOAA e cache.
+  - use_cases: orquestração de porções de terra e carregamento de bacias.
+  - presentation: gráficos padronizados (mosaicos, varredura de raios e calibração Zipf).
 """
-from .ipba_runner import (
-    crop_gebco,
-    extract_coastal_sinks,
-    run_ipba,
-    filter_basins_by_area,
-    spherical_triangle_row_areas,
+
+from .domain.scaling import (
+    ajustar_lei_potencia,
+    filtrar_pop,
+    filtrar_redes_superficie,
+    media_por_sink_raio,
+    pareados_por_raio,
+    tabela_ajustes,
 )
-from .cca_calibrator import crop_gpw, calibrate_zipf_grid, run_calibrated_cca, plot_zipf_calibration
-from .spatial_matcher import (
-    split_urban_clusters_by_basins,
-    load_noaa_nurdle_patrol,
-    match_sinks_with_exclusive_radius,
-    match_sinks_with_individual_radius,
-    evaluate_radius_sensitivity,
+from .infra.noaa import carregar_noaa_por_tipo
+from .presentation.graficos import (
+    plot_zipf_calibration,
+    plotar_lei_potencia,
+    plotar_mosaico,
+    plotar_varredura,
 )
+from .use_cases.bacias import carregar_bacias, identificar_porcoes_ativas, processar_porcao_terra
 
 __all__ = [
-    "crop_gebco",
-    "extract_coastal_sinks",
-    "run_ipba",
-    "filter_basins_by_area",
-    "spherical_triangle_row_areas",
-    "crop_gpw",
-    "calibrate_zipf_grid",
-    "run_calibrated_cca",
+    "carregar_noaa_por_tipo",
+    "filtrar_redes_superficie",
+    "filtrar_pop",
+    "identificar_porcoes_ativas",
+    "processar_porcao_terra",
+    "carregar_bacias",
+    "media_por_sink_raio",
+    "pareados_por_raio",
+    "ajustar_lei_potencia",
+    "tabela_ajustes",
+    "plotar_lei_potencia",
+    "plotar_mosaico",
+    "plotar_varredura",
     "plot_zipf_calibration",
-    "split_urban_clusters_by_basins",
-    "load_noaa_nurdle_patrol",
-    "match_sinks_with_exclusive_radius",
-    "match_sinks_with_individual_radius",
-    "evaluate_radius_sensitivity",
 ]
